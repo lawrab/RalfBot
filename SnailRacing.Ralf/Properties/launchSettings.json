@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SnailRacing.Ralf": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
