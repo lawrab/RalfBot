@@ -7,7 +7,7 @@ jobs:
   test:
     description: Setup and run application tests
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:6.0-focal
+      - image: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
       - checkout
       - restore_cache:
