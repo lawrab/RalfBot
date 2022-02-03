@@ -6,10 +6,9 @@ orbs:
 jobs:
   test:
     description: Setup and run application tests
-    docker:
-      - image: mcr.microsoft.com/dotnet/sdk:6.0-focal
     executor:
-      name: windows/default
+      docker:
+        - image: mcr.microsoft.com/dotnet/sdk:6.0-focal
     steps:
       - checkout
       - restore_cache:
