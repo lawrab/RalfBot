@@ -1,4 +1,4 @@
-﻿namespace SnailRacing.Ralf
+﻿namespace SnailRacing.Ralf.Handlers
 {
     public static class RoleChangedHandler
     {

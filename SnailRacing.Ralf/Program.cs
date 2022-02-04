@@ -25,7 +25,7 @@ static async Task MainAsync()
         //var channel = await discord.GetChannelAsync(935530785006551082);
         //await discord.SendMessageAsync(channel, "UserUpdated");
 
-        await RoleChangedHandler.UpdateRoles(discord, e);
+        //await RoleChangedHandler.UpdateRoles(discord, e);
     };
 
     discord.GuildRoleUpdated += async (s, e) =>
