@@ -1,8 +1,8 @@
 ﻿namespace SnailRacing.Ralf
 {
-    internal static class RoleChangedHandler
+    public static class RoleChangedHandler
     {
-        internal static async Task UpdateRoles(DiscordClient discord, GuildMemberUpdateEventArgs e)
+        public static async Task UpdateRoles(DiscordClient discord, GuildMemberUpdateEventArgs e)
         {
             var hasTwitchAnnie = e.RolesAfter.Any(r => r.Name == "TwitchAnnie");
             var hasTwitchLarry = e.RolesAfter.Any(r => r.Name == "TwitchLarry");
@@ -10,7 +10,7 @@
             await SetTwitchRoles(discord, e, hasTwitchAnnie || hasTwitchLarry);
         }
 
-        internal static async Task SetTwitchRoles(DiscordClient discord, GuildMemberUpdateEventArgs e, bool shouldHaveSubscribers)
+        public static async Task SetTwitchRoles(DiscordClient discord, GuildMemberUpdateEventArgs e, bool shouldHaveSubscribers)
         {
             var hasSubscribers = e.Member.Roles.Any(r => r.Name == "Subscribers");
 
@@ -19,7 +19,7 @@
             if (!hasSubscribers && shouldHaveSubscribers) await AddRole(discord, e, "Subscribers");
         }
 
-        internal static async Task AddRole(DiscordClient discord, GuildMemberUpdateEventArgs e, string roleToAdd)
+        public static async Task AddRole(DiscordClient discord, GuildMemberUpdateEventArgs e, string roleToAdd)
         {
             var subscriberRole = e.Guild.Roles.Single(r => r.Value.Name == roleToAdd);
 
@@ -28,7 +28,7 @@
             await e.Member.ReplaceRolesAsync(newRoles);
         }
 
-        internal static async Task RemoveRole(DiscordClient discord, GuildMemberUpdateEventArgs e, string roleToRemove)
+        public static async Task RemoveRole(DiscordClient discord, GuildMemberUpdateEventArgs e, string roleToRemove)
         {
             var subscriberRole = e.Guild.Roles.Single(r => r.Value.Name == roleToRemove);
 

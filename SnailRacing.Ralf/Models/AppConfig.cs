@@ -2,7 +2,7 @@
 
 namespace SnailRacing.Ralf.Models
 {
-    internal static class AppConfig
+    public static class AppConfig
     {
         public static DiscordConfig Discord { get; } = new DiscordConfig();
 

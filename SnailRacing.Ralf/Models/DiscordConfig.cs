@@ -1,6 +1,6 @@
 ﻿namespace SnailRacing.Ralf.Models
 {
-    internal class DiscordConfig
+    public class DiscordConfig
     {
         public string? BotToken { get; set; }
     }

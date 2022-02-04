@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SnailRacing.Ralf
 {
-    internal class DiscordRoleSameName : EqualityComparer<DiscordRole>
+    public class DiscordRoleSameName : EqualityComparer<DiscordRole>
     {
         public override bool Equals(DiscordRole? x, DiscordRole? y)
         {
