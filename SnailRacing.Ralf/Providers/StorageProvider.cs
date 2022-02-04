@@ -28,10 +28,16 @@ namespace SnailRacing.Ralf.Providers
             this.memoryStore = store;
         }
 
-        public TValue this[TKey key] 
+        public TValue? this[TKey key] 
         { 
-            get => memoryStore[key];
-            set => UpdateStore(key, value);
+            // ToDo: fix nullability warnings here!!!!!!!
+            get 
+            {
+                TValue value;
+                var hasValue = memoryStore.TryGetValue(key, out value!);
+                return hasValue ? value : default(TValue);
+            }
+            set => UpdateStore(key, value!);
         }
 
         private void UpdateStore(TKey key, TValue value)

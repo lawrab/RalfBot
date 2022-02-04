@@ -4,7 +4,8 @@ using System.Text.Json;
 namespace SnailRacing.Ralf.Providers
 {
     [ExcludeFromCodeCoverage(Justification = "File IO implementation that cannot be tested predictably")]
-    internal class JsonFileStorageProvider<T> : IJsonFileStorageProvider<T>
+    public class JsonFileStorageProvider<T> : IJsonFileStorageProvider<T>
+        where T : new()
     {
         private readonly string filePath;
 
@@ -15,11 +16,17 @@ namespace SnailRacing.Ralf.Providers
 
         public async Task<T?> LoadAsync()
         {
-            var json = await File.ReadAllTextAsync(filePath);
+            try
+            {
+                var json = await File.ReadAllTextAsync(filePath);
 
-            return JsonSerializer.Deserialize<T>(json);
+                return JsonSerializer.Deserialize<T>(json);
+            }
+            catch (FileNotFoundException)
+            {
+                return new T();
+            }
         }
-
 
         public async Task SaveAsync(T memoryStore)
         {

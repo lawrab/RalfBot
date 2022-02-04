@@ -2,10 +2,24 @@
 global using DSharpPlus.EventArgs;
 global using SnailRacing.Ralf;
 global using SnailRacing.Ralf.Models;
+using DSharpPlus.CommandsNext;
+using Microsoft.Extensions.DependencyInjection;
+using SnailRacing.Ralf.DiscordCommands;
+using SnailRacing.Ralf.Providers;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 MainAsync().GetAwaiter().GetResult();
 
 static async Task MainAsync()
+{
+    var services = await ConfigureServices();
+    var discord = await ConnectToDiscord(services);
+
+    await Task.Delay(-1);
+}
+
+static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services)
 {
     var discord = new DiscordClient(new DiscordConfiguration()
     {
@@ -13,33 +27,52 @@ static async Task MainAsync()
         TokenType = TokenType.Bot,
         Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
     });
-    
-    discord.MessageCreated += async (s, e) =>
-    {
-        if (e.Message.Content.ToLower().StartsWith("ping"))
-            await e.Message.RespondAsync("pong!");
-    };
 
-    discord.GuildMemberUpdated += async (s, e) =>
+    var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
     {
-        //var channel = await discord.GetChannelAsync(935530785006551082);
-        //await discord.SendMessageAsync(channel, "UserUpdated");
+        StringPrefixes = new[] { "!" },
+        Services = services
+    });
 
-        //await RoleChangedHandler.UpdateRoles(discord, e);
-    };
+    commands.RegisterCommands<DiscordRolesModule>();
 
-    discord.GuildRoleUpdated += async (s, e) =>
-    {
-        var channel = await discord.GetChannelAsync(935530785006551082);
-        //await discord.SendMessageAsync(channel, "GuildRoleUpdated");
-    };
+    ////discord.MessageCreated += async (s, e) =>
+    ////{
+    ////    if (e.Message.Content.ToLower().StartsWith("ping"))
+    ////        await e.Message.RespondAsync("pong!");
+    ////};
+
+    ////discord.GuildMemberUpdated += async (s, e) =>
+    ////{
+    ////    //var channel = await discord.GetChannelAsync(935530785006551082);
+    ////    //await discord.SendMessageAsync(channel, "UserUpdated");
+
+    ////    //await RoleChangedHandler.UpdateRoles(discord, e);
+    ////};
+
+    ////discord.GuildRoleUpdated += async (s, e) =>
+    ////{
+    ////    var channel = await discord.GetChannelAsync(935530785006551082);
+    ////    //await discord.SendMessageAsync(channel, "GuildRoleUpdated");
+    ////};
 
     await discord.ConnectAsync();
 
-    await Task.Delay(-1);
+    return discord;
 }
 
+static async Task<ServiceProvider> ConfigureServices()
+{
+    return new ServiceCollection()
+            .AddSingleton<IStorageProvider<string, object>>(await CreateStorage(AppConfig.DataPath))
+            .BuildServiceProvider();
+}
 
+static async Task<IStorageProvider<string, object>> CreateStorage(string dataPath)
+{
+    var fileStorageProvider  = new JsonFileStorageProvider<ConcurrentDictionary<string, object>>(dataPath);
+    var storageProvider = new StorageProvider<string, object>();
+    await storageProvider.SetFileStorageProvider(fileStorageProvider);
 
-
-
+    return storageProvider;
+}
