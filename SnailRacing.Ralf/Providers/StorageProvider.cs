@@ -37,16 +37,17 @@ namespace SnailRacing.Ralf.Providers
         private void UpdateStore(TKey key, TValue value)
         {
             memoryStore[key] = value;
-            Task.Run(SaveData).ConfigureAwait(false);
+            SaveData().ConfigureAwait(false);
         }
 
-        private void SaveData()
+        private async Task SaveData()
         {
             try
             {
                 var jsonString = JsonSerializer.Serialize(memoryStore);
 
-                fileStorageProvider?.SaveAsync(memoryStore);
+                if (fileStorageProvider is null) return;
+                await fileStorageProvider.SaveAsync(memoryStore);
             }
             catch
             {
