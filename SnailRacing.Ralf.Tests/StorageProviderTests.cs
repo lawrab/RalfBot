@@ -2,7 +2,6 @@
 using Xunit;
 using SnailRacing.Ralf.Providers;
 using Moq;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using SnailRacing.Ralf.Models;
 
@@ -10,6 +9,30 @@ namespace SnailRacing.Ralf.Tests
 {
     public class StorageProviderTests
     {
+        [Fact]
+        public async Task Add_Role_Adds_To_SyncRole_Dictionary()
+        {
+            // arrange
+            var key = "aaa";
+            var expected = "9090";
+
+            var storage = new StorageProvider<string, object>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider<StorageProviderModel<string, object>>>();
+            await storage.SetFileStorageProvider(jsonProvider.Object);
+
+            // act
+            storage.AddRole(key, expected);
+
+            // assert
+            var actual = storage.SyncRoles[key];
+
+            Assert.Equal(expected, actual);
+
+            jsonProvider.Verify(
+                x => x.SaveAsync(It.IsAny<StorageProviderModel<string, object>>()),
+                Times.Once());
+        }
+
         [Fact]
         public async Task UpdateStore_Calls_FileStorageProvider_SaveAsync()
         {
