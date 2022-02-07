@@ -1,30 +1,46 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using SnailRacing.Ralf.Providers;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.Json;
 
 namespace SnailRacing.Ralf.DiscordCommands
 {
+    [Group("sync_role"), Hidden]
     internal class DiscordRolesModule : BaseCommandModule
     {
         // ToDo: create RolesProvider to encapsulate Roles storage
         public IStorageProvider<string, object>? StorageProvider { private get; set; }
 
-        [Command("sync_role")]
+        [Command("add")]
         public async Task AddSyncRoles(CommandContext ctx, string source, string target)
         {
-            AddRole(StorageProvider!, source, target);
-            await ctx.RespondAsync($"Role {source} will be merged with {target}");
+            await ctx.TriggerTypingAsync();
+            StorageProvider!.AddRole(source, target);
+            await ctx.RespondAsync($"Role `{source}` will be monitored and synched with `{target}`.");
         }
 
-        // ToDo: Move to external service to decouple
-        private void AddRole(IStorageProvider<string, object> storageProvider, string source, string target)
+        [Command("list")]
+        public async Task ListSyncRoles(CommandContext ctx)
         {
-            // ToDo: define a better data structure (other than dictionary) to hold the roles data
-            var roles = storageProvider["Roles"] as ConcurrentDictionary<string, string> ?? new ConcurrentDictionary<string, string>();
+            await ctx.TriggerTypingAsync();
 
-            roles[source] = target;
-            storageProvider["Roles"] = roles;
+            var roles = ListRoles(StorageProvider!).ToList();
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "Synchronised roles"
+            };
+            roles.ForEach(i => embed.AddField(i.source, i.target));
+
+            await ctx.RespondAsync(embed);
+        }
+
+        private IEnumerable<(string source, string target)> ListRoles(IStorageProvider<string, object> storageProvider)
+        {
+            return storageProvider.SyncRoles.Select(r => (r.Key, r.Value)) ?? Enumerable.Empty<(string source, string target)>();
         }
     }
 }

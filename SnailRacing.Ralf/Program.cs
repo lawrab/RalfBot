@@ -70,7 +70,7 @@ static async Task<ServiceProvider> ConfigureServices()
 
 static async Task<IStorageProvider<string, object>> CreateStorage(string dataPath)
 {
-    var fileStorageProvider  = new JsonFileStorageProvider<ConcurrentDictionary<string, object>>(dataPath);
+    var fileStorageProvider  = new JsonFileStorageProvider<StorageProviderModel<string, object>>(dataPath);
     var storageProvider = new StorageProvider<string, object>();
     await storageProvider.SetFileStorageProvider(fileStorageProvider);
 

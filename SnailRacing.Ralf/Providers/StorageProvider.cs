@@ -10,15 +10,15 @@ namespace SnailRacing.Ralf.Providers
     public class StorageProvider<TKey, TValue> : IStorageProvider<TKey, TValue>
         where TKey: notnull
     {
-        private ConcurrentDictionary<TKey, TValue> memoryStore = new ConcurrentDictionary<TKey, TValue>();
-        private IJsonFileStorageProvider<ConcurrentDictionary<TKey, TValue>>? fileStorageProvider;
+        private StorageProviderModel<TKey, TValue> memoryStore = new StorageProviderModel<TKey, TValue>();
+        private IJsonFileStorageProvider<StorageProviderModel<TKey, TValue>>? fileStorageProvider;
 
         public StorageProvider()
         {
 
         }
 
-        public async Task SetFileStorageProvider(IJsonFileStorageProvider<ConcurrentDictionary<TKey, TValue>> fileStorageProvider)
+        public async Task SetFileStorageProvider(IJsonFileStorageProvider<StorageProviderModel<TKey, TValue>> fileStorageProvider)
         {
             this.fileStorageProvider = fileStorageProvider;
             var store = await fileStorageProvider.LoadAsync();
@@ -28,13 +28,21 @@ namespace SnailRacing.Ralf.Providers
             this.memoryStore = store;
         }
 
+        public Dictionary<string, string> SyncRoles => memoryStore.SyncRoles;
+
+        public void AddRole(string source, string target)
+        {
+            memoryStore.SyncRoles[source] = target;
+            SaveData().ConfigureAwait(false);
+        }
+
         public TValue? this[TKey key] 
         { 
             // ToDo: fix nullability warnings here!!!!!!!
             get 
             {
                 TValue value;
-                var hasValue = memoryStore.TryGetValue(key, out value!);
+                var hasValue = memoryStore.Props.TryGetValue(key, out value!);
                 return hasValue ? value : default(TValue);
             }
             set => UpdateStore(key, value!);
@@ -42,7 +50,7 @@ namespace SnailRacing.Ralf.Providers
 
         private void UpdateStore(TKey key, TValue value)
         {
-            memoryStore[key] = value;
+            memoryStore.Props[key] = value;
             SaveData().ConfigureAwait(false);
         }
 

@@ -4,6 +4,7 @@ using SnailRacing.Ralf.Providers;
 using Moq;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using SnailRacing.Ralf.Models;
 
 namespace SnailRacing.Ralf.Tests
 {
@@ -14,7 +15,7 @@ namespace SnailRacing.Ralf.Tests
         {
             // arrange
             var storage = new StorageProvider<string, object>();
-            var jsonProvider = new Mock<IJsonFileStorageProvider<ConcurrentDictionary<string, object>>>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider<StorageProviderModel<string, object>>>();
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // act
@@ -23,7 +24,7 @@ namespace SnailRacing.Ralf.Tests
 
             // assert
             jsonProvider.Verify(
-                x => x.SaveAsync(It.IsAny<ConcurrentDictionary<string, object>>()),
+                x => x.SaveAsync(It.IsAny<StorageProviderModel<string, object>>()),
                 Times.Once());
         }
 
@@ -32,7 +33,7 @@ namespace SnailRacing.Ralf.Tests
         {
             // arrange
             var storage = new StorageProvider<string, object>();
-            var jsonProvider = new Mock<IJsonFileStorageProvider<ConcurrentDictionary<string, object>>>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider<StorageProviderModel<string, object>>>();
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // act
@@ -49,7 +50,7 @@ namespace SnailRacing.Ralf.Tests
             // arrange
             var expected = "def";
             var storage = new StorageProvider<string, object>();
-            var jsonProvider = new Mock<IJsonFileStorageProvider<ConcurrentDictionary<string, object>>>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider<StorageProviderModel<string, object>>>();
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // act

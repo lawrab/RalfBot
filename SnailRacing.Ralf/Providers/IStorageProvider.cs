@@ -4,5 +4,7 @@
         where TKey: notnull
     {
         TValue this[TKey key] { get; set; }
+        Dictionary<string, string> SyncRoles { get;}
+        void AddRole(string source, string target);
     }
 }
