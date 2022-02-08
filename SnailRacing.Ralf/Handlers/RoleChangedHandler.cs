@@ -1,4 +1,5 @@
 ﻿using SnailRacing.Ralf.Providers;
+using System.Collections.Immutable;
 
 namespace SnailRacing.Ralf.Handlers
 {
@@ -13,17 +14,31 @@ namespace SnailRacing.Ralf.Handlers
 
         public async Task SyncRoles(string[] memberRoles, Func<string[], Task> updateMemberAction)
         {
-            await updateMemberAction(memberRoles);
+            var rolesToAdd = GetRolesToAdd(memberRoles, storage.SyncRoles);
+            var rolesToRemove = GetRolesToRemove();
+            var newRoles = DeriveNewRoles(memberRoles, rolesToAdd, rolesToRemove);
+            await updateMemberAction(newRoles);
         }
 
         private string[] DeriveNewRoles(string[] roles, string[] rolesToAdd, string[] rolesToRemove)
         {
-            return Array.Empty<string>();
+            var currentRoles = ImmutableList.Create(roles);
+            var rolesWithAdded = currentRoles.AddRange(rolesToAdd);
+            var rolesWithAddedAndRemoved = rolesWithAdded.Except(rolesToRemove);
+
+            return rolesWithAddedAndRemoved.ToArray();
         }
 
-        private string[] GetRolesToAdd()
+        private string[] GetRolesToAdd(string[] roles, Dictionary<string, string> syncRoles)
         {
-            return Array.Empty<string>();
+            var rolesList = roles.ToList();
+            var rolesToAdd = rolesList.ToList()
+                .Join(syncRoles, r => r, sr => sr.Key, (r, sr) => sr.Value)
+                .Distinct();
+
+            var hasRolesToAdd = !rolesList.Intersect(rolesToAdd).Any();
+
+            return hasRolesToAdd ? rolesToAdd.ToArray() : Array.Empty<string>();
         }
 
         private string[] GetRolesToRemove()
