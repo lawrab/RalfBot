@@ -1,5 +1,7 @@
-﻿using SnailRacing.Ralf.Providers;
+﻿using DSharpPlus.Entities;
+using SnailRacing.Ralf.Providers;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace SnailRacing.Ralf.Handlers
 {
@@ -7,10 +9,36 @@ namespace SnailRacing.Ralf.Handlers
     {
         private readonly IStorageProvider<string, object> storage;
 
-        public RoleChangedHandler(IStorageProvider<string, object> storage)
+        public RoleChangedHandler(IStorageProvider<string, object>? storage)
         {
-            this.storage = storage;
+            this.storage = storage!;
         }
+
+        #region static helpers to handle role change events
+        public Task HandleRoleChange(GuildMemberUpdateEventArgs e)
+        {
+            var roles = e.Member.Roles.Select(r => r.Name).ToArray();
+            var newRoles = SyncRoles(roles, async (r) => await ReplaceDiscordMemberRoles(e, r));
+
+            return Task.CompletedTask;
+        }
+
+        private async Task ReplaceDiscordMemberRoles(GuildMemberUpdateEventArgs e, string[] r)
+        {
+            if (HasSameRoles(e.Member.Roles, r)) return;
+
+            var discordRoles = e.Guild.Roles.IntersectBy(r, k => k.Value.Name);
+
+            await e.Member.ReplaceRolesAsync(discordRoles.Select(r => r.Value));
+        }
+        private bool HasSameRoles(IEnumerable<DiscordRole> currentRoles, string[] newRoles)
+        {
+            var currentRolesArray = currentRoles.ToArray();
+
+            if (currentRolesArray.Length != newRoles.Length) return false;
+            return Enumerable.SequenceEqual(currentRolesArray.Select(dr => dr.Name).OrderBy(r => r), newRoles.OrderBy(r => r));
+        }
+        #endregion
 
         public async Task SyncRoles(string[] memberRoles, Func<string[], Task> updateMemberAction)
         {
@@ -57,49 +85,5 @@ namespace SnailRacing.Ralf.Handlers
 
             return rolesToRemove.ToArray();
         }
-
-        ////public async Task SyncRoles(string[] memberRoles)
-        ////{
-        ////    var allMergeRoles
-        ////    var rolesToAdd = e.RolesAfter.Select(r => r.Name).Except(storage.SyncRoles.Keys);
-        ////}
-
-        ////public async Task UpdateRoles(DiscordClient discord, GuildMemberUpdateEventArgs e)
-        ////{
-
-
-
-        ////    var hasTwitchAnnie = e.RolesAfter.Any(r => r.Name == "TwitchAnnie");
-        ////    var hasTwitchLarry = e.RolesAfter.Any(r => r.Name == "TwitchLarry");
-
-        ////    await SetTwitchRoles(discord, e, hasTwitchAnnie || hasTwitchLarry);
-        ////}
-
-        ////public static async Task SetTwitchRoles(GuildMemberUpdateEventArgs e, bool shouldHaveSubscribers)
-        ////{
-        ////    var hasSubscribers = e.Member.Roles.Any(r => r.Name == "Subscribers");
-
-        ////    if (hasSubscribers && shouldHaveSubscribers) return;
-        ////    if (hasSubscribers && !shouldHaveSubscribers) await RemoveRole(e, "Subscribers");
-        ////    if (!hasSubscribers && shouldHaveSubscribers) await AddRole(e, "Subscribers");
-        ////}
-
-        ////public static async Task AddRole(GuildMemberUpdateEventArgs e, string roleToAdd)
-        ////{
-        ////    var subscriberRole = e.Guild.Roles.Single(r => r.Value.Name == roleToAdd);
-
-        ////    var newRoles = e.Member?.Roles?.Append(subscriberRole.Value);
-        ////    if (e.Member == null || newRoles == null) return;
-        ////    await e.Member.ReplaceRolesAsync(newRoles);
-        ////}
-
-        ////public static async Task RemoveRole(GuildMemberUpdateEventArgs e, string roleToRemove)
-        ////{
-        ////    var subscriberRole = e.Guild.Roles.Single(r => r.Value.Name == roleToRemove);
-
-        ////    var newRoles = e.Member?.Roles?.Where(r => r.Id != subscriberRole.Value.Id);
-        ////    if (e.Member == null || newRoles == null) return;
-        ////    await e.Member.ReplaceRolesAsync(newRoles);
-        ////}
     }
 }

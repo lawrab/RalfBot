@@ -5,6 +5,7 @@ global using SnailRacing.Ralf.Models;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.DependencyInjection;
 using SnailRacing.Ralf.DiscordCommands;
+using SnailRacing.Ralf.Handlers;
 using SnailRacing.Ralf.Providers;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -36,25 +37,16 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services)
 
     commands.RegisterCommands<DiscordRolesModule>();
 
-    ////discord.MessageCreated += async (s, e) =>
-    ////{
-    ////    if (e.Message.Content.ToLower().StartsWith("ping"))
-    ////        await e.Message.RespondAsync("pong!");
-    ////};
+    discord.GuildMemberUpdated += async (s, e) =>
+    {
+        var storage = services.GetService<IStorageProvider<string, object>>();
+        var handler = new RoleChangedHandler(storage);
 
-    ////discord.GuildMemberUpdated += async (s, e) =>
-    ////{
-    ////    //var channel = await discord.GetChannelAsync(935530785006551082);
-    ////    //await discord.SendMessageAsync(channel, "UserUpdated");
-
-    ////    //await RoleChangedHandler.UpdateRoles(discord, e);
-    ////};
-
-    ////discord.GuildRoleUpdated += async (s, e) =>
-    ////{
-    ////    var channel = await discord.GetChannelAsync(935530785006551082);
-    ////    //await discord.SendMessageAsync(channel, "GuildRoleUpdated");
-    ////};
+        await handler.HandleRoleChange(e);
+        e.Handled = true;
+        var channel = await discord.GetChannelAsync(935530785006551082);
+        await discord.SendMessageAsync(channel, $"Member {e.Member.Mention} roles updated.");
+    };
 
     await discord.ConnectAsync();
 
