@@ -28,7 +28,7 @@ namespace SnailRacing.Ralf.Tests
     {
 
         [Fact]
-        public async Task User_Added_To_Source_Role_Should_Have_Target_Role()
+        public async Task Source_Role_Added_No_Target_Roles_Should_Add_Target_Role()
         {
             // arrange
             var store = CreateStorageWithRoles(new (string source, string target)[]
@@ -58,6 +58,117 @@ namespace SnailRacing.Ralf.Tests
 
             // assert
             var expected = newRoles.Union(new[] { "Sub" }).ToArray();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task Source_Role_Added_With_Target_Role_Should_Keep_Target_Role()
+        {
+            // arrange
+            var store = CreateStorageWithRoles(new (string source, string target)[]
+            {
+                ("RoleB", "Sub"),
+                ("RoleD", "Sub"),
+                ("RoleE", "Sub2")
+            });
+            var userRoles = new string[]
+            {
+                "RoleA",
+                "RoleG",
+                "RoleD",
+                "RoleZ",
+                "Sub"
+            };
+
+            var handler = new RoleChangedHandler(store);
+
+            // act
+            string[]? actual = null;
+            var newRoles = userRoles.Union(new[] { "RoleB" }).ToArray();
+            await handler.SyncRoles(newRoles, (r) =>
+            {
+                actual = r;
+                return Task.CompletedTask;
+            });
+
+
+            // assert
+            var expected = newRoles;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task Source_Role_Removed_With_Target_Role_Should_Not_Have_Target_Role()
+        {
+            // arrange
+            var store = CreateStorageWithRoles(new (string source, string target)[]
+            {
+                ("RoleB", "Sub"),
+                ("RoleD", "Sub"),
+                ("RoleE", "Sub2")
+            });
+            var userRoles = new string[]
+            {
+                "RoleA",
+                "RoleC",
+                "RoleD",
+                "RoleZ",
+                "Sub"
+            };
+
+            var handler = new RoleChangedHandler(store);
+
+            // act
+            string[]? actual = null;
+            var newRoles = userRoles.Where(r => r != "RoleD").ToArray();
+            await handler.SyncRoles(newRoles, (r) =>
+            {
+                actual = r;
+                return Task.CompletedTask;
+            });
+
+
+            // assert
+            var expected = newRoles.Where(r => r != "Sub").ToArray();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task Source_Role_Removed_With_Shared_Target_Role_Should_Have_Target_Role()
+        {
+            // arrange
+            var store = CreateStorageWithRoles(new (string source, string target)[]
+            {
+                ("RoleB", "Sub"),
+                ("RoleD", "Sub"),
+                ("RoleE", "Sub2")
+            });
+            var userRoles = new string[]
+            {
+                "RoleA",
+                "RoleB", // --> Shared target role
+                "RoleD",
+                "RoleZ",
+                "Sub"
+            };
+
+            var handler = new RoleChangedHandler(store);
+
+            // act
+            string[]? actual = null;
+            var newRoles = userRoles.Where(r => r != "RoleD").ToArray();
+            await handler.SyncRoles(newRoles, (r) =>
+            {
+                actual = r;
+                return Task.CompletedTask;
+            });
+
+
+            // assert
+            var expected = newRoles;
 
             Assert.Equal(expected, actual);
         }

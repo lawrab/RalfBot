@@ -15,7 +15,7 @@ namespace SnailRacing.Ralf.Handlers
         public async Task SyncRoles(string[] memberRoles, Func<string[], Task> updateMemberAction)
         {
             var rolesToAdd = GetRolesToAdd(memberRoles, storage.SyncRoles);
-            var rolesToRemove = GetRolesToRemove();
+            var rolesToRemove = GetRolesToRemove(memberRoles, storage.SyncRoles);
             var newRoles = DeriveNewRoles(memberRoles, rolesToAdd, rolesToRemove);
             await updateMemberAction(newRoles);
         }
@@ -41,9 +41,21 @@ namespace SnailRacing.Ralf.Handlers
             return hasRolesToAdd ? rolesToAdd.ToArray() : Array.Empty<string>();
         }
 
-        private string[] GetRolesToRemove()
+        private string[] GetRolesToRemove(string[] roles, Dictionary<string, string> syncRoles)
         {
-            return Array.Empty<string>();
+            var rolesList = roles.ToList();
+            var excludedRoles = storage.SyncRoles
+                .ExceptBy(roles, (r) => r.Key)
+                .Select(a => a.Value)
+                .Distinct();
+            var includedRoles = storage.SyncRoles
+                .IntersectBy(roles, (r) => r.Key)
+                .Select(a => a.Value)
+                .Distinct();
+            
+            var rolesToRemove = excludedRoles.Except(includedRoles);
+
+            return rolesToRemove.ToArray();
         }
 
         ////public async Task SyncRoles(string[] memberRoles)
