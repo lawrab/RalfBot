@@ -36,6 +36,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services)
     });
 
     commands.RegisterCommands<DiscordRolesModule>();
+    commands.RegisterCommands<AdminModule>();
 
     discord.GuildMemberUpdated += async (s, e) =>
     {

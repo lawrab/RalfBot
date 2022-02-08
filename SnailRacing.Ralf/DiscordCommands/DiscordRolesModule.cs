@@ -11,7 +11,6 @@ namespace SnailRacing.Ralf.DiscordCommands
     [Group("sync_role"), Hidden]
     internal class DiscordRolesModule : BaseCommandModule
     {
-        // ToDo: create RolesProvider to encapsulate Roles storage
         public IStorageProvider<string, object>? StorageProvider { private get; set; }
 
         [Command("add")]
