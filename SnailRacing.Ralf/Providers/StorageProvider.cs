@@ -68,5 +68,16 @@ namespace SnailRacing.Ralf.Providers
                 // Error occured
             }
         }
+
+        public void RemoveRole(string role)
+        {
+            memoryStore.SyncRoles.Remove(role);
+        }
+
+        public void Remove(TKey key)
+        {
+            TValue value;
+            memoryStore.Props.Remove(key, out value!);
+        }
     }
 }
