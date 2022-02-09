@@ -13,7 +13,7 @@ namespace SnailRacing.Ralf.DiscordCommands
     {
         public IStorageProvider<string, object>? StorageProvider { private get; set; }
 
-        [Group("log"), Hidden]
+        [Group("tail"), Hidden]
         public class LoggingModule : BaseCommandModule
         {
             public IStorageProvider<string, object>? StorageProvider { private get; set; }
@@ -25,17 +25,29 @@ namespace SnailRacing.Ralf.DiscordCommands
 
                 var loggingChannel = this.StorageProvider![StorageProviderKeys.LOGGING_CHANNEL];
 
-                await ctx.RespondAsync($"Logging channel is {loggingChannel}");
+                await ctx.RespondAsync($"Tailing log in {loggingChannel}");
             }
 
-            [Command("set")]
-            public async Task SetLoggingChannel(CommandContext ctx, DiscordChannel channel)
+            [Command("on")]
+            public async Task TailOn(CommandContext ctx, DiscordChannel channel)
             {
                 await ctx.TriggerTypingAsync();
 
                 StorageProvider![StorageProviderKeys.LOGGING_CHANNEL] = channel;
 
                 await ctx.RespondAsync($"Logging channel set to `{channel}`");
+            }
+
+            [Command("off")]
+            public async Task TailOff(CommandContext ctx)
+            {
+                await ctx.TriggerTypingAsync();
+
+                var channel = StorageProvider![StorageProviderKeys.LOGGING_CHANNEL];
+
+                StorageProvider!.Remove(StorageProviderKeys.LOGGING_CHANNEL);
+
+                await ctx.RespondAsync($"Tailing off in {channel ?? "unknown"}");
             }
         }
     }
