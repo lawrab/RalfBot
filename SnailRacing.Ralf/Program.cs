@@ -1,29 +1,38 @@
 ﻿global using DSharpPlus;
 global using DSharpPlus.EventArgs;
-global using SnailRacing.Ralf;
 global using SnailRacing.Ralf.Models;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using SnailRacing.Ralf.DiscordCommands;
 using SnailRacing.Ralf.Handlers;
+using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
-using System.Collections.Concurrent;
-using System.Reflection;
 
 MainAsync().GetAwaiter().GetResult();
 
 static async Task MainAsync()
 {
-    var services = await ConfigureServices();
-    var discord = await ConnectToDiscord(services);
+    var discordSink = new DiscordSink();
+    ConfigureLogging(discordSink);
+    var loggerFactory = new LoggerFactory().AddSerilog();
+    var services = await ConfigureServices(discordSink);
+    var discord = await ConnectToDiscord(services, loggerFactory);
 
     await Task.Delay(-1);
 }
 
-static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services)
+static void ConfigureLogging(DiscordSink discordSink) => Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.DiscordSink(discordSink)
+    .CreateLogger();
+
+static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILoggerFactory loggerFactory)
 {
     var discord = new DiscordClient(new DiscordConfiguration()
     {
+        LoggerFactory = loggerFactory, // ToDo: see if we can use ServiceProvider here instead, do we need to?
         Token = AppConfig.Discord.BotToken,
         TokenType = TokenType.Bot,
         Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
@@ -45,8 +54,6 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services)
 
         await handler.HandleRoleChange(e);
         e.Handled = true;
-        var channel = await discord.GetChannelAsync(935530785006551082);
-        await discord.SendMessageAsync(channel, $"Member {e.Member.Mention} roles updated.");
     };
 
     await discord.ConnectAsync();
@@ -54,16 +61,18 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services)
     return discord;
 }
 
-static async Task<ServiceProvider> ConfigureServices()
+static async Task<ServiceProvider> ConfigureServices(DiscordSink discordSink)
 {
     return new ServiceCollection()
+            .AddLogging(l => l.AddSerilog())
             .AddSingleton<IStorageProvider<string, object>>(await CreateStorage(AppConfig.DataPath))
+            .AddSingleton(discordSink)
             .BuildServiceProvider();
 }
 
 static async Task<IStorageProvider<string, object>> CreateStorage(string dataPath)
 {
-    var fileStorageProvider  = new JsonFileStorageProvider<StorageProviderModel<string, object>>(dataPath);
+    var fileStorageProvider = new JsonFileStorageProvider<StorageProviderModel<string, object>>(dataPath);
     var storageProvider = new StorageProvider<string, object>();
     await storageProvider.SetFileStorageProvider(fileStorageProvider);
 

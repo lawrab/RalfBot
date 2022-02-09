@@ -1,6 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
+using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.DiscordCommands
@@ -11,12 +13,19 @@ namespace SnailRacing.Ralf.DiscordCommands
     [RequirePermissions(Permissions.ManageGuild)] // and restrict this to users who have appropriate permissions
     internal class AdminModule : BaseCommandModule
     {
-        public IStorageProvider<string, object>? StorageProvider { private get; set; }
-
         [Group("tail"), Hidden]
         public class LoggingModule : BaseCommandModule
         {
+            private readonly DiscordSink _discordSink;
+            private readonly ILogger<LoggingModule> _logger;
+
             public IStorageProvider<string, object>? StorageProvider { private get; set; }
+
+            public LoggingModule(DiscordSink discordSink, ILogger<LoggingModule> logger)
+            {
+                this._discordSink = discordSink;
+                _logger = logger;
+            }
 
             [GroupCommand]
             public async Task ShowLoggingChannel(CommandContext ctx)
@@ -33,8 +42,10 @@ namespace SnailRacing.Ralf.DiscordCommands
             {
                 await ctx.TriggerTypingAsync();
 
-                StorageProvider![StorageProviderKeys.LOGGING_CHANNEL] = channel;
+                _discordSink.SetChannel(channel);
+                _discordSink.Enable();
 
+                _logger.LogInformation("Turned tail on in {channel}", channel);
                 await ctx.RespondAsync($"Logging channel set to `{channel}`");
             }
 
@@ -43,11 +54,20 @@ namespace SnailRacing.Ralf.DiscordCommands
             {
                 await ctx.TriggerTypingAsync();
 
-                var channel = StorageProvider![StorageProviderKeys.LOGGING_CHANNEL];
+                _logger.LogInformation("Turning tail off in {channel}", _discordSink.Channel);
+                _discordSink.Disable();
 
-                StorageProvider!.Remove(StorageProviderKeys.LOGGING_CHANNEL);
+                await ctx.RespondAsync($"Tailing off in {_discordSink?.Channel?.Mention ?? "unknown"}");
+            }
 
-                await ctx.RespondAsync($"Tailing off in {channel ?? "unknown"}");
+            [Command("ping")]
+            public async Task Ping(CommandContext ctx)
+            {
+                await ctx.TriggerTypingAsync();
+
+                _logger.LogInformation("Your wish is my command, PONG!!!");
+
+                await ctx.RespondAsync($"Pong in logging channel ack");
             }
         }
     }
