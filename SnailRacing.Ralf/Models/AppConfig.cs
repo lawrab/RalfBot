@@ -2,17 +2,20 @@
 
 namespace SnailRacing.Ralf.Models
 {
-    public static class AppConfig
+    public class AppConfig
     {
-        public static DiscordConfig Discord { get; } = new DiscordConfig();
-        public static string DataPath { get; }
+        public DiscordConfig Discord { get; } = new DiscordConfig();
+        public string? DataPath { get; }
 
-        static AppConfig()
+        public static AppConfig Create()
         {
             var _config = InitConfig();
-            _config.GetSection("Discord").Bind(Discord);
-            DataPath = _config["DataPath"] ?? "appData.json";
+            var appConfig = new AppConfig();
+            _config.Bind(appConfig);
+
+            return appConfig;
         }
+
         private static IConfigurationRoot InitConfig()
         {
             var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
