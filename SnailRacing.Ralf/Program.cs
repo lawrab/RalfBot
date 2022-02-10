@@ -14,11 +14,12 @@ MainAsync().GetAwaiter().GetResult();
 
 static async Task MainAsync()
 {
+    var appConfig = AppConfig.Create();
     var discordSink = new DiscordSink();
     ConfigureLogging(discordSink);
     var loggerFactory = new LoggerFactory().AddSerilog();
-    var services = await ConfigureServices(discordSink);
-    var discord = await ConnectToDiscord(services, loggerFactory);
+    var services = await ConfigureServices(appConfig, discordSink);
+    var discord = await ConnectToDiscord(services, loggerFactory, appConfig.Discord.BotToken);
 
     await Task.Delay(-1);
 }
@@ -28,12 +29,12 @@ static void ConfigureLogging(DiscordSink discordSink) => Log.Logger = new Logger
     .WriteTo.DiscordSink(discordSink)
     .CreateLogger();
 
-static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILoggerFactory loggerFactory)
+static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILoggerFactory loggerFactory, string? token)
 {
     var discord = new DiscordClient(new DiscordConfiguration()
     {
         LoggerFactory = loggerFactory, // ToDo: see if we can use ServiceProvider here instead, do we need to?
-        Token = AppConfig.Discord.BotToken,
+        Token = token,
         TokenType = TokenType.Bot,
         Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
     });
@@ -61,11 +62,12 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     return discord;
 }
 
-static async Task<ServiceProvider> ConfigureServices(DiscordSink discordSink)
+static async Task<ServiceProvider> ConfigureServices(AppConfig appConfig, DiscordSink discordSink)
 {
     return new ServiceCollection()
             .AddLogging(l => l.AddSerilog())
-            .AddSingleton<IStorageProvider<string, object>>(await CreateStorage(AppConfig.DataPath))
+            .AddSingleton(appConfig)
+            .AddSingleton(await CreateStorage(appConfig.DataPath ?? "appData.json"))
             .AddSingleton(discordSink)
             .BuildServiceProvider();
 }

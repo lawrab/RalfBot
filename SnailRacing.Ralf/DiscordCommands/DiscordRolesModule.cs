@@ -2,9 +2,6 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SnailRacing.Ralf.Providers;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Text.Json;
 
 namespace SnailRacing.Ralf.DiscordCommands
 {
