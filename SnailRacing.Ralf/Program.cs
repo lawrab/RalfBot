@@ -50,7 +50,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
 
     discord.GuildMemberUpdated += async (s, e) =>
     {
-        var storage = services.GetService<IStorageProvider<string, object>>();
+        var storage = services.GetService<IStorageProvider<RolesStorageProviderModel>>();
         var handler = new RoleChangedHandler(storage);
 
         await handler.HandleRoleChange(e);
@@ -67,15 +67,15 @@ static async Task<ServiceProvider> ConfigureServices(AppConfig appConfig, Discor
     return new ServiceCollection()
             .AddLogging(l => l.AddSerilog())
             .AddSingleton(appConfig)
-            .AddSingleton(await CreateStorage(appConfig.DataPath ?? "appData.json"))
+            .AddSingleton(await CreateRoleStorage(Path.Combine(appConfig?.DataPath ?? string.Empty, "roleStorage.json")))
             .AddSingleton(discordSink)
             .BuildServiceProvider();
 }
 
-static async Task<IStorageProvider<string, object>> CreateStorage(string dataPath)
+static async Task<IStorageProvider<RolesStorageProviderModel>> CreateRoleStorage(string dataPath)
 {
-    var fileStorageProvider = new JsonFileStorageProvider<StorageProviderModel<string, object>>(dataPath);
-    var storageProvider = new StorageProvider<string, object>();
+    var fileStorageProvider = new JsonFileStorageProvider<RolesStorageProviderModel>(dataPath);
+    var storageProvider = new StorageProvider<RolesStorageProviderModel>();
     await storageProvider.SetFileStorageProvider(fileStorageProvider);
 
     return storageProvider;

@@ -19,7 +19,7 @@ namespace SnailRacing.Ralf.DiscordCommands
             private readonly DiscordSink _discordSink;
             private readonly ILogger<LoggingModule> _logger;
 
-            public IStorageProvider<string, object>? StorageProvider { private get; set; }
+            public IStorageProvider<AdminStorageProviderModel>? StorageProvider { private get; set; }
 
             public LoggingModule(DiscordSink discordSink, ILogger<LoggingModule> logger)
             {
@@ -32,7 +32,7 @@ namespace SnailRacing.Ralf.DiscordCommands
             {
                 await ctx.TriggerTypingAsync();
 
-                var loggingChannel = this.StorageProvider![StorageProviderKeys.LOGGING_CHANNEL];
+                var loggingChannel = this.StorageProvider!.Store.LoggingChannel;
 
                 await ctx.RespondAsync($"Tailing log in {loggingChannel}");
             }

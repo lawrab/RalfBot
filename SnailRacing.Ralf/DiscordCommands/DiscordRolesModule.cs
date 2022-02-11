@@ -8,13 +8,13 @@ namespace SnailRacing.Ralf.DiscordCommands
     [Group("sync_role"), Hidden]
     internal class DiscordRolesModule : BaseCommandModule
     {
-        public IStorageProvider<string, object>? StorageProvider { private get; set; }
+        public IStorageProvider<RolesStorageProviderModel>? StorageProvider { private get; set; }
 
         [Command("add")]
         public async Task AddSyncRoles(CommandContext ctx, string source, string target)
         {
             await ctx.TriggerTypingAsync();
-            StorageProvider!.AddRole(source, target);
+            StorageProvider!.Store[source] = target;
             await ctx.RespondAsync($"Role `{source}` will be monitored and synched with `{target}`.");
         }
 
@@ -34,9 +34,9 @@ namespace SnailRacing.Ralf.DiscordCommands
             await ctx.RespondAsync(embed);
         }
 
-        private IEnumerable<(string source, string target)> ListRoles(IStorageProvider<string, object> storageProvider)
+        private IEnumerable<(string source, string target)> ListRoles(IStorageProvider<RolesStorageProviderModel> storageProvider)
         {
-            return storageProvider.SyncRoles.Select(r => (r.Key, r.Value)) ?? Enumerable.Empty<(string source, string target)>();
+            return storageProvider.Store.Select(r => (r.Key, r.Value)) ?? Enumerable.Empty<(string source, string target)>();
         }
     }
 }
