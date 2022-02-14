@@ -4,6 +4,8 @@ using SnailRacing.Ralf.Providers;
 using Moq;
 using System.Threading.Tasks;
 using SnailRacing.Ralf.Models;
+using System.Collections.Concurrent;
+using System;
 
 namespace SnailRacing.Ralf.Tests
 {
@@ -17,7 +19,7 @@ namespace SnailRacing.Ralf.Tests
             var expected = "9090";
 
             var storage = new StorageProvider<RolesStorageProviderModel>();
-            var jsonProvider = new Mock<IJsonFileStorageProvider<RolesStorageProviderModel>>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider>();
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // act
@@ -29,7 +31,7 @@ namespace SnailRacing.Ralf.Tests
             Assert.Equal(expected, actual);
 
             jsonProvider.Verify(
-                x => x.SaveAsync(It.IsAny<RolesStorageProviderModel>()),
+                x => x.SaveAsync(It.IsAny<object>()),
                 Times.Once());
         }
 
@@ -38,7 +40,7 @@ namespace SnailRacing.Ralf.Tests
         {
             // arrange
             var storage = new StorageProvider<RolesStorageProviderModel>();
-            var jsonProvider = new Mock<IJsonFileStorageProvider<RolesStorageProviderModel>>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider>();
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // act
@@ -47,7 +49,7 @@ namespace SnailRacing.Ralf.Tests
 
             // assert
             jsonProvider.Verify(
-                x => x.SaveAsync(It.IsAny<RolesStorageProviderModel>()),
+                x => x.SaveAsync(It.IsAny<object>()),
                 Times.Once());
         }
 
@@ -56,13 +58,13 @@ namespace SnailRacing.Ralf.Tests
         {
             // arrange
             var storage = new StorageProvider<RolesStorageProviderModel>();
-            var jsonProvider = new Mock<IJsonFileStorageProvider<RolesStorageProviderModel>>();
+            var jsonProvider = new Mock<IJsonFileStorageProvider>();
 
             // act
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // assert
-            jsonProvider.Verify(x => x.LoadAsync(),Times.Once());
+            jsonProvider.Verify(x => x.LoadAsync(It.IsAny<Type>()),Times.Once());
         }
     }
 }

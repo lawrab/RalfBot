@@ -6,7 +6,7 @@ using SnailRacing.Ralf.Providers;
 namespace SnailRacing.Ralf.DiscordCommands
 {
     [Group("sync_role"), Hidden]
-    internal class DiscordRolesModule : BaseCommandModule
+    public class DiscordRolesModule : BaseCommandModule
     {
         public IStorageProvider<RolesStorageProviderModel>? StorageProvider { private get; set; }
 

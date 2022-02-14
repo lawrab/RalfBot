@@ -32,7 +32,7 @@ namespace SnailRacing.Ralf.DiscordCommands
             {
                 await ctx.TriggerTypingAsync();
 
-                var loggingChannel = this.StorageProvider!.Store.LoggingChannel;
+                var loggingChannel = this.StorageProvider!.Store.InternalStore;
 
                 await ctx.RespondAsync($"Tailing log in {loggingChannel}");
             }

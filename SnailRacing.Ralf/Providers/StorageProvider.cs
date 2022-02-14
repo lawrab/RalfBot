@@ -7,7 +7,7 @@ namespace SnailRacing.Ralf.Providers
     {
         private readonly ILogger<StorageProvider<TModel>>? _logger;
         private TModel _model = new TModel();
-        private IJsonFileStorageProvider<TModel>? _fileStorageProvider;
+        private IJsonFileStorageProvider? _fileStorageProvider;
 
         public StorageProvider()
         {
@@ -26,21 +26,22 @@ namespace SnailRacing.Ralf.Providers
             get => _model;
         }
 
-        public async Task SetFileStorageProvider(IJsonFileStorageProvider<TModel> fileStorageProvider)
+        public async Task SetFileStorageProvider(IJsonFileStorageProvider fileStorageProvider)
         {
             _fileStorageProvider = fileStorageProvider;
-            var data = await fileStorageProvider.LoadAsync();
+            var data = await fileStorageProvider.LoadAsync(_model.GetStoreType());
 
             if (data is null) return;
 
-            _model = data;
+            _model = new TModel();
+            _model.SetStore(data);
             _model.SetSaveDataCallback(SaveData);
         }
 
         private void SaveData()
         {
             if (_fileStorageProvider is null) return;
-            _fileStorageProvider.SaveAsync(_model)
+            _fileStorageProvider.SaveAsync(_model.GetStore())
             .ContinueWith(t => _logger?.LogError(t.Exception, "Error persisting StorageProvider memoryStore"),
                                 TaskContinuationOptions.OnlyOnFaulted); ;
         }

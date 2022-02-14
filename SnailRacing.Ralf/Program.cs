@@ -9,6 +9,7 @@ using SnailRacing.Ralf.DiscordCommands;
 using SnailRacing.Ralf.Handlers;
 using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
+using System.Collections.Concurrent;
 
 MainAsync().GetAwaiter().GetResult();
 
@@ -74,7 +75,7 @@ static async Task<ServiceProvider> ConfigureServices(AppConfig appConfig, Discor
 
 static async Task<IStorageProvider<RolesStorageProviderModel>> CreateRoleStorage(string dataPath)
 {
-    var fileStorageProvider = new JsonFileStorageProvider<RolesStorageProviderModel>(dataPath);
+    var fileStorageProvider = new JsonFileStorageProvider(dataPath);
     var storageProvider = new StorageProvider<RolesStorageProviderModel>();
     await storageProvider.SetFileStorageProvider(fileStorageProvider);
 
