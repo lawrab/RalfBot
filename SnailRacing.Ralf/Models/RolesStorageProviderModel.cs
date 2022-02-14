@@ -3,36 +3,38 @@ using System.Collections.Concurrent;
 
 namespace SnailRacing.Ralf.Models
 {
-    public class RolesStorageProviderModel : IStorageProviderModel, IEnumerable<KeyValuePair<string, string>>
+    public class RolesStorageProviderModel : StorageProviderModelBase<ConcurrentDictionary<string, string>>, IEnumerable<KeyValuePair<string, string>>
     {
-        private Action _saveDataCallback = () => {};
-        private readonly ConcurrentDictionary<string, string> _data = new ConcurrentDictionary<string, string>();
+        public RolesStorageProviderModel()
+        {
+            _data = new ConcurrentDictionary<string, string>();
+        }
 
-        public string this[string key]
+        public string? this[string key]
         {
             get
             {
-                return _data[key];
+                return _data?[key];
             }
             set
             {
-                _data[key] = value;
-                _saveDataCallback();
+                if (_data is null) throw new ArgumentException("_data property not initialised");
+                _data[key] = value!;
+                _saveData();
             }
-        }
-
-        public void SetSaveDataCallback(Action saveData)
-        {
-            _saveDataCallback = saveData;
         }
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
+            if (_data is null) return Enumerable.Empty<KeyValuePair<string, string>>().GetEnumerator();
+
             return _data.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
+            if (_data is null) return Enumerable.Empty<KeyValuePair<string, string>>().GetEnumerator();
+
             return _data.GetEnumerator();
         }
     }

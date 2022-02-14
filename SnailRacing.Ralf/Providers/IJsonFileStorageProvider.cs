@@ -1,9 +1,11 @@
 ﻿namespace SnailRacing.Ralf.Providers
 {
-    public interface IJsonFileStorageProvider<T>
+    public interface IJsonFileStorageProvider
     {
-        Task<T?> LoadAsync();
+        Task<T?> LoadAsync<T>();
 
-        Task SaveAsync(T memoryStore);
+        Task<object?> LoadAsync(Type type);
+
+        Task SaveAsync<T>(T store);
     }
 }

@@ -2,15 +2,7 @@
 
 namespace SnailRacing.Ralf.Models
 {
-    internal class AdminStorageProviderModel : IStorageProviderModel
+    public class AdminStorageProviderModel : StorageProviderModelBase<DiscordChannel>
     {
-        private Action _saveData = () => { };
-
-        public DiscordChannel? LoggingChannel { get; set; }
-
-        public void SetSaveDataCallback(Action saveData)
-        {
-            _saveData = saveData;           
-        }
     }
 }
