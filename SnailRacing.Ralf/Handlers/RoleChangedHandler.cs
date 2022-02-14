@@ -7,9 +7,9 @@ namespace SnailRacing.Ralf.Handlers
 {
     public class RoleChangedHandler
     {
-        private readonly IStorageProvider<string, object> storage;
+        private readonly IStorageProvider<RolesStorageProviderModel> storage;
 
-        public RoleChangedHandler(IStorageProvider<string, object>? storage)
+        public RoleChangedHandler(IStorageProvider<RolesStorageProviderModel>? storage)
         {
             this.storage = storage!;
         }
@@ -42,8 +42,8 @@ namespace SnailRacing.Ralf.Handlers
 
         public async Task SyncRoles(string[] memberRoles, Func<string[], Task> updateMemberAction)
         {
-            var rolesToAdd = GetRolesToAdd(memberRoles, storage.SyncRoles);
-            var rolesToRemove = GetRolesToRemove(memberRoles, storage.SyncRoles);
+            var rolesToAdd = GetRolesToAdd(memberRoles, storage.Store);
+            var rolesToRemove = GetRolesToRemove(memberRoles, storage.Store);
             var newRoles = DeriveNewRoles(memberRoles, rolesToAdd, rolesToRemove);
             await updateMemberAction(newRoles);
         }
@@ -57,7 +57,7 @@ namespace SnailRacing.Ralf.Handlers
             return rolesWithAddedAndRemoved.ToArray();
         }
 
-        private string[] GetRolesToAdd(string[] roles, Dictionary<string, string> syncRoles)
+        private string[] GetRolesToAdd(string[] roles, RolesStorageProviderModel syncRoles)
         {
             var rolesList = roles.ToList();
             var rolesToAdd = rolesList.ToList()
@@ -69,14 +69,14 @@ namespace SnailRacing.Ralf.Handlers
             return hasRolesToAdd ? rolesToAdd.ToArray() : Array.Empty<string>();
         }
 
-        private string[] GetRolesToRemove(string[] roles, Dictionary<string, string> syncRoles)
+        private string[] GetRolesToRemove(string[] roles, RolesStorageProviderModel syncRoles)
         {
             var rolesList = roles.ToList();
-            var excludedRoles = storage.SyncRoles
+            var excludedRoles = syncRoles
                 .ExceptBy(roles, (r) => r.Key)
                 .Select(a => a.Value)
                 .Distinct();
-            var includedRoles = storage.SyncRoles
+            var includedRoles = syncRoles
                 .IntersectBy(roles, (r) => r.Key)
                 .Select(a => a.Value)
                 .Distinct();

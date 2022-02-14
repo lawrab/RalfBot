@@ -5,6 +5,7 @@ using System.Linq;
 using SnailRacing.Ralf.Handlers;
 using SnailRacing.Ralf.Providers;
 using System.Threading.Tasks;
+using SnailRacing.Ralf.Models;
 
 namespace SnailRacing.Ralf.Tests
 {
@@ -205,12 +206,12 @@ namespace SnailRacing.Ralf.Tests
             Assert.Equal(expected, actual);
         }
 
-        private IStorageProvider<string, object> CreateStorageWithRoles((string source, string target)[] syncRoles)
+        private IStorageProvider<RolesStorageProviderModel> CreateStorageWithRoles((string source, string target)[] syncRoles)
         {
-            var storageProvider = new StorageProvider<string, object>();
+            var storageProvider = new StorageProvider<RolesStorageProviderModel>();
             foreach (var item in syncRoles)
             {
-                storageProvider.AddRole(item.source, item.target);
+                storageProvider.Store[item.source] = item.target;
             }
             return storageProvider;
         }

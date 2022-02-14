@@ -1,83 +1,49 @@
-﻿using System.Collections.Concurrent;
-using System.Text.Json;
+﻿using Microsoft.Extensions.Logging;
 
 namespace SnailRacing.Ralf.Providers
 {
-    /// <summary>
-    /// Generic storage provider in a dictionary structure
-    /// Data is held in memory and persisted to file to load at startup
-    /// </summary>
-    public class StorageProvider<TKey, TValue> : IStorageProvider<TKey, TValue>
-        where TKey: notnull
+    public class StorageProvider<TModel> : IStorageProvider<TModel>
+        where TModel : IStorageProviderModel, new()
     {
-        private StorageProviderModel<TKey, TValue> memoryStore = new StorageProviderModel<TKey, TValue>();
-        private IJsonFileStorageProvider<StorageProviderModel<TKey, TValue>>? fileStorageProvider;
+        private readonly ILogger<StorageProvider<TModel>>? _logger;
+        private TModel _model = new TModel();
+        private IJsonFileStorageProvider? _fileStorageProvider;
 
         public StorageProvider()
         {
-
+            _model.SetSaveDataCallback(SaveData);
         }
 
-        public async Task SetFileStorageProvider(IJsonFileStorageProvider<StorageProviderModel<TKey, TValue>> fileStorageProvider)
+        public StorageProvider(ILogger<StorageProvider<TModel>> logger)
+            : this()
         {
-            this.fileStorageProvider = fileStorageProvider;
-            var store = await fileStorageProvider.LoadAsync();
-            
-            if (store is null) return;
-            
-            this.memoryStore = store;
+            _logger = logger;
+            _logger?.LogDebug($"Logger set for {this.GetType().Name}");
         }
 
-        public Dictionary<string, string> SyncRoles => memoryStore.SyncRoles;
-
-        public void AddRole(string source, string target)
+        public TModel Store
         {
-            memoryStore.SyncRoles[source] = target;
-            SaveData().ConfigureAwait(false);
+            get => _model;
         }
 
-        public TValue? this[TKey key] 
-        { 
-            // ToDo: fix nullability warnings here!!!!!!!
-            get 
-            {
-                TValue value;
-                var hasValue = memoryStore.Props.TryGetValue(key, out value!);
-                return hasValue ? value : default(TValue);
-            }
-            set => UpdateStore(key, value!);
-        }
-
-        private void UpdateStore(TKey key, TValue value)
+        public async Task SetFileStorageProvider(IJsonFileStorageProvider fileStorageProvider)
         {
-            memoryStore.Props[key] = value;
-            SaveData().ConfigureAwait(false);
+            _fileStorageProvider = fileStorageProvider;
+            var data = await fileStorageProvider.LoadAsync(_model.GetStoreType());
+
+            if (data is null) return;
+
+            _model = new TModel();
+            _model.SetStore(data);
+            _model.SetSaveDataCallback(SaveData);
         }
 
-        private async Task SaveData()
+        private void SaveData()
         {
-            try
-            {
-                var jsonString = JsonSerializer.Serialize(memoryStore);
-
-                if (fileStorageProvider is null) return;
-                await fileStorageProvider.SaveAsync(memoryStore);
-            }
-            catch
-            {
-                // Error occured
-            }
-        }
-
-        public void RemoveRole(string role)
-        {
-            memoryStore.SyncRoles.Remove(role);
-        }
-
-        public void Remove(TKey key)
-        {
-            TValue value;
-            memoryStore.Props.Remove(key, out value!);
+            if (_fileStorageProvider is null) return;
+            _fileStorageProvider.SaveAsync(_model.GetStore())
+            .ContinueWith(t => _logger?.LogError(t.Exception, "Error persisting StorageProvider memoryStore"),
+                                TaskContinuationOptions.OnlyOnFaulted); ;
         }
     }
 }

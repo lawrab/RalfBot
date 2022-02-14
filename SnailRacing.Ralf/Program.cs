@@ -9,6 +9,7 @@ using SnailRacing.Ralf.DiscordCommands;
 using SnailRacing.Ralf.Handlers;
 using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
+using System.Collections.Concurrent;
 
 MainAsync().GetAwaiter().GetResult();
 
@@ -47,10 +48,11 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
 
     commands.RegisterCommands<DiscordRolesModule>();
     commands.RegisterCommands<AdminModule>();
+    commands.RegisterCommands<NewsLetterModule>();
 
     discord.GuildMemberUpdated += async (s, e) =>
     {
-        var storage = services.GetService<IStorageProvider<string, object>>();
+        var storage = services.GetService<IStorageProvider<RolesStorageProviderModel>>();
         var handler = new RoleChangedHandler(storage);
 
         await handler.HandleRoleChange(e);
@@ -67,15 +69,25 @@ static async Task<ServiceProvider> ConfigureServices(AppConfig appConfig, Discor
     return new ServiceCollection()
             .AddLogging(l => l.AddSerilog())
             .AddSingleton(appConfig)
-            .AddSingleton(await CreateStorage(appConfig.DataPath ?? "appData.json"))
+            .AddSingleton(await CreateRoleStorage(Path.Combine(appConfig?.DataPath ?? string.Empty, "roleStorage.json")))
+            .AddSingleton(await CreateNewsStorage(Path.Combine(appConfig?.DataPath ?? string.Empty, "newsStorage.json")))
             .AddSingleton(discordSink)
             .BuildServiceProvider();
 }
 
-static async Task<IStorageProvider<string, object>> CreateStorage(string dataPath)
+static async Task<IStorageProvider<RolesStorageProviderModel>> CreateRoleStorage(string dataPath)
 {
-    var fileStorageProvider = new JsonFileStorageProvider<StorageProviderModel<string, object>>(dataPath);
-    var storageProvider = new StorageProvider<string, object>();
+    var fileStorageProvider = new JsonFileStorageProvider(dataPath);
+    var storageProvider = new StorageProvider<RolesStorageProviderModel>();
+    await storageProvider.SetFileStorageProvider(fileStorageProvider);
+
+    return storageProvider;
+}
+
+static async Task<IStorageProvider<NewsStorageProviderModel>> CreateNewsStorage(string dataPath)
+{
+    var fileStorageProvider = new JsonFileStorageProvider(dataPath);
+    var storageProvider = new StorageProvider<NewsStorageProviderModel>();
     await storageProvider.SetFileStorageProvider(fileStorageProvider);
 
     return storageProvider;
