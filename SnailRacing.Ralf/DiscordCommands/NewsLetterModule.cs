@@ -42,5 +42,30 @@ namespace SnailRacing.Ralf.DiscordCommands
 
             await ctx.RespondAsync(embed);
         }
+
+        [Command("csv")]
+        public async Task ToCSV(CommandContext ctx)
+        {
+            await ToCSV(ctx, DateTime.UtcNow);
+        }
+
+        [Command("csv")]
+        [RequireDirectMessage()]
+        public async Task ToCSV(CommandContext ctx, DateTime date)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var news = StorageProvider!.Store.QueryMonth(date);
+
+            var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
+
+            var csv = news?.Select(n => $"{n.Who}|{n.When}|{n.Story}") ?? Enumerable.Empty<string>();
+
+            var builder = new DiscordMessageBuilder();
+            builder.WithContent($"{emoji} Newsletter (${DateTime.UtcNow.ToString("MMM, yyyy")})")
+                .WithContent($"`{string.Join(Environment.NewLine, csv)}`");
+
+            await ctx.RespondAsync(builder);
+        }
     }
 }

@@ -37,5 +37,15 @@ namespace SnailRacing.Ralf.Models
         {
             return typeof(NewsModel[]);
         }
+        
+        public IEnumerable<NewsModel> QueryMonth(DateTime date)
+        {
+            return _data?.Where(d => SamesMonth(DateTime.UtcNow, d.When)) ?? Enumerable.Empty<NewsModel>();
+        }
+
+        private bool SamesMonth(DateTime utcNow, DateTime when)
+        {
+            return when.Year == utcNow.Year && when.Month == utcNow.Month;
+        }
     }
 }
