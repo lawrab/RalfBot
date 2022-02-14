@@ -3,7 +3,7 @@
     public abstract class StorageProviderModelBase<T> : IStorageProviderModel
     {
         protected Action _saveData = () => { };
-        protected T? _data;
+        protected T? _data; // ToDo: could be initialised here, issue with Discord Types and internal ctor
 
         public T? InternalStore
         {
@@ -20,14 +20,14 @@
             return typeof(T);
         }
 
-        public void SetStore(object store)
+        public virtual void SetStore(object store)
         {
             if (store is not T) throw new ArgumentException($"Invalid argument type {nameof(store)} excpected type is {typeof(T)}");
 
             _data = (T)store;
         }
 
-        public object GetStore()
+        public virtual object GetStore()
         {
             return _data!;
         }

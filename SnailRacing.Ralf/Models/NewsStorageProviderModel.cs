@@ -4,8 +4,10 @@ namespace SnailRacing.Ralf.Models
 {
     public class NewsStorageProviderModel : StorageProviderModelBase<ConcurrentBag<NewsModel>>
     {
-        private Action _saveData = () => { };
-        private readonly ConcurrentBag<NewsModel> _data = new ConcurrentBag<NewsModel>();
+        public NewsStorageProviderModel()
+        {
+            _data = new ConcurrentBag<NewsModel>();
+        }
 
         public void SetSaveDataCallback(Action saveData)
         {
@@ -14,13 +16,26 @@ namespace SnailRacing.Ralf.Models
 
         public void Add(NewsModel news)
         {
-            _data.Add(news);
+            _data?.Add(news);
+            _saveData();
         }
 
-        public IEnumerable<NewsModel> Query(int count)
+        public IEnumerable<NewsModel>? Query(int count)
         {
-            return _data.OrderByDescending(n => n.When)
+            return _data?.OrderByDescending(n => n.When)
                 .Take(count);
+        }
+
+        public override void SetStore(object store)
+        {
+            var storeArray = store as NewsModel[] ?? Array.Empty<NewsModel>();
+            var data = new ConcurrentBag<NewsModel>(storeArray);
+            base.SetStore(data);
+        }
+
+        public override Type GetStoreType()
+        {
+            return typeof(NewsModel[]);
         }
     }
 }
