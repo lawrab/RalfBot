@@ -46,9 +46,11 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         Services = services
     });
 
+    // ToDo: tidy up and use a assebly registration instead, so all modules in the assembly is always registered
     commands.RegisterCommands<DiscordRolesModule>();
     commands.RegisterCommands<AdminModule>();
     commands.RegisterCommands<NewsLetterModule>();
+    commands.RegisterCommands<LeagueModule>();
 
     discord.GuildMemberUpdated += async (s, e) =>
     {
