@@ -5,11 +5,10 @@ using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using SnailRacing.Ralf.DiscordCommands;
-using SnailRacing.Ralf.Handlers;
+using SnailRacing.Ralf.Discord.Commands;
+using SnailRacing.Ralf.Discord.Handlers;
 using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
-using System.Collections.Concurrent;
 
 MainAsync().GetAwaiter().GetResult();
 

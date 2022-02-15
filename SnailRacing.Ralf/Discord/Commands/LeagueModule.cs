@@ -5,7 +5,7 @@ using SnailRacing.Ralf.Providers;
 
 // ToDo: refactor all this to make it better, use fluent syntax for validation and processing of commands
 
-namespace SnailRacing.Ralf.DiscordCommands
+namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("league")]
     [Description("League administration made easy, subjective opinion, good luck getting registered!")]
@@ -29,7 +29,7 @@ namespace SnailRacing.Ralf.DiscordCommands
 
             var league = StorageProvider?.Store[leagueName];
 
-            if(league!.Store.IsMember(ctx.Member))
+            if (league!.Store.IsMember(ctx.Member))
             {
                 await ctx.RespondAsync($"You are already a {league.Store[ctx.Member.Id.ToString()]?.Status} member of {leagueName}");
                 return;
@@ -46,7 +46,7 @@ namespace SnailRacing.Ralf.DiscordCommands
             await ctx.TriggerTypingAsync();
 
             // ToDo: need to sort the storage model out to fully encapsulate the InternalStore
-            if(StorageProvider!.Store!.InternalStore!.ContainsKey(name))
+            if (StorageProvider!.Store!.InternalStore!.ContainsKey(name))
             {
                 var noEntryEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:");
                 await ctx.RespondAsync($"{noEntryEmoji} League {name} already exist. Sorry, try again.");
@@ -74,15 +74,15 @@ namespace SnailRacing.Ralf.DiscordCommands
         public async Task ListLeagues(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            var leagues  = StorageProvider!.Store
+            var leagues = StorageProvider!.Store
                 .Select(x => new
                 {
                     Name = x.Key,
-                    Description = x.Value.Description,
+                    x.Value.Description,
                     CreatedOn = x.Value.CreatedDate,
                     Pending = x.Value.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
                     Approved = x.Value.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
-                    Standings = x.Value.Standings
+                    x.Value.Standings
                 });
 
             foreach (var league in leagues)
