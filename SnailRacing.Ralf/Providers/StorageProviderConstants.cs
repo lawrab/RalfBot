@@ -1,6 +1,6 @@
 ﻿namespace SnailRacing.Ralf.Providers
 {
-    internal class StorageProviderKeys
+    internal class StorageProviderConstants
     {
         public const string ROLES = "roles";
 

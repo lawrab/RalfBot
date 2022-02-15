@@ -46,9 +46,11 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         Services = services
     });
 
+    // ToDo: tidy up and use a assebly registration instead, so all modules in the assembly is always registered
     commands.RegisterCommands<DiscordRolesModule>();
     commands.RegisterCommands<AdminModule>();
     commands.RegisterCommands<NewsLetterModule>();
+    commands.RegisterCommands<LeagueModule>();
 
     discord.GuildMemberUpdated += async (s, e) =>
     {
@@ -71,8 +73,18 @@ static async Task<ServiceProvider> ConfigureServices(AppConfig appConfig, Discor
             .AddSingleton(appConfig)
             .AddSingleton(await CreateRoleStorage(Path.Combine(appConfig?.DataPath ?? string.Empty, "roleStorage.json")))
             .AddSingleton(await CreateNewsStorage(Path.Combine(appConfig?.DataPath ?? string.Empty, "newsStorage.json")))
+            .AddSingleton(await CreateLeaguesStorage(Path.Combine(appConfig?.DataPath ?? string.Empty, "leaguesStorage.json")))
             .AddSingleton(discordSink)
             .BuildServiceProvider();
+}
+
+static async Task<IStorageProvider<LeagueStorageProviderModel>> CreateLeaguesStorage(string dataPath)
+{
+    var fileStorageProvider = new JsonFileStorageProvider(dataPath);
+    var storageProvider = new StorageProvider<LeagueStorageProviderModel>();
+    await storageProvider.SetFileStorageProvider(fileStorageProvider);
+
+    return storageProvider;
 }
 
 static async Task<IStorageProvider<RolesStorageProviderModel>> CreateRoleStorage(string dataPath)

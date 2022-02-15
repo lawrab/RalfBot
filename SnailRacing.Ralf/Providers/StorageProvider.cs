@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace SnailRacing.Ralf.Providers
 {
@@ -21,6 +22,7 @@ namespace SnailRacing.Ralf.Providers
             _logger?.LogDebug($"Logger set for {this.GetType().Name}");
         }
 
+        [JsonIgnore]
         public TModel Store
         {
             get => _model;
@@ -43,7 +45,7 @@ namespace SnailRacing.Ralf.Providers
             if (_fileStorageProvider is null) return;
             _fileStorageProvider.SaveAsync(_model.GetStore())
             .ContinueWith(t => _logger?.LogError(t.Exception, "Error persisting StorageProvider memoryStore"),
-                                TaskContinuationOptions.OnlyOnFaulted); ;
+                                TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }
