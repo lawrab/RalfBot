@@ -1,14 +1,29 @@
-﻿using System.Collections.Concurrent;
+﻿using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Models
 {
-    public class LeagueModel
+    public class LeagueModel : StorageProvider<LeagueParticipantStorageProviderModel>
     {
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public LeagueStatus Status { get; set; }
-        public ConcurrentBag<LeagueParticipantModel> Participants { get; set; } = new ConcurrentBag<LeagueParticipantModel>();
-        public DateTime CreatedDate { get; set; }
-        public Uri? Standings { get; set; } = new Uri("https://annieandlarry.com");
+        public LeagueModel(string name, string description, DateTime createdDate, string storagePath)
+        {
+            Name = name;
+            Description = description;
+            CreatedDate = createdDate;
+            StoragePath = storagePath;
+            InitStorage();
+        }
+
+        private void InitStorage()
+        {
+            SetFileStorageProvider(new JsonFileStorageProvider(Path.Combine(StoragePath, $"{Name}LeagueStorage.json")))
+                .ConfigureAwait(false);
+        }
+
+        public string Name { get; private set; } = string.Empty;
+        public string Description { get; private set; } = string.Empty;
+        public LeagueStatus Status { get; private set; }
+        public DateTime CreatedDate { get; private set; }
+        public string StoragePath { get; }
+        public Uri? Standings { get; private set; } = new Uri("https://annieandlarry.com");
     }
 }

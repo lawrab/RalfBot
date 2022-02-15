@@ -9,6 +9,7 @@ namespace SnailRacing.Ralf.DiscordCommands
     [Description("League administration made easy, subjective opinion, good luck getting registered!")]
     public class LeagueModule : BaseCommandModule
     {
+        public AppConfig? AppConfig { get; set; }
         public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
 
         [Command("new")]
@@ -16,6 +17,7 @@ namespace SnailRacing.Ralf.DiscordCommands
         {
             await ctx.TriggerTypingAsync();
 
+            // ToDo: need to sort the storage model out to fully encapsulate the InternalStore
             if(StorageProvider!.Store.InternalStore.ContainsKey(name))
             {
                 var noEntryEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:");
@@ -23,13 +25,7 @@ namespace SnailRacing.Ralf.DiscordCommands
                 return;
             }
 
-            // ToDo: create propper constructors for the models to default values
-            StorageProvider!.Store[name] = new LeagueModel
-            {
-                Name = name,
-                Description = description,
-                CreatedDate = DateTime.UtcNow
-            };
+            StorageProvider!.Store[name] = new LeagueModel(name, description, DateTime.UtcNow, AppConfig?.DataPath ?? string.Empty);
 
             var successEmoji = DiscordEmoji.FromName(ctx.Client, ":ok:", true);
             await ctx.RespondAsync($"{successEmoji} New league {name} created, you can win this!");
