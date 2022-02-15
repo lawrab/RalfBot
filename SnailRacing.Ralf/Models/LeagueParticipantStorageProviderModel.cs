@@ -26,9 +26,16 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
-        public void JoinLeague(DiscordMember member, int clientId, string fullName)
+        public bool IsMember(DiscordMember member)
         {
-            this[member.Id.ToString()] = new LeagueParticipantModel
+            return InternalStore?.ContainsKey(member.Id.ToString()) == true;
+        }
+        public bool JoinLeague(DiscordMember member, int clientId, string fullName)
+        {
+            var key = member.Id.ToString();
+            if (InternalStore?.ContainsKey(key) == true) return false;
+
+            this[key] = new LeagueParticipantModel
             {
                 DiscordNickname = member.DisplayName,
                 IRacingClientId = clientId,
@@ -37,6 +44,8 @@ namespace SnailRacing.Ralf.Models
                 Email = member.Email,
                 Status = LeagueParticipantStatus.Pending
             };
+
+            return true;
         }
 
         public IEnumerator<KeyValuePair<string, LeagueParticipantModel>> GetEnumerator()
