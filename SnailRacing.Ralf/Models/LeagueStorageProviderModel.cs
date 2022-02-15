@@ -25,6 +25,16 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
+        public bool Remove(string leagueName)
+        {
+            LeagueModel? league;
+            var result = _data!.Remove(leagueName, out league);
+
+            _saveData();
+
+            return result;
+        }
+         
         public IEnumerator<KeyValuePair<string, LeagueModel>> GetEnumerator()
         {
             if (_data is null) return Enumerable.Empty<KeyValuePair<string, LeagueModel>>().GetEnumerator();

@@ -18,7 +18,7 @@ namespace SnailRacing.Ralf.DiscordCommands
             await ctx.TriggerTypingAsync();
 
             // ToDo: need to sort the storage model out to fully encapsulate the InternalStore
-            if(StorageProvider!.Store.InternalStore.ContainsKey(name))
+            if(StorageProvider!.Store!.InternalStore!.ContainsKey(name))
             {
                 var noEntryEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:");
                 await ctx.RespondAsync($"{noEntryEmoji} League {name} already exist. Sorry, try again.");
@@ -32,17 +32,28 @@ namespace SnailRacing.Ralf.DiscordCommands
         }
 
         [Command("remove")]
-        public async Task RemoveLeague(CommandContext ctx)
+        public async Task RemoveLeague(CommandContext ctx, string leagueName)
         {
             await ctx.TriggerTypingAsync();
-            await ctx.RespondAsync($"Remove league not implemented yet");
+
+            var removed = StorageProvider!.Store.Remove(leagueName);
+            var responseMessage = removed ? $"League **{leagueName}** wiped from the end of the earth." : $"Mistakes were made, **{leagueName}** isn't a thing, try !league to see all leagues.";
+
+            await ctx.RespondAsync(responseMessage);
         }
 
         [GroupCommand]
         public async Task ListLeagues(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            await ctx.RespondAsync($"List leagues not implemented yet");
+            var leagues  = StorageProvider!.Store.Select(x => $"**{x.Key}**: `{x.Value.Description}` created on `{x.Value.CreatedDate.ToShortDateString()}`");
+
+            var builder = new DiscordMessageBuilder();
+            builder.WithReply(ctx.Message.Id)
+                .WithContent("_All leagues_")
+                .WithContent(string.Join(Environment.NewLine, leagues));
+            
+            await ctx.RespondAsync(builder);
         }
     }
 }
