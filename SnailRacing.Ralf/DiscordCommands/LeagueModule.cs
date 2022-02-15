@@ -12,6 +12,15 @@ namespace SnailRacing.Ralf.DiscordCommands
         public AppConfig? AppConfig { get; set; }
         public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
 
+        [Command("join")]
+        public async Task JoinLeague(CommandContext ctx, string leagueName)
+        {
+            await ctx.TriggerTypingAsync();
+
+            StorageProvider!.Store[leagueName].Join(ctx.Member, 0, string.Empty);
+
+        }
+
         [Command("new")]
         public async Task NewLeague(CommandContext ctx, string name, [RemainingText] string description)
         {
@@ -46,14 +55,30 @@ namespace SnailRacing.Ralf.DiscordCommands
         public async Task ListLeagues(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            var leagues  = StorageProvider!.Store.Select(x => $"**{x.Key}**: `{x.Value.Description}` created on `{x.Value.CreatedDate.ToShortDateString()}`");
+            var leagues  = StorageProvider!.Store
+                .Select(x => new
+                {
+                    Name = x.Key,
+                    Description = x.Value.Description,
+                    CreatedOn = x.Value.CreatedDate,
+                    Pending = x.Value.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
+                    Approved = x.Value.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
+                    Standings = x.Value.Standings
+                });
 
-            var builder = new DiscordMessageBuilder();
-            builder.WithReply(ctx.Message.Id)
-                .WithContent("_All leagues_")
-                .WithContent(string.Join(Environment.NewLine, leagues));
-            
-            await ctx.RespondAsync(builder);
+            foreach (var league in leagues)
+            {
+                var builder = new DiscordEmbedBuilder()
+                    .WithTitle(league.Name)
+                    .WithUrl(league.Standings)
+                    .WithDescription(league.Description)
+                    .WithColor(DiscordColor.DarkRed)
+                    .AddField("Approved", league.Approved.ToString(), true)
+                    .AddField("Pending", league.Pending.ToString(), true)
+                    .AddField("Created On", league.CreatedOn.ToShortDateString());
+
+                await ctx.Channel.SendMessageAsync(builder);
+            }
         }
     }
 }

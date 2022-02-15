@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DSharpPlus.Entities;
+using System.Collections;
 using System.Collections.Concurrent;
 
 namespace SnailRacing.Ralf.Models

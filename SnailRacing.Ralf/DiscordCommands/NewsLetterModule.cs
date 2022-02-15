@@ -46,7 +46,7 @@ namespace SnailRacing.Ralf.DiscordCommands
         [Command("csv")]
         public async Task ToCSV(CommandContext ctx)
         {
-            await ToCSV(ctx, DateTime.UtcNow);
+            await ToCSV(ctx, DateTime.UtcNow);  
         }
 
         [Command("csv")]

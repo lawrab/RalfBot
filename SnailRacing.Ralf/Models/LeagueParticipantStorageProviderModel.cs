@@ -1,17 +1,18 @@
-﻿using System.Collections;
+﻿using DSharpPlus.Entities;
+using System.Collections;
 using System.Collections.Concurrent;
 
 namespace SnailRacing.Ralf.Models
 {
-    public class LeagueParticipantStorageProviderModel : StorageProviderModelBase<ConcurrentDictionary<string, LeagueModel>>, 
-        IEnumerable<KeyValuePair<string, LeagueModel>>
+    public class LeagueParticipantStorageProviderModel : StorageProviderModelBase<ConcurrentDictionary<string, LeagueParticipantModel>>, 
+        IEnumerable<KeyValuePair<string, LeagueParticipantModel>>
     {
         public LeagueParticipantStorageProviderModel()
         {
-            _data = new ConcurrentDictionary<string, LeagueModel>();
+            _data = new ConcurrentDictionary<string, LeagueParticipantModel>();
         }
 
-        public LeagueModel? this[string key]
+        public LeagueParticipantModel? this[string key]
         {
             get
             {
@@ -25,16 +26,29 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
-        public IEnumerator<KeyValuePair<string, LeagueModel>> GetEnumerator()
+        public void JoinLeague(DiscordMember member, int clientId, string fullName)
         {
-            if (_data is null) return Enumerable.Empty<KeyValuePair<string, LeagueModel>>().GetEnumerator();
+            this[member.Id.ToString()] = new LeagueParticipantModel
+            {
+                DiscordNickname = member.DisplayName,
+                IRacingClientId = clientId,
+                IRacingName = fullName,
+                RegistrationDate = DateTime.UtcNow,
+                Email = member.Email,
+                Status = LeagueParticipantStatus.Pending
+            };
+        }
+
+        public IEnumerator<KeyValuePair<string, LeagueParticipantModel>> GetEnumerator()
+        {
+            if (_data is null) return Enumerable.Empty<KeyValuePair<string, LeagueParticipantModel>>().GetEnumerator();
 
             return _data.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            if (_data is null) return Enumerable.Empty<KeyValuePair<string, string>>().GetEnumerator();
+            if (_data is null) return Enumerable.Empty<KeyValuePair<string, LeagueParticipantModel>>().GetEnumerator();
 
             return _data.GetEnumerator();
         }
