@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace SnailRacing.Ralf.Tests
+namespace SnailRacing.Ralf.Tests.Discord.Handlers
 {
     /// <summary>
     /// Scenario 1:

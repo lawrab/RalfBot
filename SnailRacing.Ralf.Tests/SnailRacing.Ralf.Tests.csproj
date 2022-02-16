@@ -33,8 +33,4 @@
     <ProjectReference Include="..\SnailRacing.Ralf\SnailRacing.Ralf.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Handlers\" />
-  </ItemGroup>
-
 </Project>
