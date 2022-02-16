@@ -3,6 +3,6 @@
     public interface IResponse
     {
         bool HasErrors();
-        IEnumerable<string> Errors { get; }
+        IEnumerable<string> Errors { get; set; }
     }
 }

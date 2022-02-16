@@ -21,9 +21,9 @@ namespace SnailRacing.Ralf.Models
             InitStorage();
         }
 
-        public bool Join(DiscordMember member, int clientId, string fullName)
+        public bool Join(string discordMemberId, int clientId, string fullName)
         {
-            return Store.JoinLeague(member, clientId, fullName);
+            return Store.JoinLeague(discordMemberId, clientId, fullName);
         }
 
         private void InitStorage()

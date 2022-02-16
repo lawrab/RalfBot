@@ -2,15 +2,11 @@
 {
     public abstract class ResponseBase : IResponse
     {
-        protected List<string> _errors = new List<string>();
-        public IEnumerable<string> Errors
-        {
-            get => _errors;
-        }
+        public IEnumerable<string> Errors { get; set; } = Enumerable.Empty<string>();
 
         public bool HasErrors()
         {
-            return _errors.Any();
+            return Errors.Any();
         }
     }
 }
