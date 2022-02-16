@@ -32,11 +32,11 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var league = StorageProvider?.Store[leagueName];
 
-            if (league!.Store.IsMember(ctx.Member))
-            {
-                await ctx.RespondAsync($"You are already a {league.Store[ctx.Member.Id.ToString()]?.Status} member of {leagueName}");
-                return;
-            }
+            ////if (league!.Store.IsMember(ctx.Member))
+            ////{
+            ////    await ctx.RespondAsync($"You are already a {league.Store[ctx.Member.Id.ToString()]?.Status} member of {leagueName}");
+            ////    return;
+            ////}
 
             var joined = StorageProvider?.Store[leagueName]?.Join(ctx.Member, 0, string.Empty);
 

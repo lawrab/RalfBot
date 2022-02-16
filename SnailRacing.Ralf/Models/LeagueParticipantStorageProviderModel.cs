@@ -26,9 +26,9 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
-        public bool IsMember(DiscordMember member)
+        public bool IsMember(string discordMemeberId)
         {
-            return InternalStore?.ContainsKey(member.Id.ToString()) == true;
+            return InternalStore?.ContainsKey(discordMemeberId) == true;
         }
         public bool JoinLeague(DiscordMember member, int clientId, string fullName)
         {
