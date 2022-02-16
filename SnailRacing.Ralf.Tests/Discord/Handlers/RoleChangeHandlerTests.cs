@@ -1,13 +1,11 @@
-﻿using DSharpPlus.EventArgs;
-using System.Collections.Generic;
-using Xunit;
-using System.Linq;
-using SnailRacing.Ralf.Handlers;
-using SnailRacing.Ralf.Providers;
-using System.Threading.Tasks;
+﻿using SnailRacing.Ralf.Discord.Handlers;
 using SnailRacing.Ralf.Models;
+using SnailRacing.Ralf.Providers;
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
 
-namespace SnailRacing.Ralf.Tests
+namespace SnailRacing.Ralf.Tests.Discord.Handlers
 {
     /// <summary>
     /// Scenario 1:
@@ -48,8 +46,8 @@ namespace SnailRacing.Ralf.Tests
             var handler = new RoleChangedHandler(store);
 
             // act
-            string[]? actual = null; 
-            var newRoles = userRoles.Union(new [] { "RoleB" }).ToArray();
+            string[]? actual = null;
+            var newRoles = userRoles.Union(new[] { "RoleB" }).ToArray();
             await handler.SyncRoles(newRoles, (r) =>
             {
                 actual = r;
@@ -178,7 +176,7 @@ namespace SnailRacing.Ralf.Tests
         public async Task Updated_User_With_No_Matches_Should_Be_Correct()
         {
             // arrange
-            var store = CreateStorageWithRoles( new (string source, string target)[]
+            var store = CreateStorageWithRoles(new (string source, string target)[]
             {
                 ("RoleB", "Sub"),
                 ("RoleD", "Sub"),

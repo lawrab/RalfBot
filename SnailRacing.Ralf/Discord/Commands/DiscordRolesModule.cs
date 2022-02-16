@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SnailRacing.Ralf.Providers;
 
-namespace SnailRacing.Ralf.DiscordCommands
+namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("sync_role"), Hidden]
     public class DiscordRolesModule : BaseCommandModule

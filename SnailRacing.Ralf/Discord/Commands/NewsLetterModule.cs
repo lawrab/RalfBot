@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SnailRacing.Ralf.Providers;
 
-namespace SnailRacing.Ralf.DiscordCommands
+namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("news")]
     public class NewsLetterModule : BaseCommandModule
@@ -46,7 +46,7 @@ namespace SnailRacing.Ralf.DiscordCommands
         [Command("csv")]
         public async Task ToCSV(CommandContext ctx)
         {
-            await ToCSV(ctx, DateTime.UtcNow);  
+            await ToCSV(ctx, DateTime.UtcNow);
         }
 
         [Command("csv")]

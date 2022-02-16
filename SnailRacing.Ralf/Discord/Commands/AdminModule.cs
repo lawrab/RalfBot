@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
 
-namespace SnailRacing.Ralf.DiscordCommands
+namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("admin")] // let's mark this class as a command group
     [Description("Administrative commands.")] // give it a description for help purposes
@@ -23,7 +23,7 @@ namespace SnailRacing.Ralf.DiscordCommands
 
             public LoggingModule(DiscordSink discordSink, ILogger<LoggingModule> logger)
             {
-                this._discordSink = discordSink;
+                _discordSink = discordSink;
                 _logger = logger;
             }
 
@@ -32,7 +32,7 @@ namespace SnailRacing.Ralf.DiscordCommands
             {
                 await ctx.TriggerTypingAsync();
 
-                var loggingChannel = this.StorageProvider!.Store.InternalStore;
+                var loggingChannel = StorageProvider!.Store.InternalStore;
 
                 await ctx.RespondAsync($"Tailing log in {loggingChannel}");
             }

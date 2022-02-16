@@ -3,7 +3,7 @@ using SnailRacing.Ralf.Providers;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace SnailRacing.Ralf.Handlers
+namespace SnailRacing.Ralf.Discord.Handlers
 {
     public class RoleChangedHandler
     {
@@ -36,7 +36,7 @@ namespace SnailRacing.Ralf.Handlers
             var currentRolesArray = currentRoles.ToArray();
 
             if (currentRolesArray.Length != newRoles.Length) return false;
-            return Enumerable.SequenceEqual(currentRolesArray.Select(dr => dr.Name).OrderBy(r => r), newRoles.OrderBy(r => r));
+            return currentRolesArray.Select(dr => dr.Name).OrderBy(r => r).SequenceEqual(newRoles.OrderBy(r => r));
         }
         #endregion
 
@@ -80,7 +80,7 @@ namespace SnailRacing.Ralf.Handlers
                 .IntersectBy(roles, (r) => r.Key)
                 .Select(a => a.Value)
                 .Distinct();
-            
+
             var rolesToRemove = excludedRoles.Except(includedRoles);
 
             return rolesToRemove.ToArray();

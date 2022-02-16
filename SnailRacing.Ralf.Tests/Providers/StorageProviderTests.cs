@@ -1,13 +1,12 @@
 ﻿
-using Xunit;
-using SnailRacing.Ralf.Providers;
 using Moq;
-using System.Threading.Tasks;
 using SnailRacing.Ralf.Models;
-using System.Collections.Concurrent;
+using SnailRacing.Ralf.Providers;
 using System;
+using System.Threading.Tasks;
+using Xunit;
 
-namespace SnailRacing.Ralf.Tests
+namespace SnailRacing.Ralf.Tests.Providers
 {
     public class StorageProviderTests
     {
@@ -64,7 +63,7 @@ namespace SnailRacing.Ralf.Tests
             await storage.SetFileStorageProvider(jsonProvider.Object);
 
             // assert
-            jsonProvider.Verify(x => x.LoadAsync(It.IsAny<Type>()),Times.Once());
+            jsonProvider.Verify(x => x.LoadAsync(It.IsAny<Type>()), Times.Once());
         }
     }
 }
