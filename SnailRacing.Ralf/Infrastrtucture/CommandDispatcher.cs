@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace SnailRacing.Ralf.Handlers
+namespace SnailRacing.Ralf.Infrastrtucture
 {
     public class CommandDispatcher<TRequest, TResponse> : IDispatcher<TRequest, TResponse>
+        where TResponse : IResponse
     {
         private readonly IServiceProvider _services;
 

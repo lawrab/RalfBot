@@ -1,7 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using SnailRacing.Ralf.Handlers;
+using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 // ToDo: refactor all this to make it better, use fluent syntax for validation and processing of commands
@@ -14,7 +15,7 @@ namespace SnailRacing.Ralf.Discord.Commands
     {
         public AppConfig? AppConfig { get; set; }
         public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
-        public IDispatcher<string, string>? Dispatcher { get; set; }
+        public IDispatcher<LeagueJoinRequest, LeagueJoinResponse>? Dispatcher { get; set; }
 
         [Command("join")]
         public async Task JoinLeague(CommandContext ctx, string leagueName)

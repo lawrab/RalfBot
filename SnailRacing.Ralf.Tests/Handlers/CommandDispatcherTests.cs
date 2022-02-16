@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SnailRacing.Ralf.Handlers;
+using SnailRacing.Ralf.Infrastrtucture;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -30,7 +30,7 @@ namespace SnailRacing.Ralf.Tests.Handlers
     class TestRequest
     { }
 
-    class TestResponse
+    class TestResponse : ResponseBase
     { }
 
     class TestHandler : ICommand<TestRequest, TestResponse>
