@@ -1,8 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MediatR;
 using SnailRacing.Ralf.Handlers.League;
-using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 // ToDo: refactor all this to make it better, use fluent syntax for validation and processing of commands
@@ -15,14 +15,14 @@ namespace SnailRacing.Ralf.Discord.Commands
     {
         public AppConfig? AppConfig { get; set; }
         public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
-        public IDispatcher? Dispatcher { get; set; }
+        public IMediator? Mediator { get; set; }
 
         [Command("join")]
         public async Task JoinLeague(CommandContext ctx, string leagueName)
         {
             await ctx.TriggerTypingAsync();
 
-            var response = await Dispatcher!.Send(new LeagueJoinRequest
+            var response = await Mediator!.Send(new LeagueJoinRequest
             {
                 DiscordMemberId = ctx.Member.Id.ToString(),
                 LeagueName = leagueName
@@ -36,7 +36,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            var response = await Dispatcher!.Send(new LeagueNewRequest
+            var response = await Mediator!.Send(new LeagueNewRequest
             {
                 LeagueName = leagueName,
                 Description = description

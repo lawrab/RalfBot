@@ -1,4 +1,4 @@
-﻿using SnailRacing.Ralf.Infrastrtucture;
+﻿using MediatR;
 
 namespace SnailRacing.Ralf.Handlers.League
 {

@@ -2,6 +2,7 @@
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -25,7 +26,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var handler = new LeagueNewHandler(storage, validator, new AppConfig());
 
             // act
-            var actual = await handler.Handle(request);
+            var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
             var storedLeagueActual = storage.Store[request.LeagueName] ?? new LeagueModel(string.Empty, string.Empty, DateTime.MinValue, string.Empty);
@@ -53,7 +54,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var handler = new LeagueNewHandler(storage, validator, new AppConfig());
 
             // act
-            var actual = await handler.Handle(request);
+            LeagueNewResponse? actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
             Assert.True(actual.HasErrors());

@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
-using SnailRacing.Ralf.Infrastrtucture;
+using MediatR;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Handlers.League
 {
-    public class LeagueJoinHandler : ICommand<LeagueJoinRequest, LeagueJoinResponse>
+    public class LeagueJoinHandler : IRequestHandler<LeagueJoinRequest, LeagueJoinResponse>
     {
         private readonly IStorageProvider<LeagueStorageProviderModel> _storage;
         private readonly IValidator<LeagueJoinRequest> _validator;
@@ -15,7 +15,8 @@ namespace SnailRacing.Ralf.Handlers.League
             _storage = storage;
             _validator = validator;
         }
-        public Task<LeagueJoinResponse> Handle(LeagueJoinRequest request)
+
+        public Task<LeagueJoinResponse> Handle(LeagueJoinRequest request, CancellationToken cancellationToken)
         {
             var validationResponse = _validator.Validate(request);
 

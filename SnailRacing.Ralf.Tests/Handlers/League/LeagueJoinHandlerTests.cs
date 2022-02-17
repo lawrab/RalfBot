@@ -2,6 +2,7 @@
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -27,7 +28,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var handler = new LeagueJoinHandler(storage, validator);
 
             // act
-            var actual = await handler.Handle(request);
+            var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
             Assert.False(actual.HasErrors());

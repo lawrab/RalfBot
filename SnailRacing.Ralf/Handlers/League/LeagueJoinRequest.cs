@@ -1,10 +1,10 @@
-﻿using SnailRacing.Ralf.Infrastrtucture;
+﻿using MediatR;
 
 namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueJoinRequest : IRequest<LeagueJoinResponse>
     {
-        public string LeagueName { get; set; }
-        public string DiscordMemberId { get; set; }
+        public string LeagueName { get; set; } = string.Empty;
+        public string DiscordMemberId { get; set; } = string.Empty;
     }
 }
