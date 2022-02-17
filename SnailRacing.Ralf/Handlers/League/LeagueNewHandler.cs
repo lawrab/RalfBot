@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using MediatR;
+﻿using MediatR;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Handlers.League
