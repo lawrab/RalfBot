@@ -23,7 +23,7 @@ namespace SnailRacing.Ralf.Handlers.League
         {
             if (_storage.Store.InternalStore?.ContainsKey(leagueName) != true)
             {
-                validationContext.AddFailure($"The {leagueName} do not exist. Use !league for a list of active leagues you can join.");
+                validationContext.AddFailure(string.Format(Messages.INVALID_LEAGUE, leagueName));
             }
         }
 
@@ -33,7 +33,7 @@ namespace SnailRacing.Ralf.Handlers.League
             var discordMemberId = validationContext.InstanceToValidate.DiscordMemberId;
             if (league!.Store.IsMember(discordMemberId))
             {
-                validationContext.AddFailure($"You are already a {league.Store[discordMemberId]?.Status} member of {leagueName}");
+                validationContext.AddFailure( string.Format(Messages.ALREADY_MEMBER_OF_LEAGUE, league.Store[discordMemberId]?.Status, leagueName));
             }
         }
     }

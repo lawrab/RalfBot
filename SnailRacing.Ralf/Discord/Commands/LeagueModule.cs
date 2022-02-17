@@ -3,9 +3,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MediatR;
 using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
-
-// ToDo: refactor all this to make it better, use fluent syntax for validation and processing of commands
 
 namespace SnailRacing.Ralf.Discord.Commands
 {
@@ -18,7 +17,9 @@ namespace SnailRacing.Ralf.Discord.Commands
         public IMediator? Mediator { get; set; }
 
         [Command("join")]
-        public async Task JoinLeague(CommandContext ctx, string leagueName)
+        [Description("Request to join a league")]
+        public async Task JoinLeague(CommandContext ctx, 
+            [Description("Use !league to get a list of leagues")] string leagueName)
         {
             await ctx.TriggerTypingAsync();
 
@@ -28,18 +29,18 @@ namespace SnailRacing.Ralf.Discord.Commands
                 LeagueName = leagueName
             });
 
-            if (response.HasErrors())
-            {
-                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
-                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
-                return;
-            }
-
-            await ctx.RespondAsync($"You were added to the {leagueName} league, your status is pending approval and a league admin will be in touch soon.");
+            var responseMessage = response
+                .ToResponseMessage($"You were added to the {leagueName} league, your status is pending approval and a league admin will be in touch soon.");
+            
+            await ctx.RespondAsync(responseMessage);
         }
 
         [Command("new")]
-        public async Task NewLeague(CommandContext ctx, string leagueName, [RemainingText] string description)
+        [Aliases("add")]
+        [Description("Creates a new league")]
+        public async Task NewLeague(CommandContext ctx,
+            [Description("Call it something nice")] string leagueName, 
+            [Description("A short desrciption of the league")][RemainingText] string description)
         {
             await ctx.TriggerTypingAsync();
 
@@ -49,18 +50,14 @@ namespace SnailRacing.Ralf.Discord.Commands
                 Description = description
             });
 
-            if(response.HasErrors())
-            {
-                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
-                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
-                return;
-            }
+            var responseMessage = response
+                .ToResponseMessage($"New league {leagueName} created, you can win this!");
 
-            var successEmoji = DiscordEmoji.FromName(ctx.Client, ":ok:", true);
-            await ctx.RespondAsync($"{successEmoji} New league {leagueName} created, you can win this!");
+            await ctx.RespondAsync(responseMessage);
         }
 
         [Command("remove")]
+        [Description("Deletes the league")]
         public async Task RemoveLeague(CommandContext ctx, string leagueName)
         {
 
@@ -71,17 +68,15 @@ namespace SnailRacing.Ralf.Discord.Commands
                 LeagueName = leagueName,
             });
 
-            if (response.HasErrors())
-            {
-                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
-                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
-                return;
-            }
+            var responseMessage = response
+                .ToResponseMessage($"League **{leagueName}** wiped from the end of the earth.");
 
-            await ctx.RespondAsync($"League **{leagueName}** wiped from the end of the earth.");
+            await ctx.RespondAsync(responseMessage);
         }
 
         [GroupCommand]
+        [Command("list")]
+        [Description("Shows all the leagues")]
         public async Task ListLeagues(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
@@ -90,15 +85,14 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             if (response.HasErrors())
             {
-                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
-                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
+                await ctx.RespondAsync(response.ToErrorMessage());
                 return;
             }
 
             if(!response.Leagues.Any())
             {
                 var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
-                await ctx.RespondAsync($"{shrugEmoji} I cannot find any leagues, add one if you want to see something here!");
+                await ctx.RespondAsync($"{shrugEmoji} There are currently no leagues running.");
                 return;
             }
 
