@@ -6,7 +6,7 @@
         {
             return response.HasErrors() ?
                 response.ToErrorMessage() :
-                $":OK: {sucessMessage}";
+                $":ok: {sucessMessage}";
         }
 
         public static string ToErrorMessage(this ResponseBase response)

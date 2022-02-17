@@ -9,6 +9,7 @@ using SnailRacing.Ralf.Providers;
 namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("league")]
+    [RequireGuild]
     [Description("League administration made easy, subjective opinion, good luck getting registered!")]
     public class LeagueModule : BaseCommandModule
     {
@@ -38,6 +39,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Command("new")]
         [Aliases("add")]
         [Description("Creates a new league")]
+        [RequireRoles(RoleCheckMode.Any, "League Admin")]
         public async Task NewLeague(CommandContext ctx,
             [Description("Call it something nice")] string leagueName, 
             [Description("A short desrciption of the league")][RemainingText] string description)
