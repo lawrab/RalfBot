@@ -7,23 +7,15 @@ namespace SnailRacing.Ralf.Handlers.League
     public class LeagueJoinHandler : IRequestHandler<LeagueJoinRequest, LeagueJoinResponse>
     {
         private readonly IStorageProvider<LeagueStorageProviderModel> _storage;
-        private readonly IValidator<LeagueJoinRequest> _validator;
 
-        public LeagueJoinHandler(IStorageProvider<LeagueStorageProviderModel> storage,
-            IValidator<LeagueJoinRequest> validator)
+        public LeagueJoinHandler(IStorageProvider<LeagueStorageProviderModel> storage)
         {
             _storage = storage;
-            _validator = validator;
         }
 
         public Task<LeagueJoinResponse> Handle(LeagueJoinRequest request, CancellationToken cancellationToken)
         {
-            var validationResponse = _validator.Validate(request);
-
-            var response = new LeagueJoinResponse
-            {
-                Errors = validationResponse.Errors.Select(e => e.ErrorMessage)
-            };
+            var response = new LeagueJoinResponse();
 
             _storage.Store[request.LeagueName]?.Join(request.DiscordMemberId, 0, string.Empty);
 

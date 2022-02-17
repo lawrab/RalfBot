@@ -21,9 +21,8 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 Description = "Desc1"
             };
             var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var validator = new LeagueNewRequestValidator(storage);
 
-            var handler = new LeagueNewHandler(storage, validator, new AppConfig());
+            var handler = new LeagueNewHandler(storage, new AppConfig());
 
             // act
             var actual = await handler.Handle(request, CancellationToken.None);
@@ -35,30 +34,5 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             Assert.Equal(request.LeagueName, storedLeagueActual.Name);
             Assert.Equal(request.Description, storedLeagueActual.Description);
         }
-
-        [Fact]
-        public async Task LeagueNewRequest_With_Errors_Dont_Add_League()
-        {
-            // arrange
-            var request = new LeagueNewRequest
-            {
-                LeagueName = "League1",
-                Description = "Desc1"
-            };
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel(request.LeagueName, string.Empty, DateTime.UtcNow, "");
-
-            storage.Store[request.LeagueName] = league;
-
-            var validator = new LeagueNewRequestValidator(storage);
-            var handler = new LeagueNewHandler(storage, validator, new AppConfig());
-
-            // act
-            LeagueNewResponse? actual = await handler.Handle(request, CancellationToken.None);
-
-            // assert
-            Assert.True(actual.HasErrors());
-        }
-
     }
 }

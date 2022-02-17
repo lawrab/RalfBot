@@ -24,8 +24,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
 
             storage.Store[request.LeagueName] = league;
 
-            var validator = new LeagueJoinRequestValidator(storage);
-            var handler = new LeagueJoinHandler(storage, validator);
+            var handler = new LeagueJoinHandler(storage);
 
             // act
             var actual = await handler.Handle(request, CancellationToken.None);

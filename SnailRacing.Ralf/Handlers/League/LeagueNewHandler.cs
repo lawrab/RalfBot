@@ -7,26 +7,18 @@ namespace SnailRacing.Ralf.Handlers.League
     public class LeagueNewHandler : IRequestHandler<LeagueNewRequest, LeagueNewResponse>
     {
         private IStorageProvider<LeagueStorageProviderModel> _storage;
-        private IValidator<LeagueNewRequest> _validator;
         private readonly AppConfig _config;
 
         public LeagueNewHandler(IStorageProvider<LeagueStorageProviderModel> storage,
-                    IValidator<LeagueNewRequest> validator,
                     AppConfig config)
         {
             _storage = storage;
-            _validator = validator;
             _config = config;
         }
 
         public Task<LeagueNewResponse> Handle(LeagueNewRequest request, CancellationToken cancellationToken)
         {
-            var validationResponse = _validator.Validate(request);
-
-            var response = new LeagueNewResponse
-            {
-                Errors = validationResponse.Errors.Select(e => e.ErrorMessage)
-            };
+            var response = new LeagueNewResponse();
 
             _storage.Store[request.LeagueName] = new LeagueModel(request.LeagueName,
                 request.Description,
