@@ -1,6 +1,8 @@
-﻿namespace SnailRacing.Ralf.Handlers.League
+﻿using SnailRacing.Ralf.Infrastrtucture;
+
+namespace SnailRacing.Ralf.Handlers.League
 {
-    public class LeagueJoinRequest
+    public class LeagueJoinRequest : IRequest<LeagueJoinResponse>
     {
         public string LeagueName { get; set; }
         public string DiscordMemberId { get; set; }

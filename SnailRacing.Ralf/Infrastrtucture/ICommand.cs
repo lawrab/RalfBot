@@ -2,7 +2,7 @@
 
 {
     public interface ICommand<TRequest, TResponse>
-        where TResponse : IResponse
+        where TRequest : IRequest<TResponse>
     {
         Task<TResponse> Handle(TRequest request);
     }

@@ -15,7 +15,7 @@ namespace SnailRacing.Ralf.Discord.Commands
     {
         public AppConfig? AppConfig { get; set; }
         public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
-        public IDispatcher<LeagueJoinRequest, LeagueJoinResponse>? Dispatcher { get; set; }
+        public IDispatcher? Dispatcher { get; set; }
 
         [Command("join")]
         public async Task JoinLeague(CommandContext ctx, string leagueName)
@@ -32,22 +32,19 @@ namespace SnailRacing.Ralf.Discord.Commands
         }
 
         [Command("new")]
-        public async Task NewLeague(CommandContext ctx, string name, [RemainingText] string description)
+        public async Task NewLeague(CommandContext ctx, string leagueName, [RemainingText] string description)
         {
             await ctx.TriggerTypingAsync();
 
-            // ToDo: need to sort the storage model out to fully encapsulate the InternalStore
-            if (StorageProvider!.Store!.InternalStore!.ContainsKey(name))
+            var response = await Dispatcher!.Send(new LeagueNewRequest
             {
-                var noEntryEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:");
-                await ctx.RespondAsync($"{noEntryEmoji} League {name} already exist. Sorry, try again.");
-                return;
-            }
+                LeagueName = leagueName,
+                Description = description
+            });
 
-            StorageProvider!.Store[name] = new LeagueModel(name, description, DateTime.UtcNow, AppConfig?.DataPath ?? string.Empty);
 
             var successEmoji = DiscordEmoji.FromName(ctx.Client, ":ok:", true);
-            await ctx.RespondAsync($"{successEmoji} New league {name} created, you can win this!");
+            await ctx.RespondAsync($"{successEmoji} New league {leagueName} created, you can win this!");
         }
 
         [Command("remove")]

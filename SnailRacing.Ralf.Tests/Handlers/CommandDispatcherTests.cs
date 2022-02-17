@@ -12,13 +12,15 @@ namespace SnailRacing.Ralf.Tests.Handlers
         {
             // arrange
             var services = new ServiceCollection()
-                .AddTransient(typeof(IDispatcher<,>), typeof(CommandDispatcher<,>))
+                .AddTransient(typeof(IDispatcher), typeof(CommandDispatcher))
                 .AddTransient<ICommand<TestRequest, TestResponse>, TestHandler>()
                 .BuildServiceProvider();
 
-            var handler = services.GetService<IDispatcher<TestRequest, TestResponse>>();
+            var handler = services.GetService<IDispatcher>();
 
-            // act
+            var test = (ICommand<IRequest<TestResponse>, TestResponse>)new TestHandler();
+
+                        // act
             var actual = await handler!.Send(new TestRequest());
 
             // assert
@@ -27,7 +29,7 @@ namespace SnailRacing.Ralf.Tests.Handlers
         }
     }
 
-    class TestRequest
+    class TestRequest : IRequest<TestResponse>
     { }
 
     class TestResponse : ResponseBase
