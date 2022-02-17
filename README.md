@@ -14,6 +14,19 @@ Not ready to be installed yet, innitial commits are in progress and no deployed 
 
 Bot commands will be added here when they are available
 
+## Development
+
+Publish
+```sh
+dotnet publish -c Release
+docker build -t lawrab/ralf-bot .
+docker push lawrab/ralf-bot
+```
+
+Run local
+```sh
+docker run -e Discord__BotToken="YOUR TOKEN" -e DataPath="/Data" lawrab/ralf-bot
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

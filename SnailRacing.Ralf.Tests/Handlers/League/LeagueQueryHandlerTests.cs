@@ -35,7 +35,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
 
             // assert
             Assert.False(actual.HasErrors());
-            Assert.Equal(expected.Select(x => x.Name), actual.Leagues.Select(x => x.Name));
+            Assert.Equal(expected.Select(x => x.Name).OrderBy(x => x), actual.Leagues.Select(x => x.Name).OrderBy(x => x));
         }
     }
 }
