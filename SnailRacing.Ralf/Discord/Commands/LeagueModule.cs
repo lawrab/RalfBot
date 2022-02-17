@@ -28,6 +28,13 @@ namespace SnailRacing.Ralf.Discord.Commands
                 LeagueName = leagueName
             });
 
+            if (response.HasErrors())
+            {
+                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
+                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
+                return;
+            }
+
             await ctx.RespondAsync($"You were added to the {leagueName} league, your status is pending approval and a league admin will be in touch soon.");
         }
 
@@ -42,6 +49,12 @@ namespace SnailRacing.Ralf.Discord.Commands
                 Description = description
             });
 
+            if(response.HasErrors())
+            {
+                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
+                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
+                return;
+            }
 
             var successEmoji = DiscordEmoji.FromName(ctx.Client, ":ok:", true);
             await ctx.RespondAsync($"{successEmoji} New league {leagueName} created, you can win this!");
@@ -50,12 +63,22 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Command("remove")]
         public async Task RemoveLeague(CommandContext ctx, string leagueName)
         {
+
             await ctx.TriggerTypingAsync();
 
-            var removed = StorageProvider!.Store.Remove(leagueName);
-            var responseMessage = removed ? $"League **{leagueName}** wiped from the end of the earth." : $"Mistakes were made, **{leagueName}** isn't a thing, try !league to see all leagues.";
+            var response = await Mediator!.Send(new LeagueRemoveRequest
+            {
+                LeagueName = leagueName,
+            });
 
-            await ctx.RespondAsync(responseMessage);
+            if (response.HasErrors())
+            {
+                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
+                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
+                return;
+            }
+
+            await ctx.RespondAsync($"League **{leagueName}** wiped from the end of the earth.");
         }
 
         [GroupCommand]
