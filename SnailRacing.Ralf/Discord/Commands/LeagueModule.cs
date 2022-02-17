@@ -85,15 +85,32 @@ namespace SnailRacing.Ralf.Discord.Commands
         public async Task ListLeagues(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            var leagues = StorageProvider!.Store
+
+            var response = await Mediator!.Send(new LeagueQueryRequest());
+
+            if (response.HasErrors())
+            {
+                var errorEmoji = DiscordEmoji.FromName(ctx.Client, ":no_entry:", true);
+                await ctx.RespondAsync($"{errorEmoji} {string.Join(Environment.NewLine, response.Errors)}");
+                return;
+            }
+
+            if(!response.Leagues.Any())
+            {
+                var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
+                await ctx.RespondAsync($"{shrugEmoji} I cannot find any leagues, add one if you want to see something here!");
+                return;
+            }
+
+            var leagues = response.Leagues
                 .Select(x => new
                 {
-                    Name = x.Key,
-                    x.Value.Description,
-                    CreatedOn = x.Value.CreatedDate,
-                    Pending = x.Value.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
-                    Approved = x.Value.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
-                    x.Value.Standings
+                    Name = x.Name,
+                    x.Description,
+                    CreatedOn = x.CreatedDate,
+                    Pending = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
+                    Approved = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
+                    x.Standings
                 });
 
             foreach (var league in leagues)
