@@ -1,4 +1,5 @@
 ﻿using SnailRacing.Ralf.Providers;
+using System.Text.Json.Serialization;
 
 namespace SnailRacing.Ralf.Models
 {
@@ -9,9 +10,10 @@ namespace SnailRacing.Ralf.Models
         public string Description { get; private set; } = string.Empty;
         public LeagueStatus Status { get; private set; }
         public DateTime CreatedDate { get; private set; }
-        public string StoragePath { get; }
+        public string StoragePath { get; private set; }
         public Uri? Standings { get; private set; } = new Uri("https://annieandlarry.com");
 
+        [JsonConstructor]
         public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath)
             : this(guild, name, description, createdDate, storagePath, true)
         { 

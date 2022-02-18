@@ -14,7 +14,7 @@ namespace SnailRacing.Ralf.Handlers.League
 
         public Task<LeagueRemoveResponse> Handle(LeagueRemoveRequest request, CancellationToken cancellationToken)
         {
-            _storage!.Store.Remove(request.LeagueName);
+            _storage!.Store.Remove(request.LeagueKey);
 
             return Task.FromResult(new LeagueRemoveResponse());
         }

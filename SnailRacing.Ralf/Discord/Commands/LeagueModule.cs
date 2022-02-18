@@ -20,7 +20,7 @@ namespace SnailRacing.Ralf.Discord.Commands
 
         [Command("join")]
         [Description("Request to join a league")]
-        public async Task JoinLeague(CommandContext ctx, 
+        public async Task JoinLeague(CommandContext ctx,
             [Description("Use !league to get a list of leagues")] string leagueName)
         {
             await ctx.TriggerTypingAsync();
@@ -34,7 +34,27 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var responseMessage = response
                 .ToResponseMessage($"You were added to the {leagueName} league, your status is pending approval and a league admin will be in touch soon.");
-            
+
+            await ctx.RespondAsync(responseMessage);
+        }
+
+        [Command("leave")]
+        [Description("Leave a league")]
+        public async Task LeaveLeague(CommandContext ctx,
+            [Description("Use !league to get a list of leagues")] string leagueName)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var response = await Mediator!.Send(new LeagueLeaveRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+                DiscordMemberId = ctx.Member.Id.ToString(),
+                LeagueName = leagueName
+            });
+
+            var responseMessage = response
+                .ToResponseMessage($"You were removed from the {leagueName} league and can not longer participate in it.");
+
             await ctx.RespondAsync(responseMessage);
         }
 
@@ -43,7 +63,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("Creates a new league")]
         [RequireRoles(RoleCheckMode.Any, "League Admin")]
         public async Task NewLeague(CommandContext ctx,
-            [Description("Call it something nice")] string leagueName, 
+            [Description("Call it something nice")] string leagueName,
             [Description("A short desrciption of the league")][RemainingText] string description)
         {
             await ctx.TriggerTypingAsync();
@@ -98,7 +118,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                 return;
             }
 
-            if(!response.Leagues.Any())
+            if (!response.Leagues.Any())
             {
                 var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
                 await ctx.RespondAsync($"{shrugEmoji} There are currently no leagues running.");

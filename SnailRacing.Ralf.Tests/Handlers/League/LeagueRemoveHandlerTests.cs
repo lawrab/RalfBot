@@ -19,12 +19,13 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             // arrange
             var request = new LeagueRemoveRequest
             {
+                GuildId = "12",
                 LeagueName = "League1"
             };
             var storage = new StorageProvider<LeagueStorageProviderModel>();
             var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
 
-            storage.Store[request.LeagueName] = league;
+            storage.Store[request.LeagueKey] = league;
 
             var handler = new LeagueRemoveHandler(storage);
 
@@ -33,7 +34,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
 
             // assert
             Assert.False(actual.HasErrors());
-            Assert.False(league.Store.InternalStore!.ContainsKey(request.LeagueName));
+            Assert.Empty(storage.Store);
         }
     }
 }
