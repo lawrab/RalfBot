@@ -6,18 +6,20 @@ namespace SnailRacing.Ralf.Providers
     [ExcludeFromCodeCoverage(Justification = "File IO implementation that cannot be tested predictably")]
     public class JsonFileStorageProvider : IJsonFileStorageProvider
     {
-        private readonly string filePath;
+        private readonly string _filePath;
 
         public JsonFileStorageProvider(string filePath)
         {
-            this.filePath = filePath;
+            this._filePath = filePath;
         }
+
+        public string FilePath => _filePath;
 
         public async Task<T?> LoadAsync<T>()
         {
             try
             {
-                var json = await File.ReadAllTextAsync(filePath);
+                var json = await File.ReadAllTextAsync(FilePath);
 
                 return JsonSerializer.Deserialize<T>(json);
             }
@@ -31,7 +33,7 @@ namespace SnailRacing.Ralf.Providers
         {
             try
             {
-                var json = await File.ReadAllTextAsync(filePath);
+                var json = await File.ReadAllTextAsync(FilePath);
 
                 return JsonSerializer.Deserialize(json, type);
             }
@@ -44,7 +46,7 @@ namespace SnailRacing.Ralf.Providers
         public async Task SaveAsync<T>(T memoryStore)
         {
             var json = JsonSerializer.Serialize(memoryStore);
-            await File.WriteAllTextAsync(filePath, json);
+            await File.WriteAllTextAsync(FilePath, json);
         }
     }
 }

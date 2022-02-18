@@ -6,19 +6,18 @@ using Xunit;
 
 namespace SnailRacing.Ralf.Tests.Handlers.League
 {
-    public class LeagueJoinValidatorTests
+    public class LeagueLeaveRequestValidatorTests
     {
-
         [Fact]
         public void Empty_GuildId_Returns_Error()
         {
             // arrange
-            var request = new LeagueJoinRequest
+            var request = new LeagueLeaveRequest
             {
                 DiscordMemberId = "1",
                 LeagueName = "League1",
             };
-            var validator = new LeagueJoinRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            var validator = new LeagueLeaveRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
 
             // act
             var actual = validator.Validate(request);
@@ -32,12 +31,12 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
         public void Empty_DiscordMemberId_Returns_Error()
         {
             // arrange
-            var request = new LeagueJoinRequest
+            var request = new LeagueLeaveRequest
             {
                 GuildId = "1",
                 LeagueName = "League1",
             };
-            var validator = new LeagueJoinRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            var validator = new LeagueLeaveRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
 
             // act
             var actual = validator.Validate(request);
@@ -51,13 +50,13 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
         public void Invalid_LeagueName_Returns_Error()
         {
             // arrange
-            var request = new LeagueJoinRequest
+            var request = new LeagueLeaveRequest
             {
                 GuildId = "1",
                 DiscordMemberId = "1",
                 LeagueName = "I do not exist"
             };
-            var validator = new LeagueJoinRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            var validator = new LeagueLeaveRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
 
             // act
             var actual = validator.Validate(request);
@@ -68,10 +67,10 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
         }
 
         [Fact]
-        public void Allready_Joined_League_Returns_Error()
+        public void Not_A_Member_Of_League_Returns_Error()
         {
             // arrange
-            var request = new LeagueJoinRequest
+            var request = new LeagueLeaveRequest
             {
                 GuildId = "1",
                 LeagueName = "League1",
@@ -79,17 +78,16 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             };
             var storage = new StorageProvider<LeagueStorageProviderModel>();
             var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
-            league.Store.InternalStore![request.DiscordMemberId] = new LeagueParticipantModel();
 
             storage.Store[request.LeagueKey] = league;
 
-            var validator = new LeagueJoinRequestValidator(storage);
+            var validator = new LeagueLeaveRequestValidator(storage);
 
             // act
             var actual = validator.Validate(request);
 
             // assert
-            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("You are already a"));
+            Assert.Contains(actual.Errors, (e) => e.ErrorMessage == string.Format(Messages.NOT_MEMBER_OF_LEAGUE, request.LeagueName));
 
         }
     }

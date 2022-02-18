@@ -11,20 +11,33 @@ namespace SnailRacing.Ralf.Models
         public DateTime CreatedDate { get; private set; }
         public string StoragePath { get; }
         public Uri? Standings { get; private set; } = new Uri("https://annieandlarry.com");
-        
+
         public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath)
+            : this(guild, name, description, createdDate, storagePath, true)
+        { 
+        }
+
+        public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath, bool initStorage)
         {
             Guild = guild;
             Name = name;
             Description = description;
             CreatedDate = createdDate;
             StoragePath = storagePath;
-            InitStorage();
+            if (initStorage)
+            {
+                InitStorage();
+            }
         }
 
-        public bool Join(string discordMemberId, int clientId, string fullName)
+        public void Join(string discordMemberId, int clientId, string fullName)
         {
-            return Store.JoinLeague(discordMemberId, clientId, fullName);
+            Store.JoinLeague(discordMemberId, clientId, fullName);
+        }
+
+        public void Leave(string discordMemberId)
+        {
+            Store.LeaveLeague(discordMemberId);
         }
 
         private void InitStorage()

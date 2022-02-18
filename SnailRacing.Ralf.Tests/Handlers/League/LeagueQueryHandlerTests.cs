@@ -24,13 +24,13 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
 
             var expected = new List<LeagueModel>
             {
-                new LeagueModel("1", "1", string.Empty, DateTime.UtcNow, ""),
-                new LeagueModel("1", "2", string.Empty, DateTime.UtcNow, "")
+                new LeagueModel("1", "1", string.Empty, DateTime.UtcNow, "", false),
+                new LeagueModel("1", "2", string.Empty, DateTime.UtcNow, "", false)
             };
 
             storage.Store["1"] = expected[0];
             storage.Store["2"] = expected[1];
-            storage.Store["3"] = new LeagueModel("2", "3", string.Empty, DateTime.UtcNow, "");
+            storage.Store["3"] = new LeagueModel("2", "3", string.Empty, DateTime.UtcNow, "", false);
 
             var handler = new LeagueQueryHandler(storage);
 

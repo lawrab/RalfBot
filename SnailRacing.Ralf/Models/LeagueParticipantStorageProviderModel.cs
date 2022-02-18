@@ -30,9 +30,9 @@ namespace SnailRacing.Ralf.Models
         {
             return InternalStore?.ContainsKey(discordMemeberId) == true;
         }
-        public bool JoinLeague(string discordMemberId, int clientId, string fullName)
+        public void JoinLeague(string discordMemberId, int clientId, string fullName)
         {
-            if (InternalStore?.ContainsKey(discordMemberId) == true) return false;
+            if (InternalStore?.ContainsKey(discordMemberId) == true) return;
 
             this[discordMemberId] = new LeagueParticipantModel
             {
@@ -42,8 +42,12 @@ namespace SnailRacing.Ralf.Models
                 RegistrationDate = DateTime.UtcNow,
                 Status = LeagueParticipantStatus.Pending
             };
+        }
 
-            return true;
+        public void LeaveLeague(string discordMemberId)
+        {
+            if (InternalStore?.ContainsKey(discordMemberId) == false) return;
+            InternalStore?.Remove(discordMemberId, out _);
         }
 
         public IEnumerator<KeyValuePair<string, LeagueParticipantModel>> GetEnumerator()

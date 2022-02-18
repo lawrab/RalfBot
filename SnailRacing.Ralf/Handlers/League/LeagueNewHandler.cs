@@ -22,7 +22,7 @@ namespace SnailRacing.Ralf.Handlers.League
             _storage.Store[request.LeagueKey] = new LeagueModel(request.GuildId, request.LeagueName,
                 request.Description,
                 DateTime.UtcNow,
-                _config.DataPath ?? string.Empty);
+                _config.DataPath ?? string.Empty, true);
 
             return Task.FromResult(response);
         }
