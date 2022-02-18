@@ -38,7 +38,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             };
 
             var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel(request.LeagueName, string.Empty, DateTime.UtcNow, "");
+            var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "");
 
             storage.Store[request.LeagueName] = league;
 

@@ -17,6 +17,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             // arrange
             var request = new LeagueNewRequest
             {
+                GuildId = "1",
                 LeagueName = "League1",
                 Description = "Desc1"
             };
@@ -28,9 +29,9 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
-            var storedLeagueActual = storage.Store[request.LeagueName] ?? new LeagueModel(string.Empty, string.Empty, DateTime.MinValue, string.Empty);
+            var storedLeagueActual = storage.Store[request.LeagueKey] ?? new LeagueModel("1", string.Empty, string.Empty, DateTime.MinValue, string.Empty);
             Assert.False(actual.HasErrors());
-            Assert.True(storage.Store.InternalStore!.ContainsKey(request.LeagueName));
+            Assert.True(storage.Store.InternalStore!.ContainsKey(request.LeagueKey));
             Assert.Equal(request.LeagueName, storedLeagueActual.Name);
             Assert.Equal(request.Description, storedLeagueActual.Description);
         }

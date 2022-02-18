@@ -9,6 +9,7 @@ using SnailRacing.Ralf.Providers;
 namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("league")]
+    [Aliases("leagues")]
     [RequireGuild]
     [Description("League administration made easy, subjective opinion, good luck getting registered!")]
     public class LeagueModule : BaseCommandModule
@@ -26,6 +27,7 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var response = await Mediator!.Send(new LeagueJoinRequest
             {
+                GuildId = ctx.Guild.Id.ToString(),
                 DiscordMemberId = ctx.Member.Id.ToString(),
                 LeagueName = leagueName
             });
@@ -48,6 +50,7 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var response = await Mediator!.Send(new LeagueNewRequest
             {
+                GuildId = ctx.Guild.Id.ToString(),
                 LeagueName = leagueName,
                 Description = description
             });
@@ -67,6 +70,7 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var response = await Mediator!.Send(new LeagueRemoveRequest
             {
+                GuildId = ctx.Guild.Id.ToString(),
                 LeagueName = leagueName,
             });
 
@@ -83,7 +87,10 @@ namespace SnailRacing.Ralf.Discord.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            var response = await Mediator!.Send(new LeagueQueryRequest());
+            var response = await Mediator!.Send(new LeagueQueryRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+            });
 
             if (response.HasErrors())
             {

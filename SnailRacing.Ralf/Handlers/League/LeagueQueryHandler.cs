@@ -13,10 +13,13 @@ namespace SnailRacing.Ralf.Handlers.League
         }
         public Task<LeagueQueryResponse> Handle(LeagueQueryRequest request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(new LeagueQueryResponse
+            var response = new LeagueQueryResponse
             {
-                Leagues = _storage.Store.Where(x => request.Query(x.Value)).Select(x => x.Value)
-            });
+                Leagues = _storage.Store
+                .Where(x => x.Value.Guild == request.GuildId)
+                .Where(x => request.Query(x.Value)).Select(x => x.Value)
+            };
+            return Task.FromResult(response);
         }
     }
 }

@@ -16,13 +16,14 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             // arrange
             var request = new LeagueJoinRequest
             {
+                GuildId = "1",
                 LeagueName = "League1",
                 DiscordMemberId = "123"
             };
             var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel(request.LeagueName, string.Empty, DateTime.UtcNow, "");
+            var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "");
 
-            storage.Store[request.LeagueName] = league;
+            storage.Store[request.LeagueKey] = league;
 
             var handler = new LeagueJoinHandler(storage);
 

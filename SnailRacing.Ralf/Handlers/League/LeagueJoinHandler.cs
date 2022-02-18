@@ -17,7 +17,7 @@ namespace SnailRacing.Ralf.Handlers.League
         {
             var response = new LeagueJoinResponse();
 
-            _storage.Store[request.LeagueName]?.Join(request.DiscordMemberId, 0, string.Empty);
+            _storage.Store[request.LeagueKey]?.Join(request.DiscordMemberId, 0, string.Empty);
 
             return Task.FromResult(response);
         }

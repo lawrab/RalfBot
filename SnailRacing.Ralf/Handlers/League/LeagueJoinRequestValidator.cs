@@ -13,6 +13,8 @@ namespace SnailRacing.Ralf.Handlers.League
 
             CascadeMode = CascadeMode.Stop;
 
+            RuleFor(x => x.GuildId).NotEmpty();
+            RuleFor(x => x.DiscordMemberId).NotEmpty();
             RuleFor(r => r.LeagueName)
                 .NotEmpty()
                 .Custom(IsValidLeagueName)
@@ -21,7 +23,14 @@ namespace SnailRacing.Ralf.Handlers.League
 
         private void IsValidLeagueName(string leagueName, ValidationContext<LeagueJoinRequest> validationContext)
         {
-            if (_storage.Store.InternalStore?.ContainsKey(leagueName) != true)
+            if(!_storage.Store.InternalStore!.ContainsKey(validationContext.InstanceToValidate.LeagueKey))
+            {
+                validationContext.AddFailure(string.Format(Messages.INVALID_LEAGUE, leagueName));
+                return;
+            }
+            
+            var league = _storage.Store[validationContext.InstanceToValidate.LeagueKey];
+            if (league?.Name != leagueName)
             {
                 validationContext.AddFailure(string.Format(Messages.INVALID_LEAGUE, leagueName));
             }
@@ -29,7 +38,7 @@ namespace SnailRacing.Ralf.Handlers.League
 
         private void IsNotMemberOfLeague(string leagueName, ValidationContext<LeagueJoinRequest> validationContext)
         {
-            var league = _storage.Store[leagueName];
+            var league = _storage.Store[validationContext.InstanceToValidate.LeagueKey];
             var discordMemberId = validationContext.InstanceToValidate.DiscordMemberId;
             if (league!.Store.IsMember(discordMemberId))
             {

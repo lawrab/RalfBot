@@ -1,10 +1,10 @@
-﻿using DSharpPlus.Entities;
-using SnailRacing.Ralf.Providers;
+﻿using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Models
 {
     public class LeagueModel : StorageProvider<LeagueParticipantStorageProviderModel>
     {
+        public string Guild { get; private set; } = string.Empty;
         public string Name { get; private set; } = string.Empty;
         public string Description { get; private set; } = string.Empty;
         public LeagueStatus Status { get; private set; }
@@ -12,8 +12,9 @@ namespace SnailRacing.Ralf.Models
         public string StoragePath { get; }
         public Uri? Standings { get; private set; } = new Uri("https://annieandlarry.com");
         
-        public LeagueModel(string name, string description, DateTime createdDate, string storagePath)
+        public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath)
         {
+            Guild = guild;
             Name = name;
             Description = description;
             CreatedDate = createdDate;
@@ -28,7 +29,7 @@ namespace SnailRacing.Ralf.Models
 
         private void InitStorage()
         {
-            SetFileStorageProvider(new JsonFileStorageProvider(Path.Combine(StoragePath, $"{Name}LeagueStorage.json")))
+            SetFileStorageProvider(new JsonFileStorageProvider(Path.Combine(StoragePath, $"{Guild}-{Name}-LeagueStorage.json")))
                 .ConfigureAwait(false);
         }
     }

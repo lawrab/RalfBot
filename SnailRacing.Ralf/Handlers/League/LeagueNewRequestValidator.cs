@@ -11,6 +11,7 @@ namespace SnailRacing.Ralf.Handlers.League
         {
             _storage = storage;
 
+            RuleFor(m => m.GuildId).NotEmpty();
             RuleFor(m => m.LeagueName)
                 .NotEmpty()
                 .Must(m => !_storage.Store.InternalStore!.ContainsKey(m))

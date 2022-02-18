@@ -6,5 +6,8 @@ namespace SnailRacing.Ralf.Handlers.League
     {
         public string LeagueName { get; set; } = string.Empty;
         public string DiscordMemberId { get; set; } = string.Empty;
+        public string GuildId { get; set; } = string.Empty;
+
+        public string LeagueKey { get => $"{GuildId}-{LeagueName}"; }
     }
 }

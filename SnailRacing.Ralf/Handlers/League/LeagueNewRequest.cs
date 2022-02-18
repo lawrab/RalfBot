@@ -4,7 +4,9 @@ namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueNewRequest : IRequest<LeagueNewResponse>
     {
-        public string LeagueName { get; set; } = String.Empty;
-        public string Description { get; set; } = String.Empty;
+        public string GuildId { get; set; } = string.Empty;
+        public string LeagueName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string LeagueKey { get => $"{GuildId}-{LeagueName}"; }
     }
 }
