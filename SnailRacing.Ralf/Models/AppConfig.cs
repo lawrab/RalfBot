@@ -5,7 +5,7 @@ namespace SnailRacing.Ralf.Models
     public class AppConfig
     {
         public DiscordConfig Discord { get; } = new DiscordConfig();
-        public string? DataPath { get; }
+        public string? DataPath { get; set; } = String.Empty;
 
         public static AppConfig Create()
         {

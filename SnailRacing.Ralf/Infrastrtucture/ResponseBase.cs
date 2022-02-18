@@ -1,16 +1,14 @@
-﻿namespace SnailRacing.Ralf.Infrastrtucture
+﻿using FluentValidation.Results;
+
+namespace SnailRacing.Ralf.Infrastrtucture
 {
-    public abstract class ResponseBase : IResponse
+    public abstract class ResponseBase
     {
-        protected List<string> _errors = new List<string>();
-        public IEnumerable<string> Errors
-        {
-            get => _errors;
-        }
+        public IEnumerable<ValidationFailure> Errors { get; set; } = Enumerable.Empty<ValidationFailure>();
 
         public bool HasErrors()
         {
-            return _errors.Any();
+            return Errors.Any();
         }
     }
 }
