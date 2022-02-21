@@ -38,6 +38,10 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var response = await Mediator!.Send(request);
 
+            if (request is null) return;
+
+            var response = await Mediator!.Send(request);
+
             var responseMessage = response
                 .ToResponseMessage($"Thank you, you were added to the **{leagueName}** league, your status is pending approval and a league admin will be in touch soon.");
 
