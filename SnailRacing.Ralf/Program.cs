@@ -35,6 +35,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     var discord = new DiscordClient(new DiscordConfiguration()
     {
         LoggerFactory = loggerFactory, // ToDo: see if we can use ServiceProvider here instead, do we need to?
+        MinimumLogLevel = LogLevel.Trace,
         Token = token,
         TokenType = TokenType.Bot,
         Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
