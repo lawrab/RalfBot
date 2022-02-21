@@ -15,9 +15,25 @@ namespace SnailRacing.Ralf.Handlers.League
         public Task<LeagueJoinResponse> Handle(LeagueJoinRequest request, CancellationToken cancellationToken)
         {
             var response = new LeagueJoinResponse();
+            var league = _storage.Store[request.LeagueKey];
 
-            _storage.Store[request.LeagueKey]?.Join(request.DiscordMemberId, 0, string.Empty);
+            var approvedMembers = league!.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
+            var status = league.Status == LeagueStatus.Open && approvedMembers < league.MaxGrid ?
+                LeagueParticipantStatus.Approved : LeagueParticipantStatus.Pending;
 
+            league!.Join(request.DiscordMemberId, 
+                request.IRacingCustomerId, 
+                request.IRacingName, 
+                request.AgreeTermsAndConditions,
+                status);
+
+            if(league.MaxGrid.HasValue && 
+                league.Status == LeagueStatus.Open
+                && approvedMembers >= league.MaxGrid)
+            {
+                _storage.Store.SetClosed(request.LeagueKey);
+                response.MaxApprovedReached = true;
+            }
             return Task.FromResult(response);
         }
     }

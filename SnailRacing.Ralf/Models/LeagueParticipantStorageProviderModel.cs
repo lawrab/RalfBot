@@ -26,21 +26,27 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
+        internal void SetOpen(int maxGrid)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsMember(string discordMemeberId)
         {
             return InternalStore?.ContainsKey(discordMemeberId) == true;
         }
-        public void JoinLeague(string discordMemberId, int clientId, string fullName)
+        public void JoinLeague(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions, LeagueParticipantStatus status)
         {
             if (InternalStore?.ContainsKey(discordMemberId) == true) return;
 
             this[discordMemberId] = new LeagueParticipantModel
             {
                 DiscordMemberId = discordMemberId,
-                IRacingClientId = clientId,
+                IRacingCustomerId = clientId,
                 IRacingName = fullName,
                 RegistrationDate = DateTime.UtcNow,
-                Status = LeagueParticipantStatus.Pending
+                Status = status,
+                AgreeTermsAndConditions = agreeTermsAndConditions
             };
         }
 

@@ -2,6 +2,7 @@
 global using DSharpPlus.EventArgs;
 global using SnailRacing.Ralf.Models;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -35,10 +36,13 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     var discord = new DiscordClient(new DiscordConfiguration()
     {
         LoggerFactory = loggerFactory, // ToDo: see if we can use ServiceProvider here instead, do we need to?
+        MinimumLogLevel = LogLevel.Trace,
         Token = token,
         TokenType = TokenType.Bot,
         Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
     });
+
+    discord.UseInteractivity();
 
     var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
     {
