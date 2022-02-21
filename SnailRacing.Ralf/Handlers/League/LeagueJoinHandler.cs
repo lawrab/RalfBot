@@ -34,7 +34,6 @@ namespace SnailRacing.Ralf.Handlers.League
                 _storage.Store.SetClosed(request.LeagueKey);
                 response.MaxApprovedReached = true;
             }
-
             return Task.FromResult(response);
         }
     }

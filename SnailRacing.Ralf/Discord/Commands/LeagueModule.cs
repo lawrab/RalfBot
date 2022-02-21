@@ -66,7 +66,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             });
 
             var responseMessage = response
-                .ToResponseMessage($"You were removed from the {leagueName} league and can not longer participate in it.");
+                .ToResponseMessage($"You were removed from the {leagueName} league and can no longer participate in it.");
 
             await ctx.RespondAsync(responseMessage);
         }

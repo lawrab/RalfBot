@@ -22,6 +22,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 AgreeTermsAndConditions = true,
                 IRacingCustomerId = 12345,
                 IRacingName = "Larry Rabbets"
+
             };
             var storage = new StorageProvider<LeagueStorageProviderModel>();
             var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
@@ -42,7 +43,6 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             Assert.Equal(request.IRacingName, storedParticipant?.IRacingName);
             Assert.Equal(request.AgreeTermsAndConditions, storedParticipant?.AgreeTermsAndConditions);
             Assert.Equal(LeagueParticipantStatus.Pending, storedParticipant?.Status);
-
         }
     }
 }
