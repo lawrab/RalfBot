@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
 using MediatR;
 using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
@@ -26,17 +27,21 @@ namespace SnailRacing.Ralf.Discord.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            var response = await Mediator!.Send(new LeagueJoinRequest
+            var request = await BuildLeagueJoinRequest(ctx, leagueName);
+
+            if (request is null) return;
+            if(!request.AgreeTermsAndConditions)
             {
-                GuildId = ctx.Guild.Id.ToString(),
-                DiscordMemberId = ctx.Member.Id.ToString(),
-                LeagueName = leagueName
-            });
+                await ctx.Member.SendMessageAsync("I am sorry, you cannot join the league unless you agree with the Snail Racing code of conduct.");
+                return;
+            }
+
+            var response = await Mediator!.Send(request);
 
             var responseMessage = response
-                .ToResponseMessage($"You were added to the {leagueName} league, your status is pending approval and a league admin will be in touch soon.");
+                .ToResponseMessage($"Thank you, you were added to the **{leagueName}** league, your status is pending approval and a league admin will be in touch soon.");
 
-            await ctx.RespondAsync(responseMessage);
+            await ctx.Member.SendMessageAsync(responseMessage);
         }
 
         [Command("leave")]
@@ -142,6 +147,21 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ctx.Channel.SendMessageAsync(builder);
         }
 
+        [Command("open")]
+        [Description("Set the league to open for automatic approval")]
+        public async Task SetLeagueOpen(CommandContext ctx, 
+            string leagueName,
+            [Description("Maximum grid positions, also the maximum number of automatic approvals before the league is closed")] int gridSpots)
+        {
+            await ctx.TriggerTypingAsync();
+        }
+
+        [Command("close")]
+        [Description("Set the league to closed for automatic approval")]
+        public async Task SetLeagueClosed(CommandContext ctx, string leagueName)
+        {
+            await ctx.TriggerTypingAsync();
+        }
 
         [Command("participants")]
         public async Task LeagueParticipants(CommandContext ctx, string leagueName)
@@ -178,7 +198,7 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var filterExpression = filter.ToLower() switch
             {
-                "drivers" => new Predicate<LeagueParticipantModel> (p => p.Status == LeagueParticipantStatus.Approved),
+                "drivers" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Approved),
                 "waiting" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Pending),
                 "banned" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Banned),
                 _ => new Predicate<LeagueParticipantModel>(x => true)
@@ -199,7 +219,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                         .WithTitle($"{league?.Name} - {member.DisplayName}")
                         .WithDescription($"**{driver.IRacingName}**")
                         .WithColor(DiscordColor.DarkRed)
-                        .AddField("iRacing Customer ID", driver.IRacingClientId.ToString(), true)
+                        .AddField("iRacing Customer ID", driver.IRacingCustomerId.ToString(), true)
                         .AddField("Registration Date", driver.RegistrationDate.GetValueOrDefault().ToShortDateString(), true)
                         .AddField("Status", driver.Status.ToString(), true);
 
@@ -256,6 +276,47 @@ namespace SnailRacing.Ralf.Discord.Commands
 
                 await ctx.Channel.SendMessageAsync(builder);
             }
+        }
+
+        private async Task<LeagueJoinRequest?> BuildLeagueJoinRequest(CommandContext ctx, string leagueName)
+        {
+            var interactivity = ctx.Client.GetInteractivity();
+            await ctx.Member.SendMessageAsync("We need a bit more information ");
+
+            var msg = await ctx.Member.SendMessageAsync("What is your name? (As used in iRacing.)");
+
+            var response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member);
+
+            if (response.TimedOut) return null;
+            var name = response.Result.Content;
+
+            msg = await ctx.Member.SendMessageAsync("What is your iRacing Customer ID? (Optional, respond with `none` fi you don't know)");
+            response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member); ;
+            if (response.TimedOut) return null;
+            if (!int.TryParse(response.Result.Content, out int customerId))
+            {
+                customerId = -1;
+            }
+
+            msg = await ctx.Member.SendMessageAsync("Have you read and agree with the Snail Racing code of conduct `yes/no` (https://annieandlarry.com/snail-racing-conduct)");
+            response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member);
+            if (response.TimedOut) return null;
+            if (!bool.TryParse(response.Result.Content, out bool agreeTermsAndConditions))
+            {
+                agreeTermsAndConditions = false;
+            }
+
+            var request = new LeagueJoinRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+                DiscordMemberId = ctx.Member.Id.ToString(),
+                LeagueName = leagueName,
+                IRacingName = name,
+                IRacingCustomerId = customerId,
+                AgreeTermsAndConditions = agreeTermsAndConditions
+            };
+
+            return request;
         }
     }
 }
