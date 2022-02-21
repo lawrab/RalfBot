@@ -7,7 +7,6 @@ using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
-
 //ToDo: move to ctor injection instead of property injection
 namespace SnailRacing.Ralf.Discord.Commands
 {
@@ -43,9 +42,13 @@ namespace SnailRacing.Ralf.Discord.Commands
             var response = await Mediator!.Send(request);
 
             var responseMessage = response
-                .ToResponseMessage($"Thank you, you were added to the **{leagueName}** league, your status is pending approval and a league admin will be in touch soon.");
-
+                .ToResponseMessage($"Thank you, you were added to the **{leagueName}** league, a league admin will be in touch soon.");
             await ctx.Member.SendMessageAsync(responseMessage);
+
+            if(response.MaxApprovedReached)
+            {
+                await ctx.RespondAsync($"The {leagueName} have reached the maximum number of drivers and new registrations will be added to the waiting list");
+            }
         }
 
         [Command("leave")]
@@ -144,8 +147,9 @@ namespace SnailRacing.Ralf.Discord.Commands
                     .WithUrl(league?.Standings)
                     .WithDescription(league?.Description)
                     .WithColor(DiscordColor.DarkRed)
-                    .AddField("Max cars", league?.MaxGrid.ToString(), true)
+                    .AddField("Status", league?.Status.ToString())
                     .AddField("Drivers", activeParticipants.ToString(), true)
+                    .AddField("Max", league?.MaxGrid.ToString(), true)
                     .AddField("Waiting List", waitingListParticipants.ToString(), true)
                     .AddField("Created On", league?.CreatedDate.ToShortDateString());
 
@@ -173,7 +177,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                 return;
             }
 
-            await ctx.RespondAsync($"League **{leagueName}** now open with auto approval up to **{gridSpots}**.");
+            await ctx.RespondAsync($"League **{leagueName}** is now open with auto approval up to **{gridSpots}**.");
         }
 
         [Command("close")]
@@ -181,6 +185,20 @@ namespace SnailRacing.Ralf.Discord.Commands
         public async Task SetLeagueClosed(CommandContext ctx, string leagueName)
         {
             await ctx.TriggerTypingAsync();
+
+            var response = await Mediator!.Send(new LeagueCloseRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+                LeagueName = leagueName,
+            });
+
+            if (response.HasErrors())
+            {
+                await ctx.RespondAsync(response.ToErrorMessage());
+                return;
+            }
+
+            await ctx.RespondAsync($"League **{leagueName}** is now closed and all new registrations will be put on the waiting list.");
         }
 
         [Command("participants")]
@@ -277,6 +295,8 @@ namespace SnailRacing.Ralf.Discord.Commands
                 {
                     Name = x.Name,
                     x.Description,
+                    x.MaxGrid,
+                    x.Status,
                     CreatedOn = x.CreatedDate,
                     Pending = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
                     Approved = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
@@ -290,7 +310,9 @@ namespace SnailRacing.Ralf.Discord.Commands
                     .WithUrl(league.Standings)
                     .WithDescription(league.Description)
                     .WithColor(DiscordColor.DarkRed)
+                    .AddField("Status", league.Status.ToString())
                     .AddField("Drivers", league.Approved.ToString(), true)
+                    .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "N/A", true)
                     .AddField("Waiting List", league.Pending.ToString(), true)
                     .AddField("Created On", league.CreatedOn.ToShortDateString());
 
@@ -321,10 +343,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             msg = await ctx.Member.SendMessageAsync("Have you read and agree with the Snail Racing code of conduct `yes/no` (https://annieandlarry.com/snail-racing-conduct)");
             response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member);
             if (response.TimedOut) return null;
-            if (!bool.TryParse(response.Result.Content, out bool agreeTermsAndConditions))
-            {
-                agreeTermsAndConditions = false;
-            }
+            var agreeTermsAndConditions = response.Result.Content.ToLower() == "yes";
 
             var request = new LeagueJoinRequest
             {

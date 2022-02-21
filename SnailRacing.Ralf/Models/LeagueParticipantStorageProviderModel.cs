@@ -35,7 +35,7 @@ namespace SnailRacing.Ralf.Models
         {
             return InternalStore?.ContainsKey(discordMemeberId) == true;
         }
-        public void JoinLeague(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions)
+        public void JoinLeague(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions, LeagueParticipantStatus status)
         {
             if (InternalStore?.ContainsKey(discordMemberId) == true) return;
 
@@ -45,7 +45,7 @@ namespace SnailRacing.Ralf.Models
                 IRacingCustomerId = clientId,
                 IRacingName = fullName,
                 RegistrationDate = DateTime.UtcNow,
-                Status = LeagueParticipantStatus.Pending,
+                Status = status,
                 AgreeTermsAndConditions = agreeTermsAndConditions
             };
         }

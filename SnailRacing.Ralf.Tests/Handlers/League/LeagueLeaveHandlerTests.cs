@@ -23,7 +23,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var storage = new StorageProvider<LeagueStorageProviderModel>();
             var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
 
-            league.Store.JoinLeague(request.DiscordMemberId, 0, string.Empty, true);
+            league.Store.JoinLeague(request.DiscordMemberId, 0, string.Empty, true, LeagueParticipantStatus.Approved);
 
             storage.Store[request.LeagueKey] = league;
 

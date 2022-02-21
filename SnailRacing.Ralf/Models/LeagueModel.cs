@@ -33,9 +33,9 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
-        public void Join(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions)
+        public void Join(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions, LeagueParticipantStatus status)
         {
-            Store.JoinLeague(discordMemberId, clientId, fullName, agreeTermsAndConditions);
+            Store.JoinLeague(discordMemberId, clientId, fullName, agreeTermsAndConditions, status);
         }
 
         public void Leave(string discordMemberId)
