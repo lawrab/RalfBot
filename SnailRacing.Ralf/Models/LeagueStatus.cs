@@ -3,7 +3,7 @@
     public enum LeagueStatus
     {
         NotSet,
-        Active,
-        Inactive
+        Open,
+        Closed
     }
 }

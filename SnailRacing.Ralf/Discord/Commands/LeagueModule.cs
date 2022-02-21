@@ -7,6 +7,8 @@ using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
+
+//ToDo: move to ctor injection instead of property injection
 namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("league")]
@@ -142,6 +144,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                     .WithUrl(league?.Standings)
                     .WithDescription(league?.Description)
                     .WithColor(DiscordColor.DarkRed)
+                    .AddField("Max cars", league?.MaxGrid.ToString(), true)
                     .AddField("Drivers", activeParticipants.ToString(), true)
                     .AddField("Waiting List", waitingListParticipants.ToString(), true)
                     .AddField("Created On", league?.CreatedDate.ToShortDateString());
@@ -156,6 +159,21 @@ namespace SnailRacing.Ralf.Discord.Commands
             [Description("Maximum grid positions, also the maximum number of automatic approvals before the league is closed")] int gridSpots)
         {
             await ctx.TriggerTypingAsync();
+
+            var response = await Mediator!.Send(new LeagueOpenRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+                LeagueName = leagueName,
+                MaxGrid = gridSpots
+            });
+
+            if (response.HasErrors())
+            {
+                await ctx.RespondAsync(response.ToErrorMessage());
+                return;
+            }
+
+            await ctx.RespondAsync($"League **{leagueName}** now open with auto approval up to **{gridSpots}**.");
         }
 
         [Command("close")]

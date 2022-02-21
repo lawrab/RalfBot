@@ -26,6 +26,11 @@ namespace SnailRacing.Ralf.Models
             }
         }
 
+        internal void SetOpen(int maxGrid)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsMember(string discordMemeberId)
         {
             return InternalStore?.ContainsKey(discordMemeberId) == true;

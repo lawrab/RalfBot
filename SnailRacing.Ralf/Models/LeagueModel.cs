@@ -8,10 +8,11 @@ namespace SnailRacing.Ralf.Models
         public string Guild { get; private set; } = string.Empty;
         public string Name { get; private set; } = string.Empty;
         public string Description { get; private set; } = string.Empty;
-        public LeagueStatus Status { get; private set; }
+        public LeagueStatus Status { get; set; }
         public DateTime CreatedDate { get; private set; }
         public string StoragePath { get; private set; }
         public Uri? Standings { get; private set; } = new Uri("https://annieandlarry.com");
+        public int? MaxGrid { get; set; }
 
         [JsonConstructor]
         public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath)
