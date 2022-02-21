@@ -18,7 +18,10 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             {
                 GuildId = "1",
                 LeagueName = "League1",
-                DiscordMemberId = "123"
+                DiscordMemberId = "123",
+                AgreeTermsAndConditions = true,
+                IRacingCustomerId = 12345,
+                IRacingName = "Larry Rabbets"
             };
             var storage = new StorageProvider<LeagueStorageProviderModel>();
             var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
@@ -31,8 +34,15 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
+            var storedParticipant = league.Store.InternalStore?[request.DiscordMemberId];
             Assert.False(actual.HasErrors());
-            Assert.True(league.Store.InternalStore!.ContainsKey(request.DiscordMemberId));
+            Assert.NotNull(storedParticipant);
+            Assert.Equal(request.DiscordMemberId, storedParticipant?.DiscordMemberId);
+            Assert.Equal(request.IRacingCustomerId, storedParticipant?.IRacingCustomerId);
+            Assert.Equal(request.IRacingName, storedParticipant?.IRacingName);
+            Assert.Equal(request.AgreeTermsAndConditions, storedParticipant?.AgreeTermsAndConditions);
+            Assert.Equal(LeagueParticipantStatus.Pending, storedParticipant?.Status);
+
         }
     }
 }
