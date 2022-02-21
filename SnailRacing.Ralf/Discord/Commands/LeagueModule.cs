@@ -36,6 +36,8 @@ namespace SnailRacing.Ralf.Discord.Commands
                 return;
             }
 
+            if (request is null) return;
+
             var response = await Mediator!.Send(request);
 
             var responseMessage = response
