@@ -48,12 +48,22 @@ namespace SnailRacing.Ralf.Models
                 Status = status,
                 AgreeTermsAndConditions = agreeTermsAndConditions
             };
+            _saveData();
         }
 
         public void LeaveLeague(string discordMemberId)
         {
             if (InternalStore?.ContainsKey(discordMemberId) == false) return;
             InternalStore?.Remove(discordMemberId, out _);
+            _saveData();
+        }
+
+        public void ApproveParticipant(string discordMemberId, string approvedBy)
+        {
+            if (InternalStore?.ContainsKey(discordMemberId) == false) return;
+            this[discordMemberId]!.Status = LeagueParticipantStatus.Approved;
+            this[discordMemberId]!.ApprovedDate = DateTime.UtcNow;
+            _saveData();
         }
 
         public IEnumerator<KeyValuePair<string, LeagueParticipantModel>> GetEnumerator()
