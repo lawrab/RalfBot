@@ -149,7 +149,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                     .WithColor(DiscordColor.DarkRed)
                     .AddField("Status", league?.Status.ToString())
                     .AddField("Drivers", activeParticipants.ToString(), true)
-                    .AddField("Max", league?.MaxGrid.ToString(), true)
+                    .AddField("Max", league?.MaxGrid.HasValue == true ? league?.MaxGrid.ToString() : "n/a", true)
                     .AddField("Waiting List", waitingListParticipants.ToString(), true)
                     .AddField("Created On", league?.CreatedDate.ToShortDateString());
 
@@ -312,7 +312,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                     .WithColor(DiscordColor.DarkRed)
                     .AddField("Status", league.Status.ToString())
                     .AddField("Drivers", league.Approved.ToString(), true)
-                    .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "N/A", true)
+                    .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "n/a", true)
                     .AddField("Waiting List", league.Pending.ToString(), true)
                     .AddField("Created On", league.CreatedOn.ToShortDateString());
 
