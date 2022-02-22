@@ -43,6 +43,11 @@ namespace SnailRacing.Ralf.Models
             Store.LeaveLeague(discordMemberId);
         }
 
+        public void Approve(string discordMemberId, string approvedBy)
+        {
+            Store.ApproveParticipant(discordMemberId, approvedBy);
+        }
+
         private void InitStorage()
         {
             SetFileStorageProvider(new JsonFileStorageProvider(Path.Combine(StoragePath, $"{Guild}-{Name}-LeagueStorage.json")))

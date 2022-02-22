@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SnailRacing.Ralf.Providers;
 
+//ToDo: refactor and rename to be a more generic remove handler
 namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueLeaveHandler : IRequestHandler<LeagueLeaveRequest, LeagueLeaveResponse>

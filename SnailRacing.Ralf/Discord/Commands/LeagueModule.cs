@@ -31,7 +31,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             var request = await BuildLeagueJoinRequest(ctx, leagueName);
 
             if (request is null) return;
-            if(!request.AgreeTermsAndConditions)
+            if (!request.AgreeTermsAndConditions)
             {
                 await ctx.Member.SendMessageAsync("I am sorry, you cannot join the league unless you agree with the Snail Racing code of conduct.");
                 return;
@@ -45,7 +45,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                 .ToResponseMessage($"Thank you, you were added to the **{leagueName}** league, a league admin will be in touch soon.");
             await ctx.Member.SendMessageAsync(responseMessage);
 
-            if(response.MaxApprovedReached)
+            if (response.MaxApprovedReached)
             {
                 await ctx.RespondAsync($"The {leagueName} have reached the maximum number of drivers and new registrations will be added to the waiting list");
             }
@@ -90,6 +90,51 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var responseMessage = response
                 .ToResponseMessage($"New league {leagueName} created, you can win this!");
+
+            await ctx.RespondAsync(responseMessage);
+        }
+
+        [Command("kick")]
+        [Description("Remove a participate in the league, they will need to join again")]
+        [RequireRoles(RoleCheckMode.Any, ADMIN_ROLE)]
+        public async Task KickParticipant(CommandContext ctx,
+        [Description("The league where the driver should be approved")] string leagueName,
+        [Description("Tag the Discord member to remove")] DiscordMember driver)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var response = await Mediator!.Send(new LeagueLeaveRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+                LeagueName = leagueName,
+                DiscordMemberId = driver.Id.ToString()
+            });
+
+            var responseMessage = response
+                .ToResponseMessage($"{driver} removed the {leagueName} league.");
+
+            await ctx.RespondAsync(responseMessage);
+        }
+
+        [Command("approve")]
+        [Description("Approve a driver to participate in the league, move from the waiting list to the driver list.")]
+        [RequireRoles(RoleCheckMode.Any, ADMIN_ROLE)]
+        public async Task ApproveParticipant(CommandContext ctx,
+        [Description("The league where the driver should be approved")] string leagueName,
+        [Description("Tag the Discord member to approve")] DiscordMember driver)
+        {
+            await ctx.TriggerTypingAsync();
+
+            var response = await Mediator!.Send(new LeagueParticipantApproalRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+                LeagueName = leagueName,
+                ApprovedBy = ctx.Member.Id.ToString(),
+                DiscordMemberId = driver.Id.ToString()
+            });
+
+            var responseMessage = response
+                .ToResponseMessage($"{driver} approved to drive in the {leagueName} league.");
 
             await ctx.RespondAsync(responseMessage);
         }
@@ -158,7 +203,7 @@ namespace SnailRacing.Ralf.Discord.Commands
 
         [Command("open")]
         [Description("Set the league to open for automatic approval")]
-        public async Task SetLeagueOpen(CommandContext ctx, 
+        public async Task SetLeagueOpen(CommandContext ctx,
             string leagueName,
             [Description("Maximum grid positions, also the maximum number of automatic approvals before the league is closed")] int gridSpots)
         {
@@ -254,11 +299,13 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 var member = await ctx.Guild.GetMemberAsync(ulong.Parse(driver.DiscordMemberId));
                 var builder = new DiscordEmbedBuilder()
-                        .WithTitle($"{league?.Name} - {member.DisplayName}")
-                        .WithDescription($"**{driver.IRacingName}**")
+                        .WithFooter($"{driver.Status} member of {league?.Name} since {driver.RegistrationDate.GetValueOrDefault().ToShortDateString()}")
+                        .WithThumbnail(member.AvatarUrl)
+                        .WithTitle(member.DisplayName)
+                        .WithDescription(driver.IRacingName)
                         .WithColor(DiscordColor.DarkRed)
                         .AddField("iRacing Customer ID", driver.IRacingCustomerId.ToString(), true)
-                        .AddField("Registration Date", driver.RegistrationDate.GetValueOrDefault().ToShortDateString(), true)
+                        .AddField("Approved Date", driver.ApprovedDate.HasValue ? driver.ApprovedDate.GetValueOrDefault().ToShortDateString() : "n/a", true)
                         .AddField("Status", driver.Status.ToString(), true);
 
                 await ctx.Channel.SendMessageAsync(builder);
