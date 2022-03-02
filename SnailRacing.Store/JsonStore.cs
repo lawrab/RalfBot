@@ -2,8 +2,9 @@
 
 namespace SnailRacing.Store
 {
-    public class MemoryStore<TKey, TEntity> : ConcurrentDictionary<TKey, TEntity>, IStore<TKey, TEntity>
+    public class JsonStore<TKey, TEntity> : ConcurrentDictionary<TKey, TEntity>, IStore<TKey, TEntity>
         where TKey : notnull
     {
+
     }
 }
