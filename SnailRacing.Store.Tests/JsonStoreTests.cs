@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SnailRacing.Store.Tests
@@ -11,13 +12,13 @@ namespace SnailRacing.Store.Tests
         public void Adding_Data_Saves_Json()
         {
             // arrange
-            var store = new JsonStore<string, string>("test.json");
+            var store = new JsonStore<string, string>("Adding_Data_Saves_Json.json");
 
             // act
             store.TryAdd("abc", "def");
 
             // assert
-            var json = File.ReadAllText("test.json");
+            var json = File.ReadAllText("Adding_Data_Saves_Json.json");
             var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
             var actual = data?["abc"];
 
@@ -28,27 +29,33 @@ namespace SnailRacing.Store.Tests
         public void Removing_Data_Saves_Json()
         {
             // arrange
-            var store = new JsonStore<string, string>("test.json");
+            var store = new JsonStore<string, string>("Removing_Data_Saves_Json.json");
             store.TryAdd("abc", "def");
 
             // act
             store.TryRemove("abc");
 
             // assert
-            var json = File.ReadAllText("test.json");
+            var json = File.ReadAllText("Removing_Data_Saves_Json.json");
             var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
 
             Assert.Throws<KeyNotFoundException>(() => data?["abc"]);
         }
 
-        ////public void Initialising_Loads_Data_From_Json()
-        ////{
-        ////    // arrange
-        ////    var store = new JsonStore<string, string>(string.Empty);
+        [Fact]
+        public async Task Initialising_Loads_Data_From_Json()
+        {
+            // arrange
+            var expectedStore = new JsonStore<string, string>("Initialising_Loads_Data_From_Json.json");
+            await expectedStore.Init();
+            expectedStore.TryAdd("abc", "def");
 
-        ////    // act
+            // act
+            var actualStore = new JsonStore<string, string>("Initialising_Loads_Data_From_Json.json");
+            await actualStore.Init();
 
-        ////    // assert
-        ////}
+            // assert
+            Assert.Equal(expectedStore["abc"], actualStore["abc"]);
+        }
     }
 }

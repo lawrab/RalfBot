@@ -6,17 +6,35 @@ namespace SnailRacing.Store
     public class JsonStore<TKey, TEntity> : IStore<TKey, TEntity>
         where TKey : notnull
     {
-        private readonly ConcurrentDictionary<TKey, TEntity> _data = new();
-        private readonly string _rootPath;
+        private ConcurrentDictionary<TKey, TEntity> _data = new();
+        private readonly string _filePath;
 
-        public JsonStore(string _filePath)
+        public JsonStore(string filePath)
         {
-            this._rootPath = _filePath;
+            _filePath = filePath;
         }
 
         public TEntity this[TKey key]
         {
             get => _data[key];
+        }
+
+        public async Task Init()
+        {
+            if(File.Exists(_filePath))
+            {
+                await LoadData(_filePath);
+            }
+        }
+
+        private async Task LoadData(string filePath)
+        {
+            var jsonStr = await File.ReadAllTextAsync(filePath);
+            var data = JsonSerializer.Deserialize<Dictionary<TKey, TEntity>>(jsonStr);
+            if (data != null)
+            {
+                _data = new ConcurrentDictionary<TKey, TEntity>(data);
+            }
         }
 
         public bool TryAdd(TKey key, TEntity value)
@@ -38,7 +56,7 @@ namespace SnailRacing.Store
         private void SaveData()
         {
             var json = JsonSerializer.Serialize(_data);
-            File.WriteAllTextAsync(_rootPath, json).Wait();
+            File.WriteAllTextAsync(_filePath, json).Wait();
         }
     }
 }

@@ -4,6 +4,7 @@
     {
         bool TryAdd(TKey key, TValue value);
         bool TryRemove(TKey key);
+        Task Init();
         TValue this[TKey key] { get; }
     }
 }

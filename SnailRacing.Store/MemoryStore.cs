@@ -12,6 +12,11 @@ namespace SnailRacing.Store
             get => _data[key];
         }
 
+        public Task Init()
+        {
+            return Task.CompletedTask;
+        }
+
         public bool TryAdd(TKey key, TEntity value)
         {
             return _data.TryAdd(key, value);
