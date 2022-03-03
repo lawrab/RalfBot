@@ -13,7 +13,7 @@ namespace SnailRacing.Store.Tests
 
             var value = "def";
             // act
-            store[key] = value;
+            store.TryAdd(key, value);
             var actual = store[key];
 
             // assert
