@@ -1,17 +1,18 @@
 ﻿using MediatR;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueNewHandler : IRequestHandler<LeagueNewRequest, LeagueNewResponse>
     {
-        private IStorageProvider<LeagueStorageProviderModel> _storage;
+        private IStorageProvider _storageProvider;
         private readonly AppConfig _config;
 
-        public LeagueNewHandler(IStorageProvider<LeagueStorageProviderModel> storage,
+        public LeagueNewHandler(IStorageProvider storageProvider,
                     AppConfig config)
         {
-            _storage = storage;
+            _storageProvider = storageProvider;
             _config = config;
         }
 
@@ -19,10 +20,14 @@ namespace SnailRacing.Ralf.Handlers.League
         {
             var response = new LeagueNewResponse();
 
-            _storage.Store[request.LeagueKey] = new LeagueModel(request.GuildId, request.LeagueName,
-                request.Description,
-                DateTime.UtcNow,
-                _config.DataPath ?? string.Empty, true);
+            var store = StoreHelper.GetLeagueStore(request.GuildId, _storageProvider);
+            store.TryAdd(request.LeagueKey, new LeagueModel
+            {
+                Guild = request.GuildId,
+                Name = request.LeagueName, 
+                Description = request.Description,
+                Status = LeagueStatus.NotSet
+            });
 
             return Task.FromResult(response);
         }

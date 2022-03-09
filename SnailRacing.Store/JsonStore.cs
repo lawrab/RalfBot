@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace SnailRacing.Store
@@ -37,7 +38,7 @@ namespace SnailRacing.Store
             }
         }
 
-        public bool TryAdd(TKey key, TEntity value)
+        public bool TryAdd(TKey key, TEntity? value)
         {
             var res = _data.TryAdd(key, value);
             if (res) SaveData();
@@ -57,6 +58,22 @@ namespace SnailRacing.Store
         {
             var json = JsonSerializer.Serialize(_data);
             File.WriteAllTextAsync(_filePath, json).Wait();
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TEntity>> GetEnumerator()
+        {
+            return _data.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _data.GetEnumerator();
+        }
+
+        public bool TryUpdate(TKey key, TEntity? newValue)
+        {
+            var currentValue = _data[key];
+            return _data.TryUpdate(key, newValue, currentValue);
         }
     }
 }

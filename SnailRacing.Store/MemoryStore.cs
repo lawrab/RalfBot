@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 
 namespace SnailRacing.Store
 {
@@ -10,6 +11,11 @@ namespace SnailRacing.Store
         public TEntity this[TKey key]
         {
             get => _data[key];
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TEntity>> GetEnumerator()
+        {
+            return _data.GetEnumerator();
         }
 
         public Task Init()
@@ -25,6 +31,17 @@ namespace SnailRacing.Store
         public bool TryRemove(TKey key)
         {
             return _data.TryRemove(key, out _);
+        }
+
+        public bool TryUpdate(TKey key, TEntity? newValue)
+        {
+            var currentValue = _data[key];
+            return _data.TryUpdate(key, newValue, currentValue);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _data.GetEnumerator();
         }
     }
 }

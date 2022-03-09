@@ -1,57 +1,45 @@
-﻿using SnailRacing.Ralf.Providers;
-using System.Text.Json.Serialization;
+﻿using System.Collections.Concurrent;
 
 namespace SnailRacing.Ralf.Models
 {
-    public class LeagueModel : StorageProvider<LeagueParticipantStorageProviderModel>
+    public class LeagueModel
     {
-        public string Guild { get; private set; } = string.Empty;
-        public string Name { get; private set; } = string.Empty;
-        public string Description { get; private set; } = string.Empty;
+        public string Guild { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public LeagueStatus Status { get; set; }
-        public DateTime CreatedDate { get; private set; }
-        public string StoragePath { get; private set; }
-        public Uri? Standings { get; private set; } = new Uri("https://annieandlarry.com");
+        public DateTime CreatedDate { get; set; }
+        public Uri? Standings { get; set; } = new Uri("https://annieandlarry.com");
         public int? MaxGrid { get; set; }
-
-        [JsonConstructor]
-        public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath)
-            : this(guild, name, description, createdDate, storagePath, true)
-        { 
-        }
-
-        public LeagueModel(string guild, string name, string description, DateTime createdDate, string storagePath, bool initStorage)
-        {
-            Guild = guild;
-            Name = name;
-            Description = description;
-            CreatedDate = createdDate;
-            StoragePath = storagePath;
-            if (initStorage)
-            {
-                InitStorage();
-            }
-        }
+        public ConcurrentDictionary<string, LeagueParticipantModel> Participants { get; set; } = new();
 
         public void Join(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions, LeagueParticipantStatus status)
         {
-            Store.JoinLeague(discordMemberId, clientId, fullName, agreeTermsAndConditions, status);
+            Participants.TryAdd(discordMemberId, new LeagueParticipantModel
+            {
+                DiscordMemberId = discordMemberId,
+                IRacingCustomerId = clientId,
+                IRacingName = fullName,
+                AgreeTermsAndConditions = agreeTermsAndConditions,
+                RegistrationDate = DateTime.UtcNow,
+                Status = status
+            });
         }
 
-        public void Leave(string discordMemberId)
-        {
-            Store.LeaveLeague(discordMemberId);
-        }
+        ////public void Leave(string discordMemberId)
+        ////{
+        ////    Store.LeaveLeague(discordMemberId);
+        ////}
 
-        public void Approve(string discordMemberId, string approvedBy)
-        {
-            Store.ApproveParticipant(discordMemberId, approvedBy);
-        }
+        ////public void Approve(string discordMemberId, string approvedBy)
+        ////{
+        ////    Store.ApproveParticipant(discordMemberId, approvedBy);
+        ////}
 
-        private void InitStorage()
-        {
-            SetFileStorageProvider(new JsonFileStorageProvider(Path.Combine(StoragePath, $"{Guild}-{Name}-LeagueStorage.json")))
-                .ConfigureAwait(false);
-        }
+        ////private void InitStorage()
+        ////{
+        ////    SetFileStorageProvider(new JsonFileStorageProvider(Path.Combine(StoragePath, $"{Guild}-{Name}-LeagueStorage.json")))
+        ////        .ConfigureAwait(false);
+        ////}
     }
 }

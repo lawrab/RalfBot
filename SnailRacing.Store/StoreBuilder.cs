@@ -7,11 +7,10 @@
             NotSet,
             Json,
             Memory
-
         }
 
         private StoryType _storeType;
-        private string _jsonStoreRootPath { get; set; }
+        private string _jsonStoreRootPath { get; set; } = string.Empty;
 
         public StoreBuilder Init()
         {
@@ -31,7 +30,9 @@
             return this;
         }
 
-        public IStore<TKey, TValue> Build<TKey, TValue>() where TKey : notnull =>
+        public IStore<TKey, TValue> Build<TKey, TValue>() 
+            where TKey : notnull
+            where TValue : new() =>
             
             _storeType switch
             {

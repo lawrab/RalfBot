@@ -11,44 +11,47 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
         [Fact]
         public void Empty_LeagueName_Returns_Error()
         {
-            // arrange
-            var request = new LeagueNewRequest
-            {
-                LeagueName = String.Empty
-            };
+            ////// arrange
+            ////var request = new LeagueNewRequest
+            ////{
+            ////    LeagueName = String.Empty
+            ////};
 
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var validator = new LeagueNewRequestValidator(storage);
+            ////var storage = new StorageProvider<LeagueStorageProviderModel>();
+            ////var validator = new LeagueNewRequestValidator(storage);
 
-            // act
-            var actual = validator.Validate(request);
+            ////// act
+            ////var actual = validator.Validate(request);
 
-            // assert
-            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("must not be empty"));
+            ////// assert
+            ////Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("must not be empty"));
+
+            Assert.False(true);
 
         }
 
         [Fact]
         public void LeagueName_Exists_Returns_Error()
         {
-            // arrange
-            var request = new LeagueNewRequest
-            {
-                LeagueName = "I exist"
-            };
+            ////// arrange
+            ////var request = new LeagueNewRequest
+            ////{
+            ////    LeagueName = "I exist"
+            ////};
 
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
+            ////var storage = new StorageProvider<LeagueStorageProviderModel>();
+            ////var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
 
-            storage.Store[request.LeagueName] = league;
+            ////storage.Store[request.LeagueName] = league;
 
-            var validator = new LeagueNewRequestValidator(storage);
+            ////var validator = new LeagueNewRequestValidator(storage);
 
-            // act
-            var actual = validator.Validate(request);
+            ////// act
+            ////var actual = validator.Validate(request);
 
-            // assert
-            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("already exist"));
+            ////// assert
+            ////Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("already exist"));
+            Assert.False(true);
 
         }
     }

@@ -6,6 +6,7 @@ using MediatR;
 using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Store;
 
 //ToDo: move to ctor injection instead of property injection
 namespace SnailRacing.Ralf.Discord.Commands
@@ -17,9 +18,15 @@ namespace SnailRacing.Ralf.Discord.Commands
     public class LeagueModule : BaseCommandModule
     {
         private const string ADMIN_ROLE = "League Admin";
+        private readonly IStorageProvider _storageProvider;
+
         public AppConfig? AppConfig { get; set; }
-        public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
         public IMediator? Mediator { get; set; }
+
+        public LeagueModule(IStorageProvider storageProvider)
+        {
+            _storageProvider = storageProvider;
+        }
 
         [Command("join")]
         [Description("Request to join a league")]
@@ -158,48 +165,48 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ctx.RespondAsync(responseMessage);
         }
 
-        [Command("status")]
-        [Description("Shows the status for the league")]
-        public async Task LeagueStatus(CommandContext ctx, string leagueName)
-        {
-            await ctx.TriggerTypingAsync();
+        ////[Command("status")]
+        ////[Description("Shows the status for the league")]
+        ////public async Task LeagueStatus(CommandContext ctx, string leagueName)
+        ////{
+        ////    await ctx.TriggerTypingAsync();
 
-            var response = await Mediator!.Send(new LeagueQueryRequest
-            {
-                GuildId = ctx.Guild.Id.ToString(),
-                Query = (l) => l.Name == leagueName
-            });
+        ////    var response = await Mediator!.Send(new LeagueQueryRequest
+        ////    {
+        ////        GuildId = ctx.Guild.Id.ToString(),
+        ////        Query = (l) => l.Name == leagueName
+        ////    });
 
-            if (response.HasErrors())
-            {
-                await ctx.RespondAsync(response.ToErrorMessage());
-                return;
-            }
+        ////    if (response.HasErrors())
+        ////    {
+        ////        await ctx.RespondAsync(response.ToErrorMessage());
+        ////        return;
+        ////    }
 
-            if (!response.Leagues.Any())
-            {
-                await ctx.RespondAsync(string.Format(Messages.INVALID_LEAGUE, leagueName));
-                return;
-            }
+        ////    if (!response.Leagues.Any())
+        ////    {
+        ////        await ctx.RespondAsync(string.Format(Messages.INVALID_LEAGUE, leagueName));
+        ////        return;
+        ////    }
 
-            var league = response.Leagues.SingleOrDefault();
+        ////    var league = response.Leagues.SingleOrDefault();
 
-            var waitingListParticipants = league?.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending);
-            var activeParticipants = league?.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
+        ////    var waitingListParticipants = league?.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending);
+        ////    var activeParticipants = league?.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
 
-            var builder = new DiscordEmbedBuilder()
-                    .WithTitle(league?.Name)
-                    .WithUrl(league?.Standings)
-                    .WithDescription(league?.Description)
-                    .WithColor(DiscordColor.DarkRed)
-                    .AddField("Status", league?.Status.ToString())
-                    .AddField("Drivers", activeParticipants.ToString(), true)
-                    .AddField("Max", league?.MaxGrid.HasValue == true ? league?.MaxGrid.ToString() : "n/a", true)
-                    .AddField("Waiting List", waitingListParticipants.ToString(), true)
-                    .AddField("Created On", league?.CreatedDate.ToShortDateString());
+        ////    var builder = new DiscordEmbedBuilder()
+        ////            .WithTitle(league?.Name)
+        ////            .WithUrl(league?.Standings)
+        ////            .WithDescription(league?.Description)
+        ////            .WithColor(DiscordColor.DarkRed)
+        ////            .AddField("Status", league?.Status.ToString())
+        ////            .AddField("Drivers", activeParticipants.ToString(), true)
+        ////            .AddField("Max", league?.MaxGrid.HasValue == true ? league?.MaxGrid.ToString() : "n/a", true)
+        ////            .AddField("Waiting List", waitingListParticipants.ToString(), true)
+        ////            .AddField("Created On", league?.CreatedDate.ToShortDateString());
 
-            await ctx.Channel.SendMessageAsync(builder);
-        }
+        ////    await ctx.Channel.SendMessageAsync(builder);
+        ////}
 
         [Command("open")]
         [Description("Set the league to open for automatic approval")]
@@ -246,126 +253,126 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ctx.RespondAsync($"League **{leagueName}** is now closed and all new registrations will be put on the waiting list.");
         }
 
-        [Command("participants")]
-        public async Task LeagueParticipants(CommandContext ctx, string leagueName)
-        {
-            await LeagueParticipants(ctx, leagueName, "all");
-        }
+        ////[Command("participants")]
+        ////public async Task LeagueParticipants(CommandContext ctx, string leagueName)
+        ////{
+        ////    await LeagueParticipants(ctx, leagueName, "all");
+        ////}
 
-        [Command("participants")]
-        [Aliases("part", "member", "reg")]
-        [Description("Shows the registered members for the league")]
-        public async Task LeagueParticipants(CommandContext ctx, string leagueName,
-        [Description("Use, `drivers, waiting, banned` to filter the results, default is all drivers.")] string filter)
-        {
-            await ctx.TriggerTypingAsync();
+        ////[Command("participants")]
+        ////[Aliases("part", "member", "reg")]
+        ////[Description("Shows the registered members for the league")]
+        ////public async Task LeagueParticipants(CommandContext ctx, string leagueName,
+        ////[Description("Use, `drivers, waiting, banned` to filter the results, default is all drivers.")] string filter)
+        ////{
+        ////    await ctx.TriggerTypingAsync();
 
-            var response = await Mediator!.Send(new LeagueQueryRequest
-            {
-                GuildId = ctx.Guild.Id.ToString(),
-                Query = (l) => l.Name == leagueName
-            });
+        ////    var response = await Mediator!.Send(new LeagueQueryRequest
+        ////    {
+        ////        GuildId = ctx.Guild.Id.ToString(),
+        ////        Query = (l) => l.Name == leagueName
+        ////    });
 
-            if (response.HasErrors())
-            {
-                await ctx.RespondAsync(response.ToErrorMessage());
-                return;
-            }
+        ////    if (response.HasErrors())
+        ////    {
+        ////        await ctx.RespondAsync(response.ToErrorMessage());
+        ////        return;
+        ////    }
 
-            if (!response.Leagues.Any())
-            {
-                await ctx.RespondAsync(string.Format(Messages.INVALID_LEAGUE, leagueName));
-                return;
-            }
-            var league = response.Leagues.SingleOrDefault();
+        ////    if (!response.Leagues.Any())
+        ////    {
+        ////        await ctx.RespondAsync(string.Format(Messages.INVALID_LEAGUE, leagueName));
+        ////        return;
+        ////    }
+        ////    var league = response.Leagues.SingleOrDefault();
 
-            var filterExpression = filter.ToLower() switch
-            {
-                "drivers" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Approved),
-                "waiting" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Pending),
-                "banned" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Banned),
-                _ => new Predicate<LeagueParticipantModel>(x => true)
-            };
+        ////    var filterExpression = filter.ToLower() switch
+        ////    {
+        ////        "drivers" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Approved),
+        ////        "waiting" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Pending),
+        ////        "banned" => new Predicate<LeagueParticipantModel>(p => p.Status == LeagueParticipantStatus.Banned),
+        ////        _ => new Predicate<LeagueParticipantModel>(x => true)
+        ////    };
 
-            var drivers = league?.Store.Where(p => filterExpression(p.Value)).Select(p => p.Value);
+        ////    var drivers = league?.Store.Where(p => filterExpression(p.Value)).Select(p => p.Value);
 
-            if (drivers?.Any() == false)
-            {
-                await ctx.RespondAsync(":shrug: No drivers found for your query");
-                return;
-            }
+        ////    if (drivers?.Any() == false)
+        ////    {
+        ////        await ctx.RespondAsync(":shrug: No drivers found for your query");
+        ////        return;
+        ////    }
 
-            foreach (var driver in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
-            {
-                var member = await ctx.Guild.GetMemberAsync(ulong.Parse(driver.DiscordMemberId));
-                var builder = new DiscordEmbedBuilder()
-                        .WithFooter($"{driver.Status} member of {league?.Name} since {driver.RegistrationDate.GetValueOrDefault().ToShortDateString()}")
-                        .WithThumbnail(member.AvatarUrl)
-                        .WithTitle(member.DisplayName)
-                        .WithDescription(driver.IRacingName)
-                        .WithColor(DiscordColor.DarkRed)
-                        .AddField("iRacing Customer ID", driver.IRacingCustomerId.ToString(), true)
-                        .AddField("Approved Date", driver.ApprovedDate.HasValue ? driver.ApprovedDate.GetValueOrDefault().ToShortDateString() : "n/a", true)
-                        .AddField("Status", driver.Status.ToString(), true);
+        ////    foreach (var driver in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
+        ////    {
+        ////        var member = await ctx.Guild.GetMemberAsync(ulong.Parse(driver.DiscordMemberId));
+        ////        var builder = new DiscordEmbedBuilder()
+        ////                .WithFooter($"{driver.Status} member of {league?.Name} since {driver.RegistrationDate.GetValueOrDefault().ToShortDateString()}")
+        ////                .WithThumbnail(member.AvatarUrl)
+        ////                .WithTitle(member.DisplayName)
+        ////                .WithDescription(driver.IRacingName)
+        ////                .WithColor(DiscordColor.DarkRed)
+        ////                .AddField("iRacing Customer ID", driver.IRacingCustomerId.ToString(), true)
+        ////                .AddField("Approved Date", driver.ApprovedDate.HasValue ? driver.ApprovedDate.GetValueOrDefault().ToShortDateString() : "n/a", true)
+        ////                .AddField("Status", driver.Status.ToString(), true);
 
-                await ctx.Channel.SendMessageAsync(builder);
-            }
-        }
+        ////        await ctx.Channel.SendMessageAsync(builder);
+        ////    }
+        ////}
 
-        [GroupCommand]
-        [Command("list")]
-        [Description("Shows all the leagues")]
-        public async Task ListLeagues(CommandContext ctx)
-        {
-            await ctx.TriggerTypingAsync();
+        ////[GroupCommand]
+        ////[Command("list")]
+        ////[Description("Shows all the leagues")]
+        ////public async Task ListLeagues(CommandContext ctx)
+        ////{
+        ////    await ctx.TriggerTypingAsync();
 
-            var response = await Mediator!.Send(new LeagueQueryRequest
-            {
-                GuildId = ctx.Guild.Id.ToString(),
-            });
+        ////    var response = await Mediator!.Send(new LeagueQueryRequest
+        ////    {
+        ////        GuildId = ctx.Guild.Id.ToString(),
+        ////    });
 
-            if (response.HasErrors())
-            {
-                await ctx.RespondAsync(response.ToErrorMessage());
-                return;
-            }
+        ////    if (response.HasErrors())
+        ////    {
+        ////        await ctx.RespondAsync(response.ToErrorMessage());
+        ////        return;
+        ////    }
 
-            if (!response.Leagues.Any())
-            {
-                var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
-                await ctx.RespondAsync($"{shrugEmoji} There are currently no leagues running.");
-                return;
-            }
+        ////    if (!response.Leagues.Any())
+        ////    {
+        ////        var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
+        ////        await ctx.RespondAsync($"{shrugEmoji} There are currently no leagues running.");
+        ////        return;
+        ////    }
 
-            var leagues = response.Leagues
-                .Select(x => new
-                {
-                    Name = x.Name,
-                    x.Description,
-                    x.MaxGrid,
-                    x.Status,
-                    CreatedOn = x.CreatedDate,
-                    Pending = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
-                    Approved = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
-                    x.Standings
-                });
+        ////    var leagues = response.Leagues
+        ////        .Select(x => new
+        ////        {
+        ////            Name = x.Name,
+        ////            x.Description,
+        ////            x.MaxGrid,
+        ////            x.Status,
+        ////            CreatedOn = x.CreatedDate,
+        ////            Pending = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
+        ////            Approved = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
+        ////            x.Standings
+        ////        });
 
-            foreach (var league in leagues)
-            {
-                var builder = new DiscordEmbedBuilder()
-                    .WithTitle(league.Name)
-                    .WithUrl(league.Standings)
-                    .WithDescription(league.Description)
-                    .WithColor(DiscordColor.DarkRed)
-                    .AddField("Status", league.Status.ToString())
-                    .AddField("Drivers", league.Approved.ToString(), true)
-                    .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "n/a", true)
-                    .AddField("Waiting List", league.Pending.ToString(), true)
-                    .AddField("Created On", league.CreatedOn.ToShortDateString());
+        ////    foreach (var league in leagues)
+        ////    {
+        ////        var builder = new DiscordEmbedBuilder()
+        ////            .WithTitle(league.Name)
+        ////            .WithUrl(league.Standings)
+        ////            .WithDescription(league.Description)
+        ////            .WithColor(DiscordColor.DarkRed)
+        ////            .AddField("Status", league.Status.ToString())
+        ////            .AddField("Drivers", league.Approved.ToString(), true)
+        ////            .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "n/a", true)
+        ////            .AddField("Waiting List", league.Pending.ToString(), true)
+        ////            .AddField("Created On", league.CreatedOn.ToShortDateString());
 
-                await ctx.Channel.SendMessageAsync(builder);
-            }
-        }
+        ////        await ctx.Channel.SendMessageAsync(builder);
+        ////    }
+        ////}
 
         private async Task<LeagueJoinRequest?> BuildLeagueJoinRequest(CommandContext ctx, string leagueName)
         {

@@ -1,7 +1,7 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
-using System;
+using SnailRacing.Ralf.Tests.Builder;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -24,18 +24,18 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 IRacingName = "Larry Rabbets"
 
             };
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
+            var leagueStore = StorageProviderBuilder.Create()
+                .WithLeague("1", request.LeagueName)
+                .Build();
 
-            storage.Store[request.LeagueKey] = league;
-
-            var handler = new LeagueJoinHandler(storage);
+            var handler = new LeagueJoinHandler(leagueStore);
 
             // act
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
-            var storedParticipant = league.Store.InternalStore?[request.DiscordMemberId];
+            var league = leagueStore.Get<LeagueModel>(new StoreKey(request.GuildId, request.LeagueKey));
+            var storedParticipant = league.Participants[request.DiscordMemberId];
             Assert.False(actual.HasErrors());
             Assert.NotNull(storedParticipant);
             Assert.Equal(request.DiscordMemberId, storedParticipant?.DiscordMemberId);

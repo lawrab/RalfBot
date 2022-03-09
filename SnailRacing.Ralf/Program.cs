@@ -58,7 +58,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
 
     discord.GuildMemberUpdated += async (s, e) =>
     {
-        var storage = services.GetService<IStorageProvider<RolesStorageProviderModel>>();
+        var storage = services.GetService<IStorageProvider>();
         var handler = new RoleChangedHandler(storage);
 
         await handler.HandleRoleChange(e);

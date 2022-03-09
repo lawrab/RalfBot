@@ -3,7 +3,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using SnailRacing.Ralf.Logging;
-using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Discord.Commands
 {
@@ -19,8 +18,6 @@ namespace SnailRacing.Ralf.Discord.Commands
             private readonly DiscordSink _discordSink;
             private readonly ILogger<LoggingModule> _logger;
 
-            public IStorageProvider<AdminStorageProviderModel>? StorageProvider { private get; set; }
-
             public LoggingModule(DiscordSink discordSink, ILogger<LoggingModule> logger)
             {
                 _discordSink = discordSink;
@@ -32,7 +29,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 await ctx.TriggerTypingAsync();
 
-                var loggingChannel = StorageProvider!.Store.InternalStore;
+                var loggingChannel = _discordSink.GetChannel()?.Name ?? "Not Set";
 
                 await ctx.RespondAsync($"Tailing log in {loggingChannel}");
             }

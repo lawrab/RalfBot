@@ -1,27 +1,29 @@
 ﻿using MediatR;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueJoinHandler : IRequestHandler<LeagueJoinRequest, LeagueJoinResponse>
     {
-        private readonly IStorageProvider<LeagueStorageProviderModel> _storage;
+        private readonly IStorageProvider _storageProvider;
 
-        public LeagueJoinHandler(IStorageProvider<LeagueStorageProviderModel> storage)
+        public LeagueJoinHandler(IStorageProvider storageProvider)
         {
-            _storage = storage;
+            _storageProvider = storageProvider;
         }
 
         public Task<LeagueJoinResponse> Handle(LeagueJoinRequest request, CancellationToken cancellationToken)
         {
             var response = new LeagueJoinResponse();
-            var league = _storage.Store[request.LeagueKey];
+            var store = StoreHelper.GetLeagueStore(request.GuildId, _storageProvider);
+            var league = store[request.LeagueKey];
 
-            var approvedMembers = league!.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
+            var approvedMembers = league.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
             var status = league.Status == LeagueStatus.Open && approvedMembers < league.MaxGrid ?
                 LeagueParticipantStatus.Approved : LeagueParticipantStatus.Pending;
 
-            league!.Join(request.DiscordMemberId, 
+            league.Join(request.DiscordMemberId, 
                 request.IRacingCustomerId, 
                 request.IRacingName, 
                 request.AgreeTermsAndConditions,
@@ -31,9 +33,11 @@ namespace SnailRacing.Ralf.Handlers.League
                 league.Status == LeagueStatus.Open
                 && approvedMembers >= league.MaxGrid)
             {
-                _storage.Store.SetClosed(request.LeagueKey);
+                league.Status = LeagueStatus.Closed;
                 response.MaxApprovedReached = true;
             }
+
+            store.TryUpdate(request.LeagueKey, league);
             return Task.FromResult(response);
         }
     }

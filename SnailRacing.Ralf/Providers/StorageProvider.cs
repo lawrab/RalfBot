@@ -1,51 +1,35 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Text.Json.Serialization;
+using SnailRacing.Store;
 
 namespace SnailRacing.Ralf.Providers
 {
-    public class StorageProvider<TModel> : IStorageProvider<TModel>
-        where TModel : IStorageProviderModel, new()
+    public class StorageProvider : IStorageProvider
     {
-        private readonly ILogger<StorageProvider<TModel>>? _logger;
-        private TModel _model = new TModel();
-        private IJsonFileStorageProvider? _fileStorageProvider;
+        private readonly JsonStore<StoreKey, object> _store;
+        private readonly string _rootPath;
+        private readonly ILogger<StorageProvider> _logger;
 
-        public StorageProvider()
+        public StorageProvider(string rootPath, ILogger<StorageProvider> logger)
         {
-            _model.SetSaveDataCallback(SaveData);
-        }
-
-        public StorageProvider(ILogger<StorageProvider<TModel>> logger)
-            : this()
-        {
+            _rootPath = rootPath;
             _logger = logger;
-            _logger?.LogDebug($"Logger set for {this.GetType().Name}");
+
+            _store = new(rootPath);
         }
 
-        [JsonIgnore]
-        public TModel Store
+        public object this[StoreKey key]
         {
-            get => _model;
+            get => _store;
         }
 
-        public async Task SetFileStorageProvider(IJsonFileStorageProvider fileStorageProvider)
+        public TModel Get<TModel>(StoreKey key)
         {
-            _fileStorageProvider = fileStorageProvider;
-            var data = await fileStorageProvider.LoadAsync(_model.GetStoreType());
-
-            if (data is null) return;
-
-            _model = new TModel();
-            _model.SetStore(data);
-            _model.SetSaveDataCallback(SaveData);
+            return (TModel)_store[key];
         }
 
-        private void SaveData()
+        public void Add<TModel>(StoreKey key, TModel value)
         {
-            if (_fileStorageProvider is null) return;
-            _fileStorageProvider.SaveAsync(_model.GetStore())
-            .ContinueWith(t => _logger?.LogError(t.Exception, "Error persisting StorageProvider memoryStore"),
-                                TaskContinuationOptions.OnlyOnFaulted);
+            _store.TryAdd(key, value);
         }
     }
 }

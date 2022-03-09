@@ -1,6 +1,7 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Ralf.Tests.Builder;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,21 +21,26 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
                 DiscordMemberId = "123"
             };
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
+            var leagueStore = StorageProviderBuilder.Create()
+                 .WithLeague(request.GuildId, request.LeagueName)
+                 .Build();
 
-            league.Store.JoinLeague(request.DiscordMemberId, 0, string.Empty, true, LeagueParticipantStatus.Approved);
+            var league = leagueStore.Get<LeagueModel>(new(request.GuildId, request.LeagueKey));
 
-            storage.Store[request.LeagueKey] = league;
+            league.Join(request.DiscordMemberId, 0, string.Empty, true, LeagueParticipantStatus.Approved);
 
-            var handler = new LeagueLeaveHandler(storage);
+            //storage.Store[request.LeagueKey] = league;
+
+            var handler = new LeagueLeaveHandler(leagueStore);
 
             // act
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
+            var leagueActual = leagueStore.Get<LeagueModel>(new(request.GuildId, request.LeagueKey));
             Assert.False(actual.HasErrors());
-            Assert.False(league.Store.InternalStore!.ContainsKey(request.DiscordMemberId));
+            //Assert.False(leagueActual.ContainsKey(request.DiscordMemberId));
+            Assert.False(true);
         }
     }
 }
