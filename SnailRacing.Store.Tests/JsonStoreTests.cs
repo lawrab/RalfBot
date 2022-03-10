@@ -12,7 +12,7 @@ namespace SnailRacing.Store.Tests
         public void Adding_Data_Saves_Json()
         {
             // arrange
-            var store = new JsonStore<string, string>("Adding_Data_Saves_Json.json");
+            var store = new JsonStore<string>("Adding_Data_Saves_Json.json");
 
             // act
             store.TryAdd("abc", "def");
@@ -29,7 +29,7 @@ namespace SnailRacing.Store.Tests
         public void Removing_Data_Saves_Json()
         {
             // arrange
-            var store = new JsonStore<string, string>("Removing_Data_Saves_Json.json");
+            var store = new JsonStore<string>("Removing_Data_Saves_Json.json");
             store.TryAdd("abc", "def");
 
             // act
@@ -46,12 +46,12 @@ namespace SnailRacing.Store.Tests
         public async Task Initialising_Loads_Data_From_Json()
         {
             // arrange
-            var expectedStore = new JsonStore<string, string>("Initialising_Loads_Data_From_Json.json");
+            var expectedStore = new JsonStore<string>("Initialising_Loads_Data_From_Json.json");
             await expectedStore.Init();
             expectedStore.TryAdd("abc", "def");
 
             // act
-            var actualStore = new JsonStore<string, string>("Initialising_Loads_Data_From_Json.json");
+            var actualStore = new JsonStore<string>("Initialising_Loads_Data_From_Json.json");
             await actualStore.Init();
 
             // assert

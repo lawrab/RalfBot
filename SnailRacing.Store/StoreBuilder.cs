@@ -30,14 +30,14 @@
             return this;
         }
 
-        public IStore<TKey, TValue> Build<TKey, TValue>() 
+        public IStore<TValue> Build<TKey, TValue>() 
             where TKey : notnull
             where TValue : new() =>
             
             _storeType switch
             {
-                StoryType.Memory => new MemoryStore<TKey, TValue>(),
-                StoryType.Json => new JsonStore<TKey, TValue>(_jsonStoreRootPath),
+                StoryType.Memory => new MemoryStore<TValue>(),
+                StoryType.Json => new JsonStore<TValue>(_jsonStoreRootPath),
                 _ => throw new InvalidOperationException("Type of store not specified")
             };
     }

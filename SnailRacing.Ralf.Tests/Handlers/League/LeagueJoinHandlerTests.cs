@@ -34,7 +34,8 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
-            var league = leagueStore.Get<LeagueModel>(new StoreKey(request.GuildId, request.LeagueKey));
+            var leagues = leagueStore.Get<LeagueModel>(StorageProviderConstants.ROLES);
+            var league = leagues[request.LeagueKey];
             var storedParticipant = league.Participants[request.DiscordMemberId];
             Assert.False(actual.HasErrors());
             Assert.NotNull(storedParticipant);

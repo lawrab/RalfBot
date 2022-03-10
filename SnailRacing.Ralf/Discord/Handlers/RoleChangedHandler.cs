@@ -45,7 +45,7 @@ namespace SnailRacing.Ralf.Discord.Handlers
         }
         #endregion
 
-        public async Task SyncRoles(string[] memberRoles, IStore<string, string> store,Func<string[], Task> updateMemberAction)
+        public async Task SyncRoles(string[] memberRoles, IStore<string> store,Func<string[], Task> updateMemberAction)
         {
             var rolesToAdd = GetRolesToAdd(memberRoles, store);
             var rolesToRemove = GetRolesToRemove(memberRoles, store);
@@ -62,7 +62,7 @@ namespace SnailRacing.Ralf.Discord.Handlers
             return rolesWithAddedAndRemoved.ToArray();
         }
 
-        private string[] GetRolesToAdd(string[] roles, IStore<string, string> store)
+        private string[] GetRolesToAdd(string[] roles, IStore<string> store)
         {
             var rolesList = roles.ToList();
             var rolesToAdd = rolesList.ToList()
@@ -74,7 +74,7 @@ namespace SnailRacing.Ralf.Discord.Handlers
             return hasRolesToAdd ? rolesToAdd.ToArray() : Array.Empty<string>();
         }
 
-        private string[] GetRolesToRemove(string[] roles, IStore<string, string> store)
+        private string[] GetRolesToRemove(string[] roles, IStore<string> store)
         {
             var rolesList = roles.ToList();
             var excludedRoles = store

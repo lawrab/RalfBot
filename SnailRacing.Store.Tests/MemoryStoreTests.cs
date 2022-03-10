@@ -9,7 +9,7 @@ namespace SnailRacing.Store.Tests
         {
             // arrange
             var key = "abc";
-            var store = new MemoryStore<string, string>();
+            var store = new MemoryStore<string>();
 
             var value = "def";
             // act

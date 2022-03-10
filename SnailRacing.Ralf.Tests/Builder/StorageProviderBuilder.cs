@@ -1,6 +1,7 @@
 ﻿using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
 using SnailRacing.Store;
+using System;
 using System.Collections.Generic;
 
 namespace SnailRacing.Ralf.Tests.Builder
@@ -17,7 +18,7 @@ namespace SnailRacing.Ralf.Tests.Builder
 
         public static StorageProviderBuilder Create()
         {
-            return Create(string.Empty);
+            return Create($"{Guid.NewGuid()}.json");
         }
         public static StorageProviderBuilder Create(string rootPath)
         {
@@ -26,7 +27,7 @@ namespace SnailRacing.Ralf.Tests.Builder
 
         public StorageProviderBuilder WithLeague(string guildId, string leagueName)
         {
-            var store = new LeagueModel
+            var model = new LeagueModel
             {
                 Guild = guildId,
                 Name = leagueName,
@@ -35,7 +36,9 @@ namespace SnailRacing.Ralf.Tests.Builder
                 Status = LeagueStatus.NotSet
             };
 
-            _storageProvider.Add(new StoreKey(guildId, leagueName), store);
+            _storageProvider.Add(guildId, StorageProviderConstants.LEAGUE); // ToDo improve this
+            var leagues = _storageProvider.Get<LeagueModel>(guildId, StorageProviderConstants.LEAGUE);
+            leagues.TryAdd(model.Name, model);
 
             return this;
         }

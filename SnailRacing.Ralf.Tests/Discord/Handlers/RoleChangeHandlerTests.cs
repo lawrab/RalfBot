@@ -204,9 +204,9 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
             Assert.Equal(expected, actual);
         }
 
-        private IStore<string, string> CreateStorageWithRoles((string source, string target)[] syncRoles)
+        private IStore<string> CreateStorageWithRoles((string source, string target)[] syncRoles)
         {
-            var store = new MemoryStore<string, string>();
+            var store = new MemoryStore<string>();
             foreach (var item in syncRoles)
             {
                 store.TryAdd(item.source, item.target);

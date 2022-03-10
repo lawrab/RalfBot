@@ -4,10 +4,9 @@ using System.Text.Json;
 
 namespace SnailRacing.Store
 {
-    public class JsonStore<TKey, TEntity> : IStore<TKey, TEntity>
-        where TKey : notnull
+    public class JsonStore<TEntity> : IStore<TEntity>
     {
-        private ConcurrentDictionary<TKey, TEntity> _data = new();
+        private ConcurrentDictionary<string, TEntity> _data = new();
         private readonly string _filePath;
 
         public JsonStore(string filePath)
@@ -15,7 +14,7 @@ namespace SnailRacing.Store
             _filePath = filePath;
         }
 
-        public TEntity this[TKey key]
+        public TEntity this[string key]
         {
             get => _data[key];
         }
@@ -31,14 +30,14 @@ namespace SnailRacing.Store
         private async Task LoadData(string filePath)
         {
             var jsonStr = await File.ReadAllTextAsync(filePath);
-            var data = JsonSerializer.Deserialize<Dictionary<TKey, TEntity>>(jsonStr);
+            var data = JsonSerializer.Deserialize<Dictionary<string, TEntity>>(jsonStr);
             if (data != null)
             {
-                _data = new ConcurrentDictionary<TKey, TEntity>(data);
+                _data = new ConcurrentDictionary<string, TEntity>(data);
             }
         }
 
-        public bool TryAdd(TKey key, TEntity? value)
+        public bool TryAdd(string key, TEntity? value)
         {
             var res = _data.TryAdd(key, value);
             if (res) SaveData();
@@ -46,7 +45,7 @@ namespace SnailRacing.Store
             return res;
         }
 
-        public bool TryRemove(TKey key)
+        public bool TryRemove(string key)
         {
             var res = _data.TryRemove(key, out _);
             if (res) SaveData();
@@ -60,7 +59,7 @@ namespace SnailRacing.Store
             File.WriteAllTextAsync(_filePath, json).Wait();
         }
 
-        public IEnumerator<KeyValuePair<TKey, TEntity>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, TEntity>> GetEnumerator()
         {
             return _data.GetEnumerator();
         }
@@ -70,7 +69,7 @@ namespace SnailRacing.Store
             return _data.GetEnumerator();
         }
 
-        public bool TryUpdate(TKey key, TEntity? newValue)
+        public bool TryUpdate(string key, TEntity? newValue)
         {
             var currentValue = _data[key];
             return _data.TryUpdate(key, newValue, currentValue);

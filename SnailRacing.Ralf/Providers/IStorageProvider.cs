@@ -1,9 +1,12 @@
-﻿namespace SnailRacing.Ralf.Providers
+﻿using SnailRacing.Store;
+
+namespace SnailRacing.Ralf.Providers
 {
     public interface IStorageProvider
     {
-        object this[StoreKey key] { get; }
-        void Add<TModel>(StoreKey key, TModel value);
-        TModel Get<TModel>(StoreKey key);
+        void Add(string key);
+        void Add(string group, string key);
+        IStore<TModel> Get<TModel>(string key);
+        IStore<TModel> Get<TModel>(string group, string key);
     }
 }

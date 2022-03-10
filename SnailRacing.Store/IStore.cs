@@ -1,11 +1,11 @@
 ﻿namespace SnailRacing.Store
 {
-    public interface IStore<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    public interface IStore<TValue> : IEnumerable<KeyValuePair<string, TValue>>
     {
-        bool TryAdd(TKey key, TValue? value);
-        bool TryUpdate(TKey key, TValue? newValue);
-        bool TryRemove(TKey key);
+        bool TryAdd(string key, TValue? value);
+        bool TryUpdate(string key, TValue? newValue);
+        bool TryRemove(string key);
         Task Init();
-        TValue this[TKey key] { get; }
+        TValue this[string key] { get; }
     }
 }

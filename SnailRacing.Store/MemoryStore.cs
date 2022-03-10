@@ -3,17 +3,16 @@ using System.Collections.Concurrent;
 
 namespace SnailRacing.Store
 {
-    public class MemoryStore<TKey, TEntity> : IStore<TKey, TEntity>
-        where TKey : notnull
+    public class MemoryStore<TEntity> : IStore<TEntity>
     {
-        private readonly ConcurrentDictionary<TKey, TEntity> _data = new();
+        private readonly ConcurrentDictionary<string, TEntity> _data = new();
 
-        public TEntity this[TKey key]
+        public TEntity this[string key]
         {
             get => _data[key];
         }
 
-        public IEnumerator<KeyValuePair<TKey, TEntity>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, TEntity>> GetEnumerator()
         {
             return _data.GetEnumerator();
         }
@@ -23,17 +22,17 @@ namespace SnailRacing.Store
             return Task.CompletedTask;
         }
 
-        public bool TryAdd(TKey key, TEntity value)
+        public bool TryAdd(string key, TEntity value)
         {
             return _data.TryAdd(key, value);
         }
 
-        public bool TryRemove(TKey key)
+        public bool TryRemove(string key)
         {
             return _data.TryRemove(key, out _);
         }
 
-        public bool TryUpdate(TKey key, TEntity? newValue)
+        public bool TryUpdate(string key, TEntity? newValue)
         {
             var currentValue = _data[key];
             return _data.TryUpdate(key, newValue, currentValue);

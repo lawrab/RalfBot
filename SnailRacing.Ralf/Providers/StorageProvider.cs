@@ -3,9 +3,10 @@ using SnailRacing.Store;
 
 namespace SnailRacing.Ralf.Providers
 {
+    // only supports JsonStore at the moment
     public class StorageProvider : IStorageProvider
     {
-        private readonly JsonStore<StoreKey, object> _store;
+        private readonly JsonStore<string> _store;
         private readonly string _rootPath;
         private readonly ILogger<StorageProvider> _logger;
 
@@ -14,22 +15,52 @@ namespace SnailRacing.Ralf.Providers
             _rootPath = rootPath;
             _logger = logger;
 
-            _store = new(rootPath);
+            _store = new(Path.Combine(rootPath, "storage.json"));
         }
 
-        public object this[StoreKey key]
+        public void Add(string group, string key)
         {
-            get => _store;
+            string path = GetFilePath(group, key);
+            string folderPath = GetFolderPath(group);
+            string storeKey = GetStoreKey(group, key);
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            _store.TryAdd(storeKey, path);
+        }
+        public void Add(string key)
+        {
+            Add(string.Empty, key);
         }
 
-        public TModel Get<TModel>(StoreKey key)
+        public IStore<TModel> Get<TModel>(string key)
         {
-            return (TModel)_store[key];
+            return Get<TModel>(string.Empty, key);
         }
 
-        public void Add<TModel>(StoreKey key, TModel value)
+        public IStore<TModel> Get<TModel>(string group, string key)
         {
-            _store.TryAdd(key, value);
+            var storeKey = GetStoreKey(group, key);
+            var store = new JsonStore<TModel>(_store[storeKey]);
+            store.Init().Wait();
+            return store;
+        }
+
+        private static string GetStoreKey(string group, string key)
+        {
+            return $"{group}_{key}";
+        }
+
+        private string GetFolderPath(string group)
+        {
+            return Path.Combine(_rootPath, group);
+        }
+
+        private string GetFilePath(string group, string key)
+        {
+            return Path.Combine(_rootPath, group, $"{key}.json");
         }
     }
 }

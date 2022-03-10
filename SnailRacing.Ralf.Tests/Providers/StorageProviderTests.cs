@@ -1,8 +1,5 @@
-﻿
-using Moq;
-using SnailRacing.Ralf.Providers;
-using System;
-using System.Threading.Tasks;
+﻿using SnailRacing.Ralf.Providers;
+using SnailRacing.Store;
 using Xunit;
 
 namespace SnailRacing.Ralf.Tests.Providers
@@ -10,29 +7,22 @@ namespace SnailRacing.Ralf.Tests.Providers
     public class StorageProviderTests
     {
         [Fact]
-        public async Task Add_Role_Adds_To_SyncRole_Dictionary()
+        public void Add_Storage_Returns_Same_Data()
         {
-            ////// arrange
-            ////var key = "aaa";
-            ////var expected = "9090";
+            // arrange
+            var group = "1";
+            var key = "abc";
+            var storageProvider = new StorageProvider("Add_Storage_Returns_Same_Data", null);
 
-            ////var storage = new StorageProvider(string.Empty, null);
-            ////var jsonProvider = new Mock<IJsonFileStorageProvider>();
-            ////await storage.SetFileStorageProvider(jsonProvider.Object);
+            // act
+            storageProvider.Add(group, key);
+            var store = storageProvider.Get<string>(group, key);
+            store.TryAdd(key, "123");
 
-            ////// act
-            ////storage.Store[key] = expected;
-
-            ////// assert
-            ////var actual = storage.Store[key];
-
-            ////Assert.Equal(expected, actual);
-
-            ////jsonProvider.Verify(
-            ////    x => x.SaveAsync(It.IsAny<object>()),
-            ////    Times.Once());
-            ///
-            Assert.True(false);
+            // assert
+            var actual = storageProvider.Get<string>(group, key);
+            Assert.NotNull(actual);
+            Assert.Equal("123", actual[key]);
         }
     }
 }

@@ -52,14 +52,14 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ctx.RespondAsync(embed);
         }
 
-        private static IEnumerable<(string source, string target)> ListRoles(IStore<string, string> store)
+        private static IEnumerable<(string source, string target)> ListRoles(IStore<string> store)
         {
             return store.Select(r => (r.Key, r.Value)) ?? Enumerable.Empty<(string source, string target)>();
         }
 
-        private IStore<string, string> GetStore(CommandContext ctx)
+        private IStore<string> GetStore(CommandContext ctx)
         {
-            return _storageProvider.Get<IStore<string, string>>(new StoreKey(ctx.Guild.ToString(), StorageProviderConstants.ROLES));
+            return _storageProvider.Get<string>(StorageProviderConstants.ROLES);
         }
     }
 }
