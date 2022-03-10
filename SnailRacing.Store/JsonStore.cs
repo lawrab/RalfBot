@@ -72,7 +72,16 @@ namespace SnailRacing.Store
         public bool TryUpdate(string key, TEntity? newValue)
         {
             var currentValue = _data[key];
-            return _data.TryUpdate(key, newValue, currentValue);
+            var res = _data.TryUpdate(key, newValue, currentValue);
+
+            if (res) SaveData();
+
+            return res;
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _data.ContainsKey(key);
         }
     }
 }

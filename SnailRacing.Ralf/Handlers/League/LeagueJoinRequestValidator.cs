@@ -25,7 +25,7 @@ namespace SnailRacing.Ralf.Handlers.League
         private void IsValidLeagueName(string leagueName, ValidationContext<LeagueJoinRequest> validationContext)
         {
             var leagues = StoreHelper.GetLeagueStore(validationContext.InstanceToValidate.GuildId, _storageProvider);
-            if (leagues[validationContext.InstanceToValidate.LeagueKey] != null)
+            if (!leagues.ContainsKey(validationContext.InstanceToValidate.LeagueKey))
             {
                 validationContext.AddFailure(string.Format(Messages.INVALID_LEAGUE, leagueName));
                 return;
@@ -40,8 +40,7 @@ namespace SnailRacing.Ralf.Handlers.League
 
         private void IsNotMemberOfLeague(string leagueName, ValidationContext<LeagueJoinRequest> validationContext)
         {
-            var leagues = StoreHelper.GetLeagueStore(validationContext.InstanceToValidate.GuildId, _storageProvider);
-            var league = leagues[validationContext.InstanceToValidate.LeagueKey];
+            var league = StoreHelper.GetLeague(validationContext.InstanceToValidate.GuildId, validationContext.InstanceToValidate.LeagueKey, _storageProvider);
 
             var discordMemberId = validationContext.InstanceToValidate.DiscordMemberId;
             if (league.Participants.ContainsKey(discordMemberId))

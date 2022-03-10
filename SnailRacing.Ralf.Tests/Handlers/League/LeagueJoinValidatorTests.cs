@@ -1,6 +1,8 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Ralf.Tests.Builder;
 using System;
 using Xunit;
 
@@ -12,95 +14,90 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
         [Fact]
         public void Empty_GuildId_Returns_Error()
         {
-            ////// arrange
-            ////var request = new LeagueJoinRequest
-            ////{
-            ////    DiscordMemberId = "1",
-            ////    LeagueName = "League1",
-            ////};
-            ////var validator = new LeagueJoinRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            // arrange
+            var request = new LeagueJoinRequest
+            {
+                DiscordMemberId = "1",
+                LeagueName = "League1",
+            };
 
-            ////// act
-            ////var actual = validator.Validate(request);
+            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error")
+                .Build();
+            var validator = new LeagueJoinRequestValidator(storage);
 
-            ////// assert
-            ////Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("'Guild Id' must not be empty."));
-            ///
-            Assert.False(true);
+            // act
+            var actual = validator.Validate(request);
 
-
+            // assert
+            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("'Guild Id' must not be empty."));
         }
 
         [Fact]
         public void Empty_DiscordMemberId_Returns_Error()
         {
-            ////// arrange
-            ////var request = new LeagueJoinRequest
-            ////{
-            ////    GuildId = "1",
-            ////    LeagueName = "League1",
-            ////};
-            ////var validator = new LeagueJoinRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            // arrange
+            var request = new LeagueJoinRequest
+            {
+                GuildId = "1",
+                LeagueName = "League1",
+            };
+            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error")
+                .Build();
+            var validator = new LeagueJoinRequestValidator(storage);
 
-            ////// act
-            ////var actual = validator.Validate(request);
+            // act
+            var actual = validator.Validate(request);
 
-            ////// assert
-            ////Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("'Discord Member Id' must not be empty."));
-            ///
-            Assert.False(true);
-
-
+            // assert
+            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("'Discord Member Id' must not be empty."));
         }
 
         [Fact]
         public void Invalid_LeagueName_Returns_Error()
         {
-            ////// arrange
-            ////var request = new LeagueJoinRequest
-            ////{
-            ////    GuildId = "1",
-            ////    DiscordMemberId = "1",
-            ////    LeagueName = "I do not exist"
-            ////};
-            ////var validator = new LeagueJoinRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            // arrange
+            var request = new LeagueJoinRequest
+            {
+                GuildId = "1",
+                DiscordMemberId = "1",
+                LeagueName = "I do not exist"
+            };
+            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error")
+                .WithLeague(request.GuildId, "ABC")
+                .Build();
+            var validator = new LeagueJoinRequestValidator(storage);
 
-            ////// act
-            ////var actual = validator.Validate(request);
+            // act
+            var actual = validator.Validate(request);
 
-            ////// assert
-            ////Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("do not exist"));
-            ///
-            Assert.False(true);
-
-
+            // assert
+            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("do not exist"));
         }
 
         [Fact]
         public void Allready_Joined_League_Returns_Error()
         {
-            ////// arrange
-            ////var request = new LeagueJoinRequest
-            ////{
-            ////    GuildId = "1",
-            ////    LeagueName = "League1",
-            ////    DiscordMemberId = "123"
-            ////};
-            ////var storage = new StorageProvider<LeagueStorageProviderModel>();
-            ////var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
-            ////league.Store.InternalStore![request.DiscordMemberId] = new LeagueParticipantModel();
+            // arrange
+            var request = new LeagueJoinRequest
+            {
+                GuildId = "1",
+                LeagueName = "League1",
+                DiscordMemberId = "123"
+            };
 
-            ////storage.Store[request.LeagueKey] = league;
+            var storage = StorageProviderBuilder.Create("Allready_Joined_League_Returns_Error")
+                .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
+                .Build();
 
-            ////var validator = new LeagueJoinRequestValidator(storage);
+            var league = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);
 
-            ////// act
-            ////var actual = validator.Validate(request);
+            var validator = new LeagueJoinRequestValidator(storage);
 
-            ////// assert
-            ////Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("You are already a"));
-            Assert.False(true);
+            // act
+            var actual = validator.Validate(request);
 
+            // assert
+            Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("You are already a"));
         }
     }
 }

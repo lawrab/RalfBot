@@ -37,7 +37,10 @@ namespace SnailRacing.Store
             var currentValue = _data[key];
             return _data.TryUpdate(key, newValue, currentValue);
         }
-
+        public bool ContainsKey(string key)
+        {
+            return _data.ContainsKey(key);
+        }
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _data.GetEnumerator();
