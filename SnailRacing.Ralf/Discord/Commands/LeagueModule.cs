@@ -52,6 +52,11 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ctx.Member.SendMessageAsync(responseMessage);
             await ctx.RespondAsync($"New member {ctx.Member.Mention} joined {leagueName}");
 
+            // ToDo: improve this to ensure you can be configurable and the role is mentionable
+            var adminRole = ctx.Guild.Roles.Where(r => r.Value.Name == ADMIN_ROLE).FirstOrDefault();
+
+            await ctx.RespondAsync($"New member {ctx.Member.Mention} joined {leagueName}, {adminRole.Value.Mention}");
+
             if (response.MaxApprovedReached)
             {
                 await ctx.RespondAsync($"The {leagueName} have reached the maximum number of drivers and new registrations will be added to the waiting list");
@@ -144,6 +149,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                 .ToResponseMessage($"{driver} approved to drive in the {leagueName} league.");
 
             await ctx.RespondAsync(responseMessage);
+            await driver.SendMessageAsync($"You were approved for the {leagueName} league, see you on track soon!");
         }
 
         [Command("remove")]
