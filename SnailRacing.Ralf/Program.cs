@@ -23,6 +23,13 @@ static async Task MainAsync()
     var services = ServiceInstaller.ConfigureServices(appConfig, discordSink);
     var discord = await ConnectToDiscord(services, loggerFactory, appConfig.Discord.BotToken);
 
+    // ToDo: move to configuration and settings
+    // make it guild specific, this is currently global
+    // Logging to SnailRacing ralf-log
+    var loggingChannel = await discord.GetChannelAsync(951866363268464670);
+    discordSink.SetChannel(loggingChannel);
+    discordSink.Enable();
+
     await Task.Delay(-1);
 }
 
