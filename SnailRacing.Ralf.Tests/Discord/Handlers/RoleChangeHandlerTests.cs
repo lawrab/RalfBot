@@ -43,7 +43,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "RoleZ"
             };
 
-            var handler = new RoleChangedHandler(new StorageProvider(string.Empty, null));
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
@@ -80,7 +80,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "Sub"
             };
 
-            var handler = new RoleChangedHandler(new StorageProvider(string.Empty, null));
+            var handler = new RoleChangedHandler( StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
@@ -117,7 +117,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "Sub"
             };
 
-            var handler = new RoleChangedHandler(new StorageProvider(string.Empty, null));
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
@@ -154,7 +154,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "Sub"
             };
 
-            var handler = new RoleChangedHandler(new StorageProvider(string.Empty, null));
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
@@ -182,7 +182,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 ("RoleD", "Sub"),
                 ("RoleE", "Sub2")
             });
-            var handler = new RoleChangedHandler(new StorageProvider(string.Empty, null));
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
             var expected = new string[]
             {
                 "RoleA",

@@ -31,7 +31,7 @@ namespace SnailRacing.Ralf.Tests.Builder
             {
                 RemoveAllFiles(rootPath);
             }
-            return new(new StorageProvider(rootPath, null));
+            return new(StorageProvider.Create(rootPath, null));
         }
 
         private static void RemoveAllFiles(string rootPath)
@@ -56,8 +56,7 @@ namespace SnailRacing.Ralf.Tests.Builder
                 model.Participants = new ConcurrentDictionary<string, LeagueParticipantModel>(participants.ToDictionary((m) => m.DiscordMemberId));
             }
 
-            _storageProvider.Add(guildId, StorageProviderConstants.LEAGUE); // ToDo improve this
-            var leagues = _storageProvider.Get<LeagueModel>(guildId, StorageProviderConstants.LEAGUE);
+            var leagues = StoreHelper.GetLeagueStore(guildId, _storageProvider);
             leagues.TryAdd(model.Name.ToUpper(), model);
 
             return this;

@@ -7,6 +7,11 @@ namespace SnailRacing.Ralf.Infrastrtucture
     {
         private static IStore<TValue> GetStore<TValue>(string key, string guildId, IStorageProvider storageProvider)
         {
+            // ToDo: refactor this, create the store if it does not exist yet
+            if (!storageProvider.Contains(guildId, key))
+            {
+                storageProvider.Add(guildId, key); 
+            }
             return storageProvider.Get<TValue>(guildId, key);
         }
 

@@ -12,7 +12,7 @@ namespace SnailRacing.Ralf.Tests.Providers
             // arrange
             var group = "1";
             var key = "abc";
-            var storageProvider = new StorageProvider("Add_Storage_Returns_Same_Data", null);
+            var storageProvider = StorageProvider.Create("Add_Storage_Returns_Same_Data", null);
 
             // act
             storageProvider.Add(group, key);

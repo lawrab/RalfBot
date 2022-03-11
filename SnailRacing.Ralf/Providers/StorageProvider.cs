@@ -10,12 +10,19 @@ namespace SnailRacing.Ralf.Providers
         private readonly string _rootPath;
         private readonly ILogger<StorageProvider> _logger;
 
-        public StorageProvider(string rootPath, ILogger<StorageProvider> logger)
+        private StorageProvider(string rootPath, ILogger<StorageProvider> logger)
         {
             _rootPath = rootPath;
             _logger = logger;
 
             _store = new(Path.Combine(rootPath, "storage.json"));
+        }
+
+        public static StorageProvider Create(string rootPath, ILogger<StorageProvider> logger)
+        {
+            var storageProvider = new StorageProvider(rootPath, logger);
+            storageProvider._store.Init().Wait();
+            return storageProvider;
         }
 
         public void Add(string group, string key)
@@ -46,6 +53,12 @@ namespace SnailRacing.Ralf.Providers
             var store = new JsonStore<TModel>(_store[storeKey]);
             store.Init().Wait();
             return store;
+        }
+
+        public bool Contains(string group, string key)
+        {
+            var storeKey = GetStoreKey(group, key);
+            return _store.ContainsKey(storeKey);
         }
 
         private static string GetStoreKey(string group, string key)

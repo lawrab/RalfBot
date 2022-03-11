@@ -8,5 +8,6 @@ namespace SnailRacing.Ralf.Providers
         void Add(string group, string key);
         IStore<TModel> Get<TModel>(string key);
         IStore<TModel> Get<TModel>(string group, string key);
+        bool Contains(string group, string key);
     }
 }

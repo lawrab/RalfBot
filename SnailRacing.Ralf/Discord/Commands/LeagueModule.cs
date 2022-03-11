@@ -319,60 +319,60 @@ namespace SnailRacing.Ralf.Discord.Commands
         ////    }
         ////}
 
-        ////[GroupCommand]
-        ////[Command("list")]
-        ////[Description("Shows all the leagues")]
-        ////public async Task ListLeagues(CommandContext ctx)
-        ////{
-        ////    await ctx.TriggerTypingAsync();
+        [GroupCommand]
+        [Command("list")]
+        [Description("Shows all the leagues")]
+        public async Task ListLeagues(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
 
-        ////    var response = await Mediator!.Send(new LeagueQueryRequest
-        ////    {
-        ////        GuildId = ctx.Guild.Id.ToString(),
-        ////    });
+            var response = await Mediator!.Send(new LeagueQueryRequest
+            {
+                GuildId = ctx.Guild.Id.ToString(),
+            });
 
-        ////    if (response.HasErrors())
-        ////    {
-        ////        await ctx.RespondAsync(response.ToErrorMessage());
-        ////        return;
-        ////    }
+            if (response.HasErrors())
+            {
+                await ctx.RespondAsync(response.ToErrorMessage());
+                return;
+            }
 
-        ////    if (!response.Leagues.Any())
-        ////    {
-        ////        var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
-        ////        await ctx.RespondAsync($"{shrugEmoji} There are currently no leagues running.");
-        ////        return;
-        ////    }
+            if (!response.Leagues.Any())
+            {
+                var shrugEmoji = DiscordEmoji.FromName(ctx.Client, ":shrug:", true);
+                await ctx.RespondAsync($"{shrugEmoji} There are currently no leagues running.");
+                return;
+            }
 
-        ////    var leagues = response.Leagues
-        ////        .Select(x => new
-        ////        {
-        ////            Name = x.Name,
-        ////            x.Description,
-        ////            x.MaxGrid,
-        ////            x.Status,
-        ////            CreatedOn = x.CreatedDate,
-        ////            Pending = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
-        ////            Approved = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
-        ////            x.Standings
-        ////        });
+            var leagues = response.Leagues
+                .Select(x => new
+                {
+                    Name = x.Name,
+                    x.Description,
+                    x.MaxGrid,
+                    x.Status,
+                    CreatedOn = x.CreatedDate,
+                    Pending = x.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
+                    Approved = x.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
+                    x.Standings
+                });
 
-        ////    foreach (var league in leagues)
-        ////    {
-        ////        var builder = new DiscordEmbedBuilder()
-        ////            .WithTitle(league.Name)
-        ////            .WithUrl(league.Standings)
-        ////            .WithDescription(league.Description)
-        ////            .WithColor(DiscordColor.DarkRed)
-        ////            .AddField("Status", league.Status.ToString())
-        ////            .AddField("Drivers", league.Approved.ToString(), true)
-        ////            .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "n/a", true)
-        ////            .AddField("Waiting List", league.Pending.ToString(), true)
-        ////            .AddField("Created On", league.CreatedOn.ToShortDateString());
+            foreach (var league in leagues)
+            {
+                var builder = new DiscordEmbedBuilder()
+                    .WithTitle(league.Name)
+                    .WithUrl(league.Standings)
+                    .WithDescription(league.Description)
+                    .WithColor(DiscordColor.DarkRed)
+                    .AddField("Status", league.Status.ToString())
+                    .AddField("Drivers", league.Approved.ToString(), true)
+                    .AddField("Max", league.MaxGrid.HasValue ? league.MaxGrid.ToString() : "n/a", true)
+                    .AddField("Waiting List", league.Pending.ToString(), true)
+                    .AddField("Created On", league.CreatedOn.ToShortDateString());
 
-        ////        await ctx.Channel.SendMessageAsync(builder);
-        ////    }
-        ////}
+                await ctx.Channel.SendMessageAsync(builder);
+            }
+        }
 
         private async Task<LeagueJoinRequest?> BuildLeagueJoinRequest(CommandContext ctx, string leagueName)
         {

@@ -3,7 +3,6 @@ using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 using SnailRacing.Store;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace SnailRacing.Ralf.Discord.Handlers
 {
@@ -15,7 +14,6 @@ namespace SnailRacing.Ralf.Discord.Handlers
         {
             _storageProvider = storageProvider!;
         }
-
 
         // ToDo refactor and move to mediatr
         #region static helpers to handle role change events
@@ -45,7 +43,7 @@ namespace SnailRacing.Ralf.Discord.Handlers
         }
         #endregion
 
-        public async Task SyncRoles(string[] memberRoles, IStore<string> store,Func<string[], Task> updateMemberAction)
+        public async Task SyncRoles(string[] memberRoles, IStore<string> store, Func<string[], Task> updateMemberAction)
         {
             var rolesToAdd = GetRolesToAdd(memberRoles, store);
             var rolesToRemove = GetRolesToRemove(memberRoles, store);

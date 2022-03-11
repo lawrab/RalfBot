@@ -17,7 +17,7 @@ namespace SnailRacing.Ralf.Handlers.League
             RuleFor(m => m.GuildId).NotEmpty();
             RuleFor(m => m.LeagueName)
                 .NotEmpty()
-                .Must((m, _) => StoreHelper.GetLeagueStore(m.GuildId, _storageProvider)[m.LeagueKey] == null)
+                .Must((m, _) => !StoreHelper.GetLeagueStore(m.GuildId, _storageProvider).ContainsKey(m.LeagueKey))
                 .WithMessage(m => $"League {m.LeagueName} already exist. Sorry, try again.");
         }
     }
