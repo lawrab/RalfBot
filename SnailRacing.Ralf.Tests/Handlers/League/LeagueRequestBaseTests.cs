@@ -19,7 +19,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var actual = request.LeagueKey;
 
             // assert
-            Assert.Equal("Guild1-RalfLeague", actual);
+            Assert.Equal("RalfLeague".ToUpper(), actual);
         }
     }
 }

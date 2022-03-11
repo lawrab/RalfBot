@@ -5,6 +5,7 @@ using SnailRacing.Store;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace SnailRacing.Ralf.Tests.Builder
@@ -20,13 +21,23 @@ namespace SnailRacing.Ralf.Tests.Builder
             _storageProvider = storageProvider;
         }
 
-        public static StorageProviderBuilder Create()
+        public static StorageProviderBuilder Create(bool reset = false)
         {
-            return Create($"{Guid.NewGuid()}.json");
+            return Create($"{Guid.NewGuid()}.json", reset);
         }
-        public static StorageProviderBuilder Create(string rootPath)
+        public static StorageProviderBuilder Create(string rootPath, bool reset = false)
         {
+            if(reset)
+            {
+                RemoveAllFiles(rootPath);
+            }
             return new(new StorageProvider(rootPath, null));
+        }
+
+        private static void RemoveAllFiles(string rootPath)
+        {
+            if (!Directory.Exists(rootPath)) return;
+            Directory.Delete(rootPath, true);
         }
 
         public StorageProviderBuilder WithLeague(string guildId, string leagueName, IEnumerable<LeagueParticipantModel>? participants = null)

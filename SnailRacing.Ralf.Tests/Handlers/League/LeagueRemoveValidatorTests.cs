@@ -1,4 +1,5 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Tests.Builder;
 using Xunit;
 
@@ -15,10 +16,10 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = string.Empty
             };
 
-            var leagueStore = StorageProviderBuilder.Create()
-                .WithLeague("1", "ABC")
+            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error", true)
+                .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = "234" } })
                 .Build();
-            var validator = new LeagueRemoveRequestValidator(leagueStore);
+            var validator = new LeagueRemoveRequestValidator(storage);
 
             // act
             var actual = validator.Validate(request);

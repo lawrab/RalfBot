@@ -23,7 +23,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "123"
             };
             var storage = StorageProviderBuilder.Create()
-                 .WithLeague(request.GuildId, request.LeagueName)
+                 .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
                  .Build();
 
             var league = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);
@@ -38,10 +38,9 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
-            var leagueActual = storage.Get<LeagueModel>(request.LeagueKey);
+            var leagueActual = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);
             Assert.False(actual.HasErrors());
-            //Assert.False(leagueActual.ContainsKey(request.DiscordMemberId));
-            Assert.False(true);
+            Assert.False(leagueActual.Participants.ContainsKey(request.DiscordMemberId));
         }
     }
 }

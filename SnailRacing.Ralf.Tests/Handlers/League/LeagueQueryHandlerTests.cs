@@ -1,6 +1,7 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Ralf.Tests.Builder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,34 +16,25 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
         [Fact]
         public async Task Query_League_Without_Predicate_Returns_All_Leagues_For_Guild()
         {
-            ////// arrange
-            ////var request = new LeagueQueryRequest
-            ////{
-            ////    GuildId = "1"
-            ////};
-            ////var storage = new StorageProvider<LeagueStorageProviderModel>();
+            // arrange
+            var request = new LeagueQueryRequest
+            {
+                GuildId = "1"
+            };
+            var storage = StorageProviderBuilder.Create("Query_League_Without_Predicate_Returns_All_Leagues_For_Guild", true)
+                .WithLeague("1", "1")
+                .WithLeague("1", "2")
+                .WithLeague("2", "1")
+                .Build();
 
-            ////var expected = new List<LeagueModel>
-            ////{
-            ////    new LeagueModel("1", "1", string.Empty, DateTime.UtcNow, "", false),
-            ////    new LeagueModel("1", "2", string.Empty, DateTime.UtcNow, "", false)
-            ////};
+            var handler = new LeagueQueryHandler(storage);
 
-            ////storage.Store["1"] = expected[0];
-            ////storage.Store["2"] = expected[1];
-            ////storage.Store["3"] = new LeagueModel("2", "3", string.Empty, DateTime.UtcNow, "", false);
+            // act
+            var actual = await handler.Handle(request, CancellationToken.None);
 
-            ////var handler = new LeagueQueryHandler(storage);
-
-            ////// act
-            ////var actual = await handler.Handle(request, CancellationToken.None);
-
-            ////// assert
-            ////Assert.False(actual.HasErrors());
-            ////Assert.Equal(expected.Select(x => x.Name).OrderBy(x => x), actual.Leagues.Select(x => x.Name).OrderBy(x => x));
-            ///
-            Assert.False(true);
-
+            // assert
+            Assert.False(actual.HasErrors());
+            Assert.Equal(2, actual.Leagues.Count());
         }
     }
 }

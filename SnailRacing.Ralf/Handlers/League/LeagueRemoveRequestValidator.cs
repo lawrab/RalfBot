@@ -11,6 +11,7 @@ namespace SnailRacing.Ralf.Handlers.League
         public LeagueRemoveRequestValidator(IStorageProvider storageProvider)
         {
             _storageProvider = storageProvider;
+            CascadeMode = CascadeMode.Stop;
             RuleFor(r => r.LeagueName)
                 .NotEmpty()
                 .Must((r, _) => StoreHelper.GetLeagueStore(r.GuildId, _storageProvider)[r.LeagueKey] != null)
