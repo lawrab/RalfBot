@@ -39,7 +39,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         MinimumLogLevel = LogLevel.Trace,
         Token = token,
         TokenType = TokenType.Bot,
-        Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
+        Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers 
     });
 
     discord.UseInteractivity();
@@ -62,6 +62,17 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         var handler = new RoleChangedHandler(storage);
 
         await handler.HandleRoleChange(e);
+        e.Handled = true;
+    };
+
+    // ToDo: move to DI
+    discord.MessageReactionAdded += async (s, e) =>
+    {
+        var storage = services.GetService<IStorageProvider>();
+        var logger = services.GetService<ILogger<ReactionAddedHandler>>();
+        var handler = new ReactionAddedHandler(storage!, logger!);
+
+        await handler.HandleReactionAdded(s, e);
         e.Handled = true;
     };
 
