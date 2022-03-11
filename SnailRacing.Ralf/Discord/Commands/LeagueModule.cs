@@ -6,6 +6,7 @@ using MediatR;
 using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Store;
 
 //ToDo: move to ctor injection instead of property injection
 namespace SnailRacing.Ralf.Discord.Commands
@@ -17,9 +18,15 @@ namespace SnailRacing.Ralf.Discord.Commands
     public class LeagueModule : BaseCommandModule
     {
         private const string ADMIN_ROLE = "League Admin";
+        private readonly IStorageProvider _storageProvider;
+
         public AppConfig? AppConfig { get; set; }
-        public IStorageProvider<LeagueStorageProviderModel>? StorageProvider { private get; set; }
         public IMediator? Mediator { get; set; }
+
+        public LeagueModule(IStorageProvider storageProvider)
+        {
+            _storageProvider = storageProvider;
+        }
 
         [Command("join")]
         [Description("Request to join a league")]
@@ -184,8 +191,8 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var league = response.Leagues.SingleOrDefault();
 
-            var waitingListParticipants = league?.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending);
-            var activeParticipants = league?.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
+            var waitingListParticipants = league?.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Pending);
+            var activeParticipants = league?.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Approved);
 
             var builder = new DiscordEmbedBuilder()
                     .WithTitle(league?.Name)
@@ -287,7 +294,7 @@ namespace SnailRacing.Ralf.Discord.Commands
                 _ => new Predicate<LeagueParticipantModel>(x => true)
             };
 
-            var drivers = league?.Store.Where(p => filterExpression(p.Value)).Select(p => p.Value);
+            var drivers = league?.Participants.Where(p => filterExpression(p.Value)).Select(p => p.Value);
 
             if (drivers?.Any() == false)
             {
@@ -295,21 +302,27 @@ namespace SnailRacing.Ralf.Discord.Commands
                 return;
             }
 
-            foreach (var driver in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
-            {
-                var member = await ctx.Guild.GetMemberAsync(ulong.Parse(driver.DiscordMemberId));
-                var builder = new DiscordEmbedBuilder()
-                        .WithFooter($"{driver.Status} member of {league?.Name} since {driver.RegistrationDate.GetValueOrDefault().ToShortDateString()}")
-                        .WithThumbnail(member.AvatarUrl)
-                        .WithTitle(member.DisplayName)
-                        .WithDescription(driver.IRacingName)
-                        .WithColor(DiscordColor.DarkRed)
-                        .AddField("iRacing Customer ID", driver.IRacingCustomerId.ToString(), true)
-                        .AddField("Approved Date", driver.ApprovedDate.HasValue ? driver.ApprovedDate.GetValueOrDefault().ToShortDateString() : "n/a", true)
-                        .AddField("Status", driver.Status.ToString(), true);
+            var fileName = $"drivers_{Guid.NewGuid()}.txt";
+            
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream);
+            writer.WriteLine("DiscordMember, IRacingName, IRacingCustomerId, RegistrationDate, Status");
 
-                await ctx.Channel.SendMessageAsync(builder);
+            foreach (var d in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
+            {
+                var member = await ctx.Guild.GetMemberAsync(ulong.Parse(d.DiscordMemberId));
+                var driverText = $"{member.DisplayName}, {d.IRacingName}, {d.IRacingCustomerId}, {d.RegistrationDate}, {d.Status}";
+                writer.WriteLine(driverText);
             }
+
+            writer.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var msg = new DiscordMessageBuilder()
+                .WithContent($"Drivers for {leagueName}")
+                .WithFile($"{leagueName}_participants.csv", stream);
+
+            await ctx.Channel.SendMessageAsync(msg);
         }
 
         [GroupCommand]
@@ -345,8 +358,8 @@ namespace SnailRacing.Ralf.Discord.Commands
                     x.MaxGrid,
                     x.Status,
                     CreatedOn = x.CreatedDate,
-                    Pending = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
-                    Approved = x.Store.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
+                    Pending = x.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Pending),
+                    Approved = x.Participants.Count(p => p.Value.Status == LeagueParticipantStatus.Approved),
                     x.Standings
                 });
 

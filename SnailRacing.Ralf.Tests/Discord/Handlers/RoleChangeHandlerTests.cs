@@ -1,6 +1,6 @@
 ﻿using SnailRacing.Ralf.Discord.Handlers;
-using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Store;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -43,12 +43,12 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "RoleZ"
             };
 
-            var handler = new RoleChangedHandler(store);
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
             var newRoles = userRoles.Union(new[] { "RoleB" }).ToArray();
-            await handler.SyncRoles(newRoles, (r) =>
+            await handler.SyncRoles(newRoles, store, (r) =>
             {
                 actual = r;
                 return Task.CompletedTask;
@@ -80,12 +80,12 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "Sub"
             };
 
-            var handler = new RoleChangedHandler(store);
+            var handler = new RoleChangedHandler( StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
             var newRoles = userRoles.Union(new[] { "RoleB" }).ToArray();
-            await handler.SyncRoles(newRoles, (r) =>
+            await handler.SyncRoles(newRoles, store, (r) =>
             {
                 actual = r;
                 return Task.CompletedTask;
@@ -117,12 +117,12 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "Sub"
             };
 
-            var handler = new RoleChangedHandler(store);
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
             var newRoles = userRoles.Where(r => r != "RoleD").ToArray();
-            await handler.SyncRoles(newRoles, (r) =>
+            await handler.SyncRoles(newRoles, store, (r) =>
             {
                 actual = r;
                 return Task.CompletedTask;
@@ -154,12 +154,12 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 "Sub"
             };
 
-            var handler = new RoleChangedHandler(store);
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
 
             // act
             string[]? actual = null;
             var newRoles = userRoles.Where(r => r != "RoleD").ToArray();
-            await handler.SyncRoles(newRoles, (r) =>
+            await handler.SyncRoles(newRoles, store, (r) =>
             {
                 actual = r;
                 return Task.CompletedTask;
@@ -182,7 +182,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
                 ("RoleD", "Sub"),
                 ("RoleE", "Sub2")
             });
-            var handler = new RoleChangedHandler(store);
+            var handler = new RoleChangedHandler(StorageProvider.Create(string.Empty, null));
             var expected = new string[]
             {
                 "RoleA",
@@ -194,7 +194,7 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
 
             // act
             string[]? actual = null;
-            await handler.SyncRoles(expected, (r) =>
+            await handler.SyncRoles(expected, store, (r) =>
             {
                 actual = r;
                 return Task.CompletedTask;
@@ -204,14 +204,15 @@ namespace SnailRacing.Ralf.Tests.Discord.Handlers
             Assert.Equal(expected, actual);
         }
 
-        private IStorageProvider<RolesStorageProviderModel> CreateStorageWithRoles((string source, string target)[] syncRoles)
+        private IStore<string> CreateStorageWithRoles((string source, string target)[] syncRoles)
         {
-            var storageProvider = new StorageProvider<RolesStorageProviderModel>();
+            var store = new MemoryStore<string>();
             foreach (var item in syncRoles)
             {
-                storageProvider.Store[item.source] = item.target;
+                store.TryAdd(item.source, item.target);
             }
-            return storageProvider;
+
+            return store;
         }
     }
 }

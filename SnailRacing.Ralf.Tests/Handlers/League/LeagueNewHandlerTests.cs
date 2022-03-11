@@ -1,6 +1,9 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Models;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Ralf.Tests.Builder;
+using SnailRacing.Store;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +24,9 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
                 Description = "Desc1"
             };
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
+            var storage = StorageProviderBuilder.Create("12LeagueNewRequest_Adds_New_League", true)
+                .WithLeague("1", "ABC")
+                .Build();
 
             var handler = new LeagueNewHandler(storage, new AppConfig());
 
@@ -29,11 +34,11 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             var actual = await handler.Handle(request, CancellationToken.None);
 
             // assert
-            var storedLeagueActual = storage.Store[request.LeagueKey] ?? new LeagueModel("1", string.Empty, string.Empty, DateTime.MinValue, string.Empty);
+            var league = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);
             Assert.False(actual.HasErrors());
-            Assert.True(storage.Store.InternalStore!.ContainsKey(request.LeagueKey));
-            Assert.Equal(request.LeagueName, storedLeagueActual.Name);
-            Assert.Equal(request.Description, storedLeagueActual.Description);
+            Assert.NotNull(league);
+            Assert.Equal(request.LeagueName, league.Name);
+            Assert.Equal(request.Description, league.Description);
         }
     }
 }

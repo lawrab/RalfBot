@@ -1,7 +1,6 @@
 ﻿using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Models;
-using SnailRacing.Ralf.Providers;
-using System;
+using SnailRacing.Ralf.Tests.Builder;
 using Xunit;
 
 namespace SnailRacing.Ralf.Tests.Handlers.League
@@ -17,14 +16,19 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "1",
                 LeagueName = "League1",
             };
-            var validator = new LeagueLeaveRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+
+            var storage = StorageProviderBuilder.Create("7Empty_GuildId_Returns_Error", true)
+                .WithLeague("1", request.LeagueName)
+                .Build();
+
+            var validator = new LeagueLeaveRequestValidator(storage);
 
             // act
             var actual = validator.Validate(request);
 
             // assert
+            Assert.False(actual.IsValid);
             Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("'Guild Id' must not be empty."));
-
         }
 
         [Fact]
@@ -36,14 +40,17 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 GuildId = "1",
                 LeagueName = "League1",
             };
-            var validator = new LeagueLeaveRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+
+            var storage = StorageProviderBuilder.Create("8Empty_DiscordMemberId_Returns_Error", true)
+                .WithLeague("1", request.LeagueName)
+                .Build();
+            var validator = new LeagueLeaveRequestValidator(storage);
 
             // act
             var actual = validator.Validate(request);
 
             // assert
             Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("'Discord Member Id' must not be empty."));
-
         }
 
         [Fact]
@@ -54,16 +61,41 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             {
                 GuildId = "1",
                 DiscordMemberId = "1",
-                LeagueName = "I do not exist"
+                LeagueName = "Unknown"
             };
-            var validator = new LeagueLeaveRequestValidator(new StorageProvider<LeagueStorageProviderModel>());
+            var storage = StorageProviderBuilder.Create("9Invalid_LeagueName_Returns_Error", true)
+                .WithLeague("1", "Known")
+                .Build();
+            var validator = new LeagueLeaveRequestValidator(storage);
 
             // act
             var actual = validator.Validate(request);
 
             // assert
             Assert.Contains(actual.Errors, (e) => e.ErrorMessage.Contains("do not exist"));
+        }
 
+        [Fact]
+        public void A_Member_Of_League_Returns_No_Error()
+        {
+            // arrange
+            var request = new LeagueLeaveRequest
+            {
+                GuildId = "1",
+                LeagueName = "League1",
+                DiscordMemberId = "123"
+            };
+
+            var storage = StorageProviderBuilder.Create("10A_Member_Of_League_Returns_No_Error", true)
+                .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
+                .Build();
+            var validator = new LeagueLeaveRequestValidator(storage);
+
+            // act
+            var actual = validator.Validate(request);
+
+            // assert
+            Assert.True(actual.IsValid);
         }
 
         [Fact]
@@ -76,11 +108,10 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
                 DiscordMemberId = "123"
             };
-            var storage = new StorageProvider<LeagueStorageProviderModel>();
-            var league = new LeagueModel("1", request.LeagueName, string.Empty, DateTime.UtcNow, "", false);
 
-            storage.Store[request.LeagueKey] = league;
-
+            var storage = StorageProviderBuilder.Create("11Not_A_Member_Of_League_Returns_Error", true)
+                .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = "234" } })
+                .Build();
             var validator = new LeagueLeaveRequestValidator(storage);
 
             // act
@@ -88,7 +119,6 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
 
             // assert
             Assert.Contains(actual.Errors, (e) => e.ErrorMessage == string.Format(Messages.NOT_MEMBER_OF_LEAGUE, request.LeagueName));
-
         }
     }
 }

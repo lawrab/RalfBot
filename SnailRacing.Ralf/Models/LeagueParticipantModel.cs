@@ -9,5 +9,6 @@
         public DateTime? RegistrationDate { get; set; }
         public DateTime? ApprovedDate { get; set; }
         public LeagueParticipantStatus Status { get; set; }
+        public string? ApprovedBy { get; internal set; }
     }
 }

@@ -1,24 +1,27 @@
 ﻿using DSharpPlus.Entities;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
+using SnailRacing.Store;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace SnailRacing.Ralf.Discord.Handlers
 {
     public class RoleChangedHandler
     {
-        private readonly IStorageProvider<RolesStorageProviderModel> storage;
+        private readonly IStorageProvider _storageProvider;
 
-        public RoleChangedHandler(IStorageProvider<RolesStorageProviderModel>? storage)
+        public RoleChangedHandler(IStorageProvider storageProvider)
         {
-            this.storage = storage!;
+            _storageProvider = storageProvider!;
         }
 
+        // ToDo refactor and move to mediatr
         #region static helpers to handle role change events
         public Task HandleRoleChange(GuildMemberUpdateEventArgs e)
         {
             var roles = e.Member.Roles.Select(r => r.Name).ToArray();
-            var newRoles = SyncRoles(roles, async (r) => await ReplaceDiscordMemberRoles(e, r));
+            var store = StoreHelper.GetRolesStore(e.Guild.Id.ToString(), _storageProvider);
+            var newRoles = SyncRoles(roles, store, async (r) => await ReplaceDiscordMemberRoles(e, r));
 
             return Task.CompletedTask;
         }
@@ -40,10 +43,10 @@ namespace SnailRacing.Ralf.Discord.Handlers
         }
         #endregion
 
-        public async Task SyncRoles(string[] memberRoles, Func<string[], Task> updateMemberAction)
+        public async Task SyncRoles(string[] memberRoles, IStore<string> store, Func<string[], Task> updateMemberAction)
         {
-            var rolesToAdd = GetRolesToAdd(memberRoles, storage.Store);
-            var rolesToRemove = GetRolesToRemove(memberRoles, storage.Store);
+            var rolesToAdd = GetRolesToAdd(memberRoles, store);
+            var rolesToRemove = GetRolesToRemove(memberRoles, store);
             var newRoles = DeriveNewRoles(memberRoles, rolesToAdd, rolesToRemove);
             await updateMemberAction(newRoles);
         }
@@ -57,11 +60,11 @@ namespace SnailRacing.Ralf.Discord.Handlers
             return rolesWithAddedAndRemoved.ToArray();
         }
 
-        private string[] GetRolesToAdd(string[] roles, RolesStorageProviderModel syncRoles)
+        private string[] GetRolesToAdd(string[] roles, IStore<string> store)
         {
             var rolesList = roles.ToList();
             var rolesToAdd = rolesList.ToList()
-                .Join(syncRoles, r => r, sr => sr.Key, (r, sr) => sr.Value)
+                .Join(store, r => r, sr => sr.Key, (r, sr) => sr.Value)
                 .Distinct();
 
             var hasRolesToAdd = !rolesList.Intersect(rolesToAdd).Any();
@@ -69,14 +72,14 @@ namespace SnailRacing.Ralf.Discord.Handlers
             return hasRolesToAdd ? rolesToAdd.ToArray() : Array.Empty<string>();
         }
 
-        private string[] GetRolesToRemove(string[] roles, RolesStorageProviderModel syncRoles)
+        private string[] GetRolesToRemove(string[] roles, IStore<string> store)
         {
             var rolesList = roles.ToList();
-            var excludedRoles = syncRoles
+            var excludedRoles = store
                 .ExceptBy(roles, (r) => r.Key)
                 .Select(a => a.Value)
                 .Distinct();
-            var includedRoles = syncRoles
+            var includedRoles = store
                 .IntersectBy(roles, (r) => r.Key)
                 .Select(a => a.Value)
                 .Distinct();

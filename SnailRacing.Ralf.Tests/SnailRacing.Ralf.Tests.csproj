@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SnailRacing.Ralf\SnailRacing.Ralf.csproj" />
+    <ProjectReference Include="..\SnailRacing.Store\SnailRacing.Store.csproj" />
   </ItemGroup>
 
 </Project>

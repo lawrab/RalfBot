@@ -1,9 +1,10 @@
 ﻿namespace SnailRacing.Ralf.Providers
 {
-    internal class StorageProviderConstants
+    public class StorageProviderConstants
     {
         public const string ROLES = "roles";
-
-        public static string LOGGING_CHANNEL = "logging_channel";
+        public const string ADMIN = "admin_config";
+        public const string LEAGUE = "league";
+        public const string NEWS = "news";
     }
 }

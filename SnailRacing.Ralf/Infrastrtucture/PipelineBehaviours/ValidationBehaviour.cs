@@ -14,11 +14,12 @@ namespace SnailRacing.Ralf.Infrastrtucture.PipelineBehaviours
             _validators = validators;
         }
 
-        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var context = new ValidationContext<TRequest>(request);
-            var failures = _validators
-                .Select(x => x.Validate(context))
+
+            var tasks = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context)));
+            var failures = tasks
                 .Where(x => !x.IsValid)
                 .SelectMany(x => x.Errors)
                 .ToList();
@@ -28,7 +29,7 @@ namespace SnailRacing.Ralf.Infrastrtucture.PipelineBehaviours
                 Errors = failures
             };
 
-            return response.HasErrors() ? Task.FromResult(response) : next();
+            return response.HasErrors() ? response : await next();
         }
     }
 }

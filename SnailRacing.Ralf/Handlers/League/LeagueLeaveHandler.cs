@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 //ToDo: refactor and rename to be a more generic remove handler
@@ -6,18 +7,23 @@ namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueLeaveHandler : IRequestHandler<LeagueLeaveRequest, LeagueLeaveResponse>
     {
-        private readonly IStorageProvider<LeagueStorageProviderModel> _storage;
+        private readonly IStorageProvider _storageProvider;
 
-        public LeagueLeaveHandler(IStorageProvider<LeagueStorageProviderModel> storage)
+        public LeagueLeaveHandler(IStorageProvider storageProvider)
         {
-            _storage = storage;
+            _storageProvider = storageProvider;
         }
 
         public Task<LeagueLeaveResponse> Handle(LeagueLeaveRequest request, CancellationToken cancellationToken)
         {
             var response = new LeagueLeaveResponse();
 
-            _storage.Store[request.LeagueKey]?.Leave(request.DiscordMemberId);
+            var leagues = StoreHelper.GetLeagueStore(request.GuildId, _storageProvider);
+            var league = leagues[request.LeagueKey];
+
+            league.Participants.Remove(request.DiscordMemberId, out _);
+
+            leagues.TryUpdate(request.LeagueKey, league);
 
             return Task.FromResult(response);
         }

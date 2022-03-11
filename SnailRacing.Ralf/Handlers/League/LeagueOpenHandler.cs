@@ -1,20 +1,26 @@
 ﻿using MediatR;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Handlers.League
 {
     public class LeagueOpenHandler : IRequestHandler<LeagueOpenRequest, LeagueOpenResponse>
     {
-        private readonly IStorageProvider<LeagueStorageProviderModel> _storage;
+        private readonly IStorageProvider _storageProvider;
 
-        public LeagueOpenHandler(IStorageProvider<LeagueStorageProviderModel> storage)
+        public LeagueOpenHandler(IStorageProvider storageProvider)
         {
-            _storage = storage;
+            _storageProvider = storageProvider;
         }
 
         public Task<LeagueOpenResponse> Handle(LeagueOpenRequest request, CancellationToken cancellationToken)
         {
-            _storage.Store.SetOpen(request.LeagueKey, request.MaxGrid);
+            var store = StoreHelper.GetLeagueStore(request.GuildId, _storageProvider);
+            var league = store[request.LeagueKey];
+            league.Status = LeagueStatus.Open;
+            league.MaxGrid = request.MaxGrid;
+
+            store.TryUpdate(request.LeagueKey, league);
 
             return Task.FromResult(new LeagueOpenResponse());
         }

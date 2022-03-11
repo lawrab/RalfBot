@@ -45,6 +45,11 @@ namespace SnailRacing.Ralf.Logging
             _channel = channel;
         }
 
+        public DiscordChannel? GetChannel()
+        {
+            return _channel;
+        }
+
         public void ClearChannel()
         {
             _channel = null;

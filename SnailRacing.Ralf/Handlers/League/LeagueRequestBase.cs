@@ -5,6 +5,6 @@
         public string LeagueName { get; set; } = string.Empty;
         public string GuildId { get; set; } = string.Empty;
 
-        public string LeagueKey { get => $"{GuildId}-{LeagueName}"; }
+        public string LeagueKey { get => $"{LeagueName.ToUpper()}"; }
     }
 }

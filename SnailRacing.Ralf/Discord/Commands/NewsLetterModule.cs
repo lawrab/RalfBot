@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Discord.Commands
@@ -8,13 +9,19 @@ namespace SnailRacing.Ralf.Discord.Commands
     [Group("news")]
     public class NewsLetterModule : BaseCommandModule
     {
-        public IStorageProvider<NewsStorageProviderModel>? StorageProvider { private get; set; }
+        private readonly IStorageProvider _storageProvider;
+
+        public NewsLetterModule(IStorageProvider storageProvider)
+        {
+            _storageProvider = storageProvider;
+        }
 
         [GroupCommand]
         public async Task AddNews(CommandContext ctx, [RemainingText] string newsMessage)
         {
             await ctx.TriggerTypingAsync();
-            StorageProvider!.Store.Add(new NewsModel
+            var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
+            store.TryAdd(Guid.NewGuid().ToString(), new NewsModel
             {
                 Who = ctx.Member.DisplayName,
                 Story = newsMessage
@@ -24,13 +31,14 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ctx.RespondAsync($"{emoji} added, stay awesome!");
         }
 
-
         [Command("list")]
         public async Task ListNews(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
 
-            var news = StorageProvider!.Store.Query(10);
+            var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
+
+            var news = store.Take(10);
 
             var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
 
@@ -38,34 +46,35 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 Title = $"{emoji} Latest News"
             };
-            news?.ToList().ForEach(i => embed.AddField(i.Who, i.Story, true));
+            news?.ToList().ForEach(i => embed.AddField(i.Value.Who, i.Value.Story, true));
 
             await ctx.RespondAsync(embed);
         }
 
-        [Command("csv")]
-        public async Task ToCSV(CommandContext ctx)
-        {
-            await ToCSV(ctx, DateTime.UtcNow);
-        }
+        ////[Command("csv")]
+        ////public async Task ToCSV(CommandContext ctx)
+        ////{
+        ////    await ToCSV(ctx, DateTime.UtcNow);
+        ////}
 
-        [Command("csv")]
-        [RequireDirectMessage()]
-        public async Task ToCSV(CommandContext ctx, DateTime date)
-        {
-            await ctx.TriggerTypingAsync();
+        ////[Command("csv")]
+        ////[RequireDirectMessage()]
+        ////public async Task ToCSV(CommandContext ctx, DateTime date)
+        ////{
+        ////    await ctx.TriggerTypingAsync();
 
-            var news = StorageProvider!.Store.QueryMonth(date);
+        ////    var store = GetStore(ctx);
+        ////    var news = store!.Store.QueryMonth(date);
 
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
+        ////    var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
 
-            var csv = news?.Select(n => $"{n.Who}|{n.When}|{n.Story}") ?? Enumerable.Empty<string>();
+        ////    var csv = news?.Select(n => $"{n.Who}|{n.When}|{n.Story}") ?? Enumerable.Empty<string>();
 
-            var builder = new DiscordMessageBuilder();
-            builder.WithContent($"{emoji} Newsletter (${DateTime.UtcNow.ToString("MMM, yyyy")})")
-                .WithContent($"`{string.Join(Environment.NewLine, csv)}`");
+        ////    var builder = new DiscordMessageBuilder();
+        ////    builder.WithContent($"{emoji} Newsletter (${DateTime.UtcNow.ToString("MMM, yyyy")})")
+        ////        .WithContent($"`{string.Join(Environment.NewLine, csv)}`");
 
-            await ctx.RespondAsync(builder);
-        }
+        ////    await ctx.RespondAsync(builder);
+        ////}
     }
 }

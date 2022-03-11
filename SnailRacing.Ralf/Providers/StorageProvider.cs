@@ -1,51 +1,79 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Text.Json.Serialization;
+using SnailRacing.Store;
 
 namespace SnailRacing.Ralf.Providers
 {
-    public class StorageProvider<TModel> : IStorageProvider<TModel>
-        where TModel : IStorageProviderModel, new()
+    // only supports JsonStore at the moment
+    public class StorageProvider : IStorageProvider
     {
-        private readonly ILogger<StorageProvider<TModel>>? _logger;
-        private TModel _model = new TModel();
-        private IJsonFileStorageProvider? _fileStorageProvider;
+        private readonly JsonStore<string> _store;
+        private readonly string _rootPath;
+        private readonly ILogger<StorageProvider> _logger;
 
-        public StorageProvider()
+        private StorageProvider(string rootPath, ILogger<StorageProvider> logger)
         {
-            _model.SetSaveDataCallback(SaveData);
-        }
-
-        public StorageProvider(ILogger<StorageProvider<TModel>> logger)
-            : this()
-        {
+            _rootPath = rootPath;
             _logger = logger;
-            _logger?.LogDebug($"Logger set for {this.GetType().Name}");
+
+            _store = new(Path.Combine(rootPath, "storage.json"));
         }
 
-        [JsonIgnore]
-        public TModel Store
+        public static StorageProvider Create(string rootPath, ILogger<StorageProvider> logger)
         {
-            get => _model;
+            var storageProvider = new StorageProvider(rootPath, logger);
+            storageProvider._store.Init().Wait();
+            return storageProvider;
         }
 
-        public async Task SetFileStorageProvider(IJsonFileStorageProvider fileStorageProvider)
+        public void Add(string group, string key)
         {
-            _fileStorageProvider = fileStorageProvider;
-            var data = await fileStorageProvider.LoadAsync(_model.GetStoreType());
+            string path = GetFilePath(group, key);
+            string folderPath = GetFolderPath(group);
+            string storeKey = GetStoreKey(group, key);
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
 
-            if (data is null) return;
-
-            _model = new TModel();
-            _model.SetStore(data);
-            _model.SetSaveDataCallback(SaveData);
+            _store.TryAdd(storeKey, path);
+        }
+        public void Add(string key)
+        {
+            Add(string.Empty, key);
         }
 
-        private void SaveData()
+        public IStore<TModel> Get<TModel>(string key)
         {
-            if (_fileStorageProvider is null) return;
-            _fileStorageProvider.SaveAsync(_model.GetStore())
-            .ContinueWith(t => _logger?.LogError(t.Exception, "Error persisting StorageProvider memoryStore"),
-                                TaskContinuationOptions.OnlyOnFaulted);
+            return Get<TModel>(string.Empty, key);
+        }
+
+        public IStore<TModel> Get<TModel>(string group, string key)
+        {
+            var storeKey = GetStoreKey(group, key);
+            var store = new JsonStore<TModel>(_store[storeKey]);
+            store.Init().Wait();
+            return store;
+        }
+
+        public bool Contains(string group, string key)
+        {
+            var storeKey = GetStoreKey(group, key);
+            return _store.ContainsKey(storeKey);
+        }
+
+        private static string GetStoreKey(string group, string key)
+        {
+            return $"{group}_{key}";
+        }
+
+        private string GetFolderPath(string group)
+        {
+            return Path.Combine(_rootPath, group);
+        }
+
+        private string GetFilePath(string group, string key)
+        {
+            return Path.Combine(_rootPath, group, $"{key}.json");
         }
     }
 }
