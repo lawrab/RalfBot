@@ -18,6 +18,7 @@ namespace SnailRacing.Ralf.Handlers.League
             var store = StoreHelper.GetLeagueStore(request.GuildId, _storageProvider);
             var league = store[request.LeagueKey];
             league.Status = LeagueStatus.Closed;
+            league.MaxGrid = null;
 
             store.TryUpdate(request.LeagueKey, league);
 

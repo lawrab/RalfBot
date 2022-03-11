@@ -26,7 +26,7 @@ namespace SnailRacing.Ralf.Handlers.League
                 Guild = request.GuildId,
                 Name = request.LeagueName, 
                 Description = request.Description,
-                Status = LeagueStatus.NotSet,
+                Status = LeagueStatus.Closed,
                 CreatedDate = DateTime.UtcNow,
                 Standings = new Uri("http://annieandlarry.com")
             });
