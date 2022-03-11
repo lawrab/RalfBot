@@ -35,7 +35,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = String.Empty
             };
 
-            var storage = StorageProviderBuilder.Create("Empty_LeagueName_Returns_Error")
+            var storage = StorageProviderBuilder.Create("13Empty_LeagueName_Returns_Error", true)
                 .WithLeague("1", "ABC")
                 .Build();
             var validator = new LeagueNewRequestValidator(storage);
@@ -58,7 +58,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "ABC"
             };
 
-            var storage = StorageProviderBuilder.Create("LeagueName_Exists_Returns_Error")
+            var storage = StorageProviderBuilder.Create("14LeagueName_Exists_Returns_Error", true)
                 .WithLeague(request.GuildId, request.LeagueName)
                 .Build();
 

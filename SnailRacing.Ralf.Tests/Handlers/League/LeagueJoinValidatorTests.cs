@@ -21,7 +21,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
             };
 
-            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error")
+            var storage = StorageProviderBuilder.Create("2Empty_GuildId_Returns_Error", true)
                 .Build();
             var validator = new LeagueJoinRequestValidator(storage);
 
@@ -41,7 +41,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 GuildId = "1",
                 LeagueName = "League1",
             };
-            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error")
+            var storage = StorageProviderBuilder.Create("3Empty_DiscordMemberId_Returns_Error", true)
                 .Build();
             var validator = new LeagueJoinRequestValidator(storage);
 
@@ -62,7 +62,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "1",
                 LeagueName = "I do not exist"
             };
-            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error")
+            var storage = StorageProviderBuilder.Create("4Invalid_LeagueName_Returns_Error", true)
                 .WithLeague(request.GuildId, "ABC")
                 .Build();
             var validator = new LeagueJoinRequestValidator(storage);
@@ -85,7 +85,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "123"
             };
 
-            var storage = StorageProviderBuilder.Create("Allready_Joined_League_Returns_Error")
+            var storage = StorageProviderBuilder.Create("5Allready_Joined_League_Returns_Error", true)
                 .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
                 .Build();
 

@@ -16,7 +16,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = string.Empty
             };
 
-            var storage = StorageProviderBuilder.Create("Invalid_LeagueName_Returns_Error", true)
+            var storage = StorageProviderBuilder.Create("17Invalid_LeagueName_Returns_Error", true)
                 .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = "234" } })
                 .Build();
             var validator = new LeagueRemoveRequestValidator(storage);

@@ -17,7 +17,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
             };
 
-            var storage = StorageProviderBuilder.Create()
+            var storage = StorageProviderBuilder.Create("7Empty_GuildId_Returns_Error", true)
                 .WithLeague("1", request.LeagueName)
                 .Build();
 
@@ -41,7 +41,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
             };
 
-            var storage = StorageProviderBuilder.Create()
+            var storage = StorageProviderBuilder.Create("8Empty_DiscordMemberId_Returns_Error", true)
                 .WithLeague("1", request.LeagueName)
                 .Build();
             var validator = new LeagueLeaveRequestValidator(storage);
@@ -63,7 +63,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "1",
                 LeagueName = "Unknown"
             };
-            var storage = StorageProviderBuilder.Create()
+            var storage = StorageProviderBuilder.Create("9Invalid_LeagueName_Returns_Error", true)
                 .WithLeague("1", "Known")
                 .Build();
             var validator = new LeagueLeaveRequestValidator(storage);
@@ -86,7 +86,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "123"
             };
 
-            var storage = StorageProviderBuilder.Create("A_Member_Of_League_Returns_No_Error")
+            var storage = StorageProviderBuilder.Create("10A_Member_Of_League_Returns_No_Error", true)
                 .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
                 .Build();
             var validator = new LeagueLeaveRequestValidator(storage);
@@ -109,7 +109,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 DiscordMemberId = "123"
             };
 
-            var storage = StorageProviderBuilder.Create("Not_A_Member_Of_League_Returns_Error", true)
+            var storage = StorageProviderBuilder.Create("11Not_A_Member_Of_League_Returns_Error", true)
                 .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = "234" } })
                 .Build();
             var validator = new LeagueLeaveRequestValidator(storage);

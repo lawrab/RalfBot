@@ -23,7 +23,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 IRacingName = "Larry Rabbets"
 
             };
-            var storage = StorageProviderBuilder.Create()
+            var storage = StorageProviderBuilder.Create("1Joins_League_With_Valid_League_Request", true)
                 .WithLeague("1", request.LeagueName)
                 .Build();
 

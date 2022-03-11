@@ -24,7 +24,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
                 Description = "Desc1"
             };
-            var storage = StorageProviderBuilder.Create("LeagueNewRequest_Adds_New_League")
+            var storage = StorageProviderBuilder.Create("12LeagueNewRequest_Adds_New_League", true)
                 .WithLeague("1", "ABC")
                 .Build();
 

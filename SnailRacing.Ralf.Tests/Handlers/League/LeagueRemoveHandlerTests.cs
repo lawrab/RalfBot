@@ -24,7 +24,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 GuildId = "12",
                 LeagueName = "League1"
             };
-            var storage = StorageProviderBuilder.Create("Not_A_Member_Of_League_Returns_Error", true)
+            var storage = StorageProviderBuilder.Create("16Not_A_Member_Of_League_Returns_Error", true)
                 .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = "234" } })
                 .Build();
 

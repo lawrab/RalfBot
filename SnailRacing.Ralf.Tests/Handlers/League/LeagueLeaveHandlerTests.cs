@@ -22,7 +22,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
                 LeagueName = "League1",
                 DiscordMemberId = "123"
             };
-            var storage = StorageProviderBuilder.Create()
+            var storage = StorageProviderBuilder.Create("6Leaves_League_With_Valid_League_Request_Removes_Participant", true)
                  .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
                  .Build();
 

@@ -21,7 +21,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             {
                 GuildId = "1"
             };
-            var storage = StorageProviderBuilder.Create("Query_League_Without_Predicate_Returns_All_Leagues_For_Guild", true)
+            var storage = StorageProviderBuilder.Create("15Query_League_Without_Predicate_Returns_All_Leagues_For_Guild", true)
                 .WithLeague("1", "1")
                 .WithLeague("1", "2")
                 .WithLeague("2", "1")
