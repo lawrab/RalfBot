@@ -17,21 +17,6 @@ namespace SnailRacing.Ralf.Discord.Commands
         }
 
         [GroupCommand]
-        public async Task AddNews(CommandContext ctx, [RemainingText] string newsMessage)
-        {
-            await ctx.TriggerTypingAsync();
-            var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
-            store.TryAdd(Guid.NewGuid().ToString(), new NewsModel
-            {
-                Who = ctx.Member.DisplayName,
-                Story = newsMessage,
-                When = DateTime.UtcNow
-            });
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper:");
-
-            await ctx.RespondAsync($"{emoji} added, stay awesome!");
-        }
-
         [Command("list")]
         public async Task ListNews(CommandContext ctx)
         {
@@ -39,13 +24,13 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
 
-            var news = store.Take(10);
+            var news = store.Take(3);
 
             var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
 
             var embed = new DiscordEmbedBuilder()
                 .WithTitle($"{emoji} Latest News");
-            news?.ToList().ForEach(i => embed.AddField(i.Value.Who, i.Value.Story ?? string.Empty, true));
+            news?.ToList().ForEach(i => embed.AddField(i.Value.Who, i.Value.Story ?? "No content", true));
 
             await ctx.RespondAsync(embed);
         }
@@ -57,7 +42,6 @@ namespace SnailRacing.Ralf.Discord.Commands
         }
 
         [Command("csv")]
-        [RequireDirectMessage()]
         public async Task ToCSV(CommandContext ctx, DateTime date)
         {
             await ctx.TriggerTypingAsync();

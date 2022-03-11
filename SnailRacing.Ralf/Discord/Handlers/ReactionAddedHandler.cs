@@ -32,6 +32,12 @@ namespace SnailRacing.Ralf.Discord.Handlers
         // ToDo: move this to mediatr
         private void AddNews(MessageReactionAddEventArgs eventArgs)
         {
+            if(eventArgs.Message.Author == null ||
+                eventArgs.Message.Content == null)
+            {
+                return;
+            }
+
             var store = StoreHelper.GetNewsStore(eventArgs.Guild.Id.ToString(), _storageProvider);
             var key = eventArgs.Message.Id.ToString();
 
