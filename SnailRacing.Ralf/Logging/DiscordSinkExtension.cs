@@ -10,7 +10,7 @@ namespace SnailRacing.Ralf.Logging
                   DiscordSink sink,
                   IFormatProvider? formatProvider = null)
         {
-            sink.SetFormatProvider(formatProvider);
+            if(formatProvider != null) sink.SetFormatProvider(formatProvider);
             return loggerConfiguration.Sink(sink);
         }
     }

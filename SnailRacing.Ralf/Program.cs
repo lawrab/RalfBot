@@ -20,7 +20,7 @@ static async Task MainAsync()
     var discordSink = new DiscordSink();
     ConfigureLogging(discordSink);
     var loggerFactory = new LoggerFactory().AddSerilog();
-    var services = await ServiceInstaller.ConfigureServices(appConfig, discordSink);
+    var services = ServiceInstaller.ConfigureServices(appConfig, discordSink);
     var discord = await ConnectToDiscord(services, loggerFactory, appConfig.Discord.BotToken);
 
     await Task.Delay(-1);
@@ -59,7 +59,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     discord.GuildMemberUpdated += async (s, e) =>
     {
         var storage = services.GetService<IStorageProvider>();
-        var handler = new RoleChangedHandler(storage);
+        var handler = new RoleChangedHandler(storage!);
 
         await handler.HandleRoleChange(e);
         e.Handled = true;

@@ -15,7 +15,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             // arrange
             var request = new LeagueNewRequest();
 
-            var validator = new LeagueNewRequestValidator(null);
+            var validator = new LeagueNewRequestValidator(null!);
 
             // act
             var actual = validator.Validate(request);
