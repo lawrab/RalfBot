@@ -302,21 +302,27 @@ namespace SnailRacing.Ralf.Discord.Commands
                 return;
             }
 
-            foreach (var driver in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
-            {
-                var member = await ctx.Guild.GetMemberAsync(ulong.Parse(driver.DiscordMemberId));
-                var builder = new DiscordEmbedBuilder()
-                        .WithFooter($"{driver.Status} member of {league?.Name} since {driver.RegistrationDate.GetValueOrDefault().ToShortDateString()}")
-                        .WithThumbnail(member.AvatarUrl)
-                        .WithTitle(member.DisplayName)
-                        .WithDescription(driver.IRacingName)
-                        .WithColor(DiscordColor.DarkRed)
-                        .AddField("iRacing Customer ID", driver.IRacingCustomerId.ToString(), true)
-                        .AddField("Approved Date", driver.ApprovedDate.HasValue ? driver.ApprovedDate.GetValueOrDefault().ToShortDateString() : "n/a", true)
-                        .AddField("Status", driver.Status.ToString(), true);
+            var fileName = $"drivers_{Guid.NewGuid()}.txt";
+            
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream);
+            writer.WriteLine("DiscordMember, IRacingName, IRacingCustomerId, RegistrationDate, Status");
 
-                await ctx.Channel.SendMessageAsync(builder);
+            foreach (var d in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
+            {
+                var member = await ctx.Guild.GetMemberAsync(ulong.Parse(d.DiscordMemberId));
+                var driverText = $"{member.DisplayName}, {d.IRacingName}, {d.IRacingCustomerId}, {d.RegistrationDate}, {d.Status}";
+                writer.WriteLine(driverText);
             }
+
+            writer.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var msg = new DiscordMessageBuilder()
+                .WithContent($"Drivers for {leagueName}")
+                .WithFile($"{leagueName}_participants.csv", stream);
+
+            await ctx.Channel.SendMessageAsync(msg);
         }
 
         [GroupCommand]
