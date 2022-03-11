@@ -26,7 +26,7 @@ namespace SnailRacing.Ralf.Tests.Infrastructure.PipelineBehaviours
             var mediatr = services.GetService<IMediator>();
 
             // act
-            var actual = await mediatr?.Send(request);
+            var actual = await mediatr!.Send(request);
 
             // assert
             Assert.NotNull(actual);

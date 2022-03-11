@@ -12,7 +12,7 @@ namespace SnailRacing.Ralf.Infrastrtucture
 {
     public static class ServiceInstaller
     {
-        public static async Task<ServiceProvider> ConfigureServices(AppConfig appConfig, DiscordSink discordSink)
+        public static ServiceProvider ConfigureServices(AppConfig appConfig, DiscordSink discordSink)
         {
             return new ServiceCollection()
                     .AddLogging(l => l.AddSerilog())

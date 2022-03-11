@@ -22,12 +22,12 @@ jobs:
           key: dotnet-packages-v1-{{ checksum "SnailRacing.Ralf/SnailRacing.Ralf.csproj" }}
       - run:
           name: "Run Application Tests"
-          command: dotnet test --blame-hang --blame-hang-timeout 2min -v n --results-directory:test_coverage --collect:"Code Coverage"
+          command: dotnet test -v d --results-directory:test_coverage --collect:"Code Coverage"
       - run:
           name: "Print Working Directory"
           command: pwd
       - store_artifacts:
-          path: C:\Users\circleci\project\test_coverage
+          path: /root/project/test_coverage
   build:
     description: Build application with Release configuration
     docker:

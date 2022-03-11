@@ -17,20 +17,6 @@ namespace SnailRacing.Ralf.Discord.Commands
         }
 
         [GroupCommand]
-        public async Task AddNews(CommandContext ctx, [RemainingText] string newsMessage)
-        {
-            await ctx.TriggerTypingAsync();
-            var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
-            store.TryAdd(Guid.NewGuid().ToString(), new NewsModel
-            {
-                Who = ctx.Member.DisplayName,
-                Story = newsMessage
-            });
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper:");
-
-            await ctx.RespondAsync($"{emoji} added, stay awesome!");
-        }
-
         [Command("list")]
         public async Task ListNews(CommandContext ctx)
         {
@@ -38,43 +24,42 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
 
-            var news = store.Take(10);
+            var news = store.Take(3);
 
             var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
 
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = $"{emoji} Latest News"
-            };
-            news?.ToList().ForEach(i => embed.AddField(i.Value.Who, i.Value.Story, true));
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"{emoji} Latest News");
+            news?.ToList().ForEach(i => embed.AddField(i.Value.Who, i.Value.Story ?? "No content", true));
 
             await ctx.RespondAsync(embed);
         }
 
-        ////[Command("csv")]
-        ////public async Task ToCSV(CommandContext ctx)
-        ////{
-        ////    await ToCSV(ctx, DateTime.UtcNow);
-        ////}
+        [Command("csv")]
+        public async Task ToCSV(CommandContext ctx)
+        {
+            await ToCSV(ctx, DateTime.UtcNow);
+        }
 
-        ////[Command("csv")]
-        ////[RequireDirectMessage()]
-        ////public async Task ToCSV(CommandContext ctx, DateTime date)
-        ////{
-        ////    await ctx.TriggerTypingAsync();
+        [Command("csv")]
+        public async Task ToCSV(CommandContext ctx, DateTime date)
+        {
+            await ctx.TriggerTypingAsync();
 
-        ////    var store = GetStore(ctx);
-        ////    var news = store!.Store.QueryMonth(date);
+            var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
+            var news = store
+                .Where(n => n.Value.When.AddDays(31) > date)
+                .Select(n => n.Value);
 
-        ////    var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
+            var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
 
-        ////    var csv = news?.Select(n => $"{n.Who}|{n.When}|{n.Story}") ?? Enumerable.Empty<string>();
+            var csv = news?.Select(n => $"{n.Who}|{n.When}|{n.Story}") ?? Enumerable.Empty<string>();
 
-        ////    var builder = new DiscordMessageBuilder();
-        ////    builder.WithContent($"{emoji} Newsletter (${DateTime.UtcNow.ToString("MMM, yyyy")})")
-        ////        .WithContent($"`{string.Join(Environment.NewLine, csv)}`");
+            var builder = new DiscordMessageBuilder();
+            builder.WithContent($"{emoji} Newsletter (${DateTime.UtcNow.ToString("MMM, yyyy")})")
+                .WithContent($"`{string.Join(Environment.NewLine, csv)}`");
 
-        ////    await ctx.RespondAsync(builder);
-        ////}
+            await ctx.RespondAsync(builder);
+        }
     }
 }

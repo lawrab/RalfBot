@@ -6,7 +6,6 @@ using MediatR;
 using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
-using SnailRacing.Store;
 
 //ToDo: move to ctor injection instead of property injection
 namespace SnailRacing.Ralf.Discord.Commands
@@ -51,6 +50,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             var responseMessage = response
                 .ToResponseMessage($"Thank you, you were added to the **{leagueName}** league, a league admin will be in touch soon.");
             await ctx.Member.SendMessageAsync(responseMessage);
+            await ctx.RespondAsync($"New member {ctx.Member.Mention} joined {leagueName}");
 
             if (response.MaxApprovedReached)
             {
@@ -303,7 +303,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             }
 
             var fileName = $"drivers_{Guid.NewGuid()}.txt";
-            
+
             using var stream = new MemoryStream();
             using var writer = new StreamWriter(stream);
             writer.WriteLine("DiscordMember, IRacingName, IRacingCustomerId, RegistrationDate, Status");

@@ -20,7 +20,7 @@ static async Task MainAsync()
     var discordSink = new DiscordSink();
     ConfigureLogging(discordSink);
     var loggerFactory = new LoggerFactory().AddSerilog();
-    var services = await ServiceInstaller.ConfigureServices(appConfig, discordSink);
+    var services = ServiceInstaller.ConfigureServices(appConfig, discordSink);
     var discord = await ConnectToDiscord(services, loggerFactory, appConfig.Discord.BotToken);
 
     await Task.Delay(-1);
@@ -39,7 +39,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         MinimumLogLevel = LogLevel.Trace,
         Token = token,
         TokenType = TokenType.Bot,
-        Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
+        Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers 
     });
 
     discord.UseInteractivity();
@@ -59,9 +59,20 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     discord.GuildMemberUpdated += async (s, e) =>
     {
         var storage = services.GetService<IStorageProvider>();
-        var handler = new RoleChangedHandler(storage);
+        var handler = new RoleChangedHandler(storage!);
 
         await handler.HandleRoleChange(e);
+        e.Handled = true;
+    };
+
+    // ToDo: move to DI
+    discord.MessageReactionAdded += async (s, e) =>
+    {
+        var storage = services.GetService<IStorageProvider>();
+        var logger = services.GetService<ILogger<ReactionAddedHandler>>();
+        var handler = new ReactionAddedHandler(storage!, logger!);
+
+        await handler.HandleReactionAdded(s, e);
         e.Handled = true;
     };
 

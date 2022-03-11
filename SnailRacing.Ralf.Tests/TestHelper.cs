@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using System;
+﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -8,7 +7,7 @@ namespace SnailRacing.Ralf.Tests
     internal class TestHelper
     {
         public static T? CreateInstance<T>(params object[] args)
-            where T: class?
+            where T : class?
         {
             var type = typeof(T);
             if (!string.IsNullOrEmpty(type.FullName))
@@ -24,12 +23,10 @@ namespace SnailRacing.Ralf.Tests
 
         internal static void SetProperty<T, TValue>(T obj, Expression<Func<T, TValue>> propertyLambda, TValue value)
         {
-            var member = propertyLambda.Body as MemberExpression;
+            if (propertyLambda.Body is not MemberExpression member) throw new Exception("Invalid expression");
 
-            if (member == null) throw new Exception("Invalid expression");
-
-            MethodInfo setMethod = ((PropertyInfo)member.Member).GetSetMethod(true);
-            setMethod?.Invoke(obj, new object[] { value });
+            var setMethod = ((PropertyInfo)member.Member).GetSetMethod(true);
+            setMethod?.Invoke(obj, new object[] { value! });
         }
     }
 }

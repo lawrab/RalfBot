@@ -31,7 +31,7 @@ namespace SnailRacing.Ralf.Tests.Builder
             {
                 RemoveAllFiles(rootPath);
             }
-            return new(StorageProvider.Create(rootPath, null));
+            return new(StorageProvider.Create(rootPath, null!));
         }
 
         private static void RemoveAllFiles(string rootPath)
