@@ -21,7 +21,7 @@ namespace SnailRacing.Ralf.Providers
         public static StorageProvider Create(string rootPath, ILogger<StorageProvider> logger)
         {
             var storageProvider = new StorageProvider(rootPath, logger);
-            storageProvider._store.Init().Wait();
+            storageProvider._store.Init().Wait(2000);
             return storageProvider;
         }
 
@@ -51,7 +51,7 @@ namespace SnailRacing.Ralf.Providers
         {
             var storeKey = GetStoreKey(group, key);
             var store = new JsonStore<TModel>(_store[storeKey]);
-            store.Init().Wait();
+            store.Init().Wait(2000);
             return store;
         }
 
