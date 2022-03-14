@@ -5,7 +5,7 @@ namespace SnailRacing.Store
 {
     public class MemoryStore<TEntity> : IStore<TEntity>
     {
-        private readonly ConcurrentDictionary<string, TEntity> _data = new();
+        private readonly ConcurrentDictionary<string, TEntity> _data = new(StringComparer.InvariantCultureIgnoreCase);
 
         public TEntity this[string key]
         {

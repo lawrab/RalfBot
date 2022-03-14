@@ -6,7 +6,7 @@ namespace SnailRacing.Store
 {
     public class JsonStore<TEntity> : IStore<TEntity>
     {
-        private ConcurrentDictionary<string, TEntity> _data = new();
+        private ConcurrentDictionary<string, TEntity> _data = new(StringComparer.InvariantCultureIgnoreCase);
         private readonly string _filePath;
 
         public JsonStore(string filePath)
@@ -16,7 +16,14 @@ namespace SnailRacing.Store
 
         public TEntity this[string key]
         {
-            get => _data[key];
+            get
+                {
+                var canGet = _data.TryGetValue(key, out var value);
+
+                if (!canGet) throw new KeyNotFoundException($"{key} not found in Store");
+
+                return value;
+            }
         }
 
         public async Task Init()
