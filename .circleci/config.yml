@@ -40,6 +40,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Add Slimget source"
+          command: dotnet nuget add source https://nuget.emzi0767.com/api/v3/index.json -n Slimget
+      - run:
           name: "Build Application according to some given configuration"
           command: dotnet build --configuration Release
 workflows:
