@@ -398,8 +398,8 @@ namespace SnailRacing.Ralf.Discord.Commands
             if (response.TimedOut) return null;
             var name = response.Result.Content;
 
-            msg = await ctx.Member.SendMessageAsync("What is your iRacing Customer ID? (Optional, respond with `none` fi you don't know)");
-            response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member); ;
+            msg = await ctx.Member.SendMessageAsync("What is your iRacing Customer ID? (Optional, respond with `none` if you don't know)");
+            response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member);
             if (response.TimedOut) return null;
             if (!int.TryParse(response.Result.Content, out int customerId))
             {
