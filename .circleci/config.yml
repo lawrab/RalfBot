@@ -14,6 +14,9 @@ jobs:
           keys:
             - dotnet-packages-v1-{{ checksum "SnailRacing.Ralf/SnailRacing.Ralf.csproj" }}
       - run:
+          name: "Add Slimget source"
+          command: dotnet nuget add source https://nuget.emzi0767.com/api/v3/index.json -n Slimget
+      - run:
           name: "Install project dependencies"
           command: dotnet restore
       - save_cache:
@@ -36,6 +39,9 @@ jobs:
       - image: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
       - checkout
+      - run:
+          name: "Add Slimget source"
+          command: dotnet nuget add source https://nuget.emzi0767.com/api/v3/index.json -n Slimget
       - run:
           name: "Build Application according to some given configuration"
           command: dotnet build --configuration Release
