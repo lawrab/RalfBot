@@ -57,7 +57,7 @@ namespace SnailRacing.Ralf.Tests.Builder
             }
 
             var leagues = StoreHelper.GetLeagueStore(guildId, _storageProvider);
-            leagues.TryAdd(model.Name.ToUpper(), model);
+            leagues.TryAdd(model.Name.ToUpper(), model); 
 
             return this;
         }

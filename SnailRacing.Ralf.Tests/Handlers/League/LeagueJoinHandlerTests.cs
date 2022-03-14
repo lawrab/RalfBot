@@ -43,5 +43,40 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             Assert.Equal(request.AgreeTermsAndConditions, storedParticipant?.AgreeTermsAndConditions);
             Assert.Equal(LeagueParticipantStatus.Pending, storedParticipant?.Status);
         }
+
+        [Fact]
+        public async Task Joins_League_With_LowerCase_Name()
+        {
+            // arrange
+            var request = new LeagueJoinRequest
+            {
+                GuildId = "1",
+                LeagueName = "league1",
+                DiscordMemberId = "123",
+                AgreeTermsAndConditions = true,
+                IRacingCustomerId = 12345,
+                IRacingName = "Larry Rabbets"
+
+            };
+            var storage = StorageProviderBuilder.Create("1Joins_League_With_LowerCase_Name", true)
+                .WithLeague("1", "League1")
+                .Build();
+
+            var handler = new LeagueJoinHandler(storage);
+
+            // act
+            var actual = await handler.Handle(request, CancellationToken.None);
+
+            // assert
+            var league = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);
+            var storedParticipant = league.Participants[request.DiscordMemberId];
+            Assert.False(actual.HasErrors());
+            Assert.NotNull(storedParticipant);
+            Assert.Equal(request.DiscordMemberId, storedParticipant?.DiscordMemberId);
+            Assert.Equal(request.IRacingCustomerId, storedParticipant?.IRacingCustomerId);
+            Assert.Equal(request.IRacingName, storedParticipant?.IRacingName);
+            Assert.Equal(request.AgreeTermsAndConditions, storedParticipant?.AgreeTermsAndConditions);
+            Assert.Equal(LeagueParticipantStatus.Pending, storedParticipant?.Status);
+        }
     }
 }

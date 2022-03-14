@@ -3,9 +3,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using SnailRacing.Ralf.Handlers.League;
 using SnailRacing.Ralf.Infrastrtucture;
-using SnailRacing.Ralf.Providers;
 
 //ToDo: move to ctor injection instead of property injection
 namespace SnailRacing.Ralf.Discord.Commands
@@ -17,21 +17,18 @@ namespace SnailRacing.Ralf.Discord.Commands
     public class LeagueModule : BaseCommandModule
     {
         private const string ADMIN_ROLE = "League Admin";
-        private readonly IStorageProvider _storageProvider;
 
         public AppConfig? AppConfig { get; set; }
         public IMediator? Mediator { get; set; }
 
-        public LeagueModule(IStorageProvider storageProvider)
-        {
-            _storageProvider = storageProvider;
-        }
+        public ILogger<LeagueModule>? Logger { get; set; }
 
         [Command("join")]
         [Description("Request to join a league")]
         public async Task JoinLeague(CommandContext ctx,
             [Description("Use !league to get a list of leagues")] string leagueName)
         {
+            Logger.LogInformation("Command: !league join {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var request = await BuildLeagueJoinRequest(ctx, leagueName);
@@ -68,6 +65,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         public async Task LeaveLeague(CommandContext ctx,
             [Description("Use !league to get a list of leagues")] string leagueName)
         {
+            Logger.LogInformation("Command: !league leave {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueLeaveRequest
@@ -91,6 +89,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             [Description("Call it something nice")] string leagueName,
             [Description("A short desrciption of the league")][RemainingText] string description)
         {
+            Logger.LogInformation("Command: !league new/add {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueNewRequest
@@ -113,6 +112,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("The league where the driver should be approved")] string leagueName,
         [Description("Tag the Discord member to remove")] DiscordMember driver)
         {
+            Logger.LogInformation("Command: !league kick {leagueName} {driver} by {member}", leagueName, driver.DisplayName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueLeaveRequest
@@ -135,6 +135,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("The league where the driver should be approved")] string leagueName,
         [Description("Tag the Discord member to approve")] DiscordMember driver)
         {
+            Logger.LogInformation("Command: !league approve {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueParticipantApproalRequest
@@ -156,7 +157,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("Deletes the league")]
         public async Task RemoveLeague(CommandContext ctx, string leagueName)
         {
-
+            Logger.LogInformation("Command: !league remove {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueRemoveRequest
@@ -175,12 +176,13 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("Shows the status for the league")]
         public async Task LeagueStatus(CommandContext ctx, string leagueName)
         {
+            Logger.LogInformation("Command: !league status {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueQueryRequest
             {
                 GuildId = ctx.Guild.Id.ToString(),
-                Query = (l) => l.Name == leagueName
+                Query = (l) => l.Name.ToLowerInvariant() == leagueName.ToLowerInvariant()
             });
 
             if (response.HasErrors())
@@ -220,6 +222,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             string leagueName,
             [Description("Maximum grid positions, also the maximum number of automatic approvals before the league is closed")] int gridSpots)
         {
+            Logger.LogInformation("Command: !league open {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueOpenRequest
@@ -242,6 +245,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("Set the league to closed for automatic approval")]
         public async Task SetLeagueClosed(CommandContext ctx, string leagueName)
         {
+            Logger.LogInformation("Command: !league close {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueCloseRequest
@@ -271,6 +275,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         public async Task LeagueParticipants(CommandContext ctx, string leagueName,
         [Description("Use, `drivers, waiting, banned` to filter the results, default is all drivers.")] string filter)
         {
+            Logger.LogInformation("Command: !league participants {leagueName} by {member}", leagueName, ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueQueryRequest
@@ -336,6 +341,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Description("Shows all the leagues")]
         public async Task ListLeagues(CommandContext ctx)
         {
+            Logger.LogInformation("Command: !league list by {member}", ctx.Member.DisplayName);
             await ctx.TriggerTypingAsync();
 
             var response = await Mediator!.Send(new LeagueQueryRequest
@@ -394,13 +400,14 @@ namespace SnailRacing.Ralf.Discord.Commands
             var msg = await ctx.Member.SendMessageAsync("What is your name? (As used in iRacing.)");
 
             var response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member);
+            if (await RespondIfTimeout(ctx, response)) return null;
 
-            if (response.TimedOut) return null;
             var name = response.Result.Content;
 
             msg = await ctx.Member.SendMessageAsync("What is your iRacing Customer ID? (Optional, respond with `none` fi you don't know)");
             response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member); ;
-            if (response.TimedOut) return null;
+            if (await RespondIfTimeout(ctx, response)) return null;
+
             if (!int.TryParse(response.Result.Content, out int customerId))
             {
                 customerId = -1;
@@ -408,7 +415,8 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             msg = await ctx.Member.SendMessageAsync("Have you read and agree with the Snail Racing code of conduct `yes/no` (https://annieandlarry.com/snail-racing-conduct)");
             response = await interactivity.WaitForMessageAsync((m) => m.ChannelId == msg.ChannelId && m.Author == ctx.Member);
-            if (response.TimedOut) return null;
+            if (await RespondIfTimeout(ctx, response)) return null;
+
             var agreeTermsAndConditions = response.Result.Content.ToLower() == "yes";
 
             var request = new LeagueJoinRequest
@@ -422,6 +430,17 @@ namespace SnailRacing.Ralf.Discord.Commands
             };
 
             return request;
+        }
+
+        private async Task<bool> RespondIfTimeout(CommandContext ctx, DSharpPlus.Interactivity.InteractivityResult<DiscordMessage> response)
+        {
+            if (response.TimedOut)
+            {
+                Logger.LogWarning("Command: !league join timeout on questions from {member} ", ctx.Member.DisplayName);
+                await ctx.Member.SendMessageAsync("Sorry, I am a little impatient and you took too long to respond, please start again to join the league");
+            }
+
+            return response.TimedOut;
         }
     }
 }
