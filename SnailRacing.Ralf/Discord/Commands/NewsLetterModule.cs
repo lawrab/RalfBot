@@ -1,6 +1,9 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using CoreHtmlToImage;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MediatR;
+using SnailRacing.Ralf.Handlers.News;
 using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
@@ -10,6 +13,8 @@ namespace SnailRacing.Ralf.Discord.Commands
     public class NewsLetterModule : BaseCommandModule
     {
         private readonly IStorageProvider _storageProvider;
+        
+        public IMediator? Mediator { get; set; }
 
         public NewsLetterModule(IStorageProvider storageProvider)
         {
@@ -22,17 +27,26 @@ namespace SnailRacing.Ralf.Discord.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            var store = StoreHelper.GetNewsStore(ctx.Guild.Id.ToString(), _storageProvider);
+            var response = await Mediator!.Send(new NewsQueryRequest
+            {
+                GuildId = ctx.Guild.Id.ToString()
+            });
 
-            var news = store.Take(3);
+            var newsItems = response.News
+                .Select(n => $"<div><h3>{n.Who} - {n.When.ToShortDateString()}</h3><p>{n.Story}</p></div>")
+                .ToList();
 
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":newspaper2:");
+            var htmlString = newsItems.Any() ? string.Concat(newsItems, Environment.NewLine) : "<div><h3>No news is good news<h3></div>";
 
-            var embed = new DiscordEmbedBuilder()
-                .WithTitle($"{emoji} Latest News");
-            news?.ToList().ForEach(i => embed.AddField(i.Value.Who, i.Value.Story ?? "No content", true));
+            var convertor = new HtmlConverter();
+            var bytes = convertor.FromHtmlString(htmlString);
 
-            await ctx.RespondAsync(embed);
+            using var stream = new MemoryStream(bytes);
+
+            var builder = new DiscordMessageBuilder()
+                .WithFile("news.jpg", stream);
+
+            await ctx.RespondAsync(builder);
         }
 
         [Command("csv")]
