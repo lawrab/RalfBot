@@ -21,8 +21,11 @@ namespace SnailRacing.Ralf.Logging
         {
             if (!_enabled || _channel == null) return;
 
-            var embed = BuildMessage(logEvent);
-            _channel.SendMessageAsync(embed);
+            if (logEvent.Level >= LogEventLevel.Information)
+            {
+                var embed = BuildMessage(logEvent);
+                _channel.SendMessageAsync(embed);
+            }
         }
 
         public void SetFormatProvider(IFormatProvider formatProvider)
