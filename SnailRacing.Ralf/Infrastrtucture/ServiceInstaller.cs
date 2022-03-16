@@ -1,12 +1,14 @@
-﻿using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using SnailRacing.Ralf.Logging;
+﻿using DinkToPdf;
+using DinkToPdf.Contracts;
 using FluentValidation;
-using SnailRacing.Ralf.Infrastrtucture.PipelineBehaviours;
-using SnailRacing.Ralf.Providers;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Infrastrtucture.PipelineBehaviours;
+using SnailRacing.Ralf.Logging;
+using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Infrastrtucture
 {
@@ -18,6 +20,7 @@ namespace SnailRacing.Ralf.Infrastrtucture
                     .AddLogging(l => l.AddSerilog())
                     .AddSingleton(appConfig)
                     .AddSingleton(discordSink)
+                    .AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()))
                     .AddTransient(CreateStorageProvider)
                     .AddTransient(typeof(IPipelineBehavior<,>), typeof(LogginBehavior<,>))
                     .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))

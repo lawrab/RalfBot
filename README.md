@@ -19,7 +19,7 @@ Bot commands will be added here when they are available
 Publish
 ```sh
 dotnet publish -c Release
-docker build -t lawrab/ralf-bot .
+docker build --pull -t lawrab/ralf-bot:alpine .
 docker push lawrab/ralf-bot
 ```
 

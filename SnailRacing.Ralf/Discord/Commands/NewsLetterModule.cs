@@ -1,4 +1,5 @@
-﻿using CoreHtmlToImage;
+﻿using DinkToPdf;
+using DinkToPdf.Contracts;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -12,22 +13,24 @@ namespace SnailRacing.Ralf.Discord.Commands
     [Group("news")]
     public class NewsLetterModule : BaseCommandModule
     {
+        private readonly IMediator _mediator;
         private readonly IStorageProvider _storageProvider;
-        
-        public IMediator? Mediator { get; set; }
+        private readonly IConverter _htmlConvertor;
 
-        public NewsLetterModule(IStorageProvider storageProvider)
+        public NewsLetterModule(IMediator mediator, IStorageProvider storageProvider, IConverter htmlConvertor)
         {
+            _mediator = mediator;
             _storageProvider = storageProvider;
+            _htmlConvertor = htmlConvertor;
         }
 
         [GroupCommand]
-        [Command("list")]
+        [Command("pdf")]
         public async Task ListNews(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
 
-            var response = await Mediator!.Send(new NewsQueryRequest
+            var response = await _mediator.Send(new NewsQueryRequest
             {
                 GuildId = ctx.Guild.Id.ToString()
             });
@@ -36,15 +39,14 @@ namespace SnailRacing.Ralf.Discord.Commands
                 .Select(n => $"<div><h3>{n.Who} - {n.When.ToShortDateString()}</h3><p>{n.Story}</p></div>")
                 .ToList();
 
-            var htmlString = newsItems.Any() ? string.Concat(newsItems, Environment.NewLine) : "<div><h3>No news is good news<h3></div>";
+            var htmlString = newsItems.Any() ? string.Join(Environment.NewLine, newsItems) : "<div><h3>No news is good news<h3></div>";
 
-            var convertor = new HtmlConverter();
-            var bytes = convertor.FromHtmlString(htmlString);
+            var bytes = GeneratePdf(htmlString);
 
             using var stream = new MemoryStream(bytes);
 
             var builder = new DiscordMessageBuilder()
-                .WithFile("news.jpg", stream);
+                .WithFile("news.pdf", stream);
 
             await ctx.RespondAsync(builder);
         }
@@ -55,8 +57,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ToCSV(ctx, DateTime.UtcNow);
         }
 
-        [Command("csv")]
-        public async Task ToCSV(CommandContext ctx, DateTime date)
+        [Command("csv")]public async Task ToCSV(CommandContext ctx, DateTime date)
         {
             await ctx.TriggerTypingAsync();
 
@@ -74,6 +75,37 @@ namespace SnailRacing.Ralf.Discord.Commands
                 .WithContent($"`{string.Join(Environment.NewLine, csv)}`");
 
             await ctx.RespondAsync(builder);
+        }
+        private byte[] GeneratePdf(string htmlContent)
+        {
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 18, Bottom = 18 },
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = htmlContent,
+                WebSettings = { DefaultEncoding = "utf-8" },
+                HeaderSettings = { FontSize = 10, Right = "Page [page] of [toPage]", Line = true },
+                FooterSettings = { 
+                    FontSize = 8, 
+                    Center = "Snail Racing News", 
+                    Right = $"{DateTime.UtcNow.ToShortDateString()} GMT", 
+                    Line = true },
+            };
+
+            var htmlToPdfDocument = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings },
+            };
+
+            return _htmlConvertor.Convert(htmlToPdfDocument);
         }
     }
 }

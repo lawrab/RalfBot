@@ -2,6 +2,8 @@
 global using DSharpPlus.EventArgs;
 global using SnailRacing.Ralf.Models;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -57,6 +59,8 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         Services = services
     });
 
+    commands.CommandErrored += Commands_CommandErrored;
+
     // ToDo: tidy up and use a assebly registration instead, so all modules in the assembly is always registered
     commands.RegisterCommands<DiscordRolesModule>();
     commands.RegisterCommands<AdminModule>();
@@ -86,4 +90,31 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     await discord.ConnectAsync();
 
     return discord;
+}
+
+static async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+{
+    var BotEventId = new EventId(1001, "Ralf-0001"); // ToDo: review this
+
+    // let's log the error details
+    e.Context.Client.Logger.LogError(BotEventId, $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception?.ToString() ?? "<no message>"}", DateTime.Now);
+
+    // let's check if the error is a result of lack
+    // of required permissions
+    if (e.Exception is ChecksFailedException ex)
+    {
+        // yes, the user lacks required permissions, 
+        // let them know
+
+        var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+
+        // let's wrap the response into an embed
+        var embed = new DiscordEmbedBuilder
+        {
+            Title = "Access denied",
+            Description = $"{emoji} You do not have the permissions required to execute this command.",
+            Color = new DiscordColor(0xFF0000) // red
+        };
+        await e.Context.RespondAsync(embed);
+    }
 }
