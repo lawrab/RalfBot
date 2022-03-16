@@ -1,12 +1,12 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using SnailRacing.Ralf.Logging;
-using FluentValidation;
-using SnailRacing.Ralf.Infrastrtucture.PipelineBehaviours;
-using SnailRacing.Ralf.Providers;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using SnailRacing.Ralf.Handlers.League;
+using SnailRacing.Ralf.Infrastrtucture.PipelineBehaviours;
+using SnailRacing.Ralf.Logging;
+using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Infrastrtucture
 {
