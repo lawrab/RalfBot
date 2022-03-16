@@ -13,11 +13,12 @@ namespace SnailRacing.Ralf.Models
         public int? MaxGrid { get; set; }
         public ConcurrentDictionary<string, LeagueParticipantModel> Participants { get; set; } = new();
 
-        public void Join(string discordMemberId, int clientId, string fullName, bool agreeTermsAndConditions, LeagueParticipantStatus status)
+        public void Join(string discordMemberId, string discordMemberUser, int clientId, string fullName, bool agreeTermsAndConditions, LeagueParticipantStatus status)
         {
             Participants.TryAdd(discordMemberId, new LeagueParticipantModel
             {
                 DiscordMemberId = discordMemberId,
+                DicordMemberUser = discordMemberUser,
                 IRacingCustomerId = clientId,
                 IRacingName = fullName,
                 AgreeTermsAndConditions = agreeTermsAndConditions,

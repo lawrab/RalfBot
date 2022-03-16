@@ -45,6 +45,17 @@ jobs:
       - run:
           name: "Build Application according to some given configuration"
           command: dotnet build --configuration Release
+  build-master:
+    environment:
+      IMAGE_NAME: lawrab/ralf-bot
+    docker:
+      - image: circleci/buildpack-deps:stretch
+      steps:
+        - checkout
+        - setup_remote_docker
+        - run:
+            name: Build Docker image
+            command: docker build -t $IMAGE_NAME:latest .
 workflows:
   test_and_build:
     jobs:

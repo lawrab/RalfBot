@@ -315,12 +315,13 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             using var stream = new MemoryStream();
             using var writer = new StreamWriter(stream);
-            writer.WriteLine("DiscordMember, IRacingName, IRacingCustomerId, RegistrationDate, Status");
+            writer.WriteLine("DiscordMemberId | IRacingName | IRacingCustomerId | RegistrationDate | Status");
 
             foreach (var d in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
             {
-                var member = await ctx.Guild.GetMemberAsync(ulong.Parse(d.DiscordMemberId));
-                var driverText = $"{member.DisplayName}, {d.IRacingName}, {d.IRacingCustomerId}, {d.RegistrationDate}, {d.Status}";
+                // ToDo: need to fix this by storing Discord Username
+                ////var member = await ctx.Guild.GetMemberAsync(ulong.Parse(d.DiscordMemberId));
+                var driverText = $"{d.DiscordMemberId} | {d.IRacingName} | {d.IRacingCustomerId} | {d.RegistrationDate} | {d.Status}";
                 writer.WriteLine(driverText);
             }
 
@@ -421,6 +422,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 GuildId = ctx.Guild.Id.ToString(),
                 DiscordMemberId = ctx.Member.Id.ToString(),
+                DiscordMemberUser = ctx.Member.Username,
                 LeagueName = leagueName,
                 IRacingName = name,
                 IRacingCustomerId = customerId,

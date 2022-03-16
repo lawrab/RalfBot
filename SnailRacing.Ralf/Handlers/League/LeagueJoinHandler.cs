@@ -24,6 +24,7 @@ namespace SnailRacing.Ralf.Handlers.League
                 LeagueParticipantStatus.Approved : LeagueParticipantStatus.Pending;
 
             league.Join(request.DiscordMemberId, 
+                request.DiscordMemberUser,
                 request.IRacingCustomerId, 
                 request.IRacingName, 
                 request.AgreeTermsAndConditions,
