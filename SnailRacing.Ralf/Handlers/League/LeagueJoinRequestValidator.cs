@@ -16,6 +16,7 @@ namespace SnailRacing.Ralf.Handlers.League
 
             RuleFor(x => x.GuildId).NotEmpty();
             RuleFor(x => x.DiscordMemberId).NotEmpty();
+            RuleFor(x => x.DiscordMemberUser).NotEmpty();
             RuleFor(r => r.LeagueName)
                 .NotEmpty()
                 .Custom(IsValidLeagueName)

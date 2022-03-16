@@ -60,6 +60,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             {
                 GuildId = "1",
                 DiscordMemberId = "1",
+                DiscordMemberUser = "ABC",
                 LeagueName = "I do not exist"
             };
             var storage = StorageProviderBuilder.Create("4Invalid_LeagueName_Returns_Error", true)
@@ -82,11 +83,12 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
             {
                 GuildId = "1",
                 LeagueName = "League1",
-                DiscordMemberId = "123"
+                DiscordMemberId = "123",
+                DiscordMemberUser = "ABC"
             };
 
             var storage = StorageProviderBuilder.Create("5Allready_Joined_League_Returns_Error", true)
-                .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId } })
+                .WithLeague(request.GuildId, request.LeagueName, new[] { new LeagueParticipantModel { DiscordMemberId = request.DiscordMemberId, DicordMemberUser = request.DiscordMemberUser} })
                 .Build();
 
             var league = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);

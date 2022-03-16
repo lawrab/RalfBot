@@ -28,7 +28,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.League
 
             var league = StoreHelper.GetLeague(request.GuildId, request.LeagueKey, storage);
 
-            league.Join(request.DiscordMemberId, 0, string.Empty, true, LeagueParticipantStatus.Approved);
+            league.Join(request.DiscordMemberId, "ABC", 0, string.Empty, true, LeagueParticipantStatus.Approved);
 
             //storage.Store[request.LeagueKey] = league;
 

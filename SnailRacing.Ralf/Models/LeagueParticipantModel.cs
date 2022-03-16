@@ -3,6 +3,7 @@
     public class LeagueParticipantModel
     {
         public string DiscordMemberId { get; set; } = string.Empty;
+        public string DicordMemberUser { get; set; } = string.Empty;
         public string IRacingName { get; set; } = string.Empty;
         public int IRacingCustomerId { get; set; }
         public bool AgreeTermsAndConditions { get; set; }
