@@ -1,5 +1,5 @@
 # https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
@@ -10,15 +10,14 @@ RUN dotnet nuget add source https://nuget.emzi0767.com/api/v3/index.json -n Slim
 COPY SnailRacing.Ralf/ SnailRacing.Ralf/
 COPY SnailRacing.Store/ SnailRacing.Store/
 
-RUN dotnet restore SnailRacing.Ralf/ -r linux-musl-x64
-RUN dotnet restore SnailRacing.Store/ -r linux-musl-x64
-RUN dotnet publish SnailRacing.Ralf/ -c release -o /app -r linux-musl-x64 --self-contained false --no-restore
+RUN dotnet restore SnailRacing.Ralf/
+RUN dotnet restore SnailRacing.Store/
+RUN dotnet publish SnailRacing.Ralf/ -c release -o /app --self-contained false --no-restore
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine-amd64
+FROM mcr.microsoft.com/dotnet/runtime:6.0
 WORKDIR /app
 COPY --from=build /app .
-RUN apk add --no-cache bash
-RUN apk --no-cache update && apk add --no-cache wkhtmltopdf
-ENV PATH="/usr/bin:${PATH}"
+
+RUN apt-get update -qq && apt-get -y install wkhtmltopdf
 ENTRYPOINT ["dotnet", "SnailRacing.Ralf.dll"]

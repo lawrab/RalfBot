@@ -1,5 +1,4 @@
-﻿using DinkToPdf;
-using DinkToPdf.Contracts;
+﻿using CoreHtmlToImage;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -15,13 +14,11 @@ namespace SnailRacing.Ralf.Discord.Commands
     {
         private readonly IMediator _mediator;
         private readonly IStorageProvider _storageProvider;
-        private readonly IConverter _htmlConvertor;
 
-        public NewsLetterModule(IMediator mediator, IStorageProvider storageProvider, IConverter htmlConvertor)
+        public NewsLetterModule(IMediator mediator, IStorageProvider storageProvider)
         {
             _mediator = mediator;
             _storageProvider = storageProvider;
-            _htmlConvertor = htmlConvertor;
         }
 
         [GroupCommand]
@@ -32,7 +29,8 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             var response = await _mediator.Send(new NewsQueryRequest
             {
-                GuildId = ctx.Guild.Id.ToString()
+                GuildId = ctx.Guild.Id.ToString(),
+                Filter = m => m.When.AddDays(31) >= DateTime.UtcNow
             });
 
             var newsItems = response.News
@@ -46,7 +44,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             using var stream = new MemoryStream(bytes);
 
             var builder = new DiscordMessageBuilder()
-                .WithFile("news.pdf", stream);
+                .WithFile("news.png", stream);
 
             await ctx.RespondAsync(builder);
         }
@@ -57,7 +55,8 @@ namespace SnailRacing.Ralf.Discord.Commands
             await ToCSV(ctx, DateTime.UtcNow);
         }
 
-        [Command("csv")]public async Task ToCSV(CommandContext ctx, DateTime date)
+        [Command("csv")]
+        public async Task ToCSV(CommandContext ctx, DateTime date)
         {
             await ctx.TriggerTypingAsync();
 
@@ -78,34 +77,9 @@ namespace SnailRacing.Ralf.Discord.Commands
         }
         private byte[] GeneratePdf(string htmlContent)
         {
-            var globalSettings = new GlobalSettings
-            {
-                ColorMode = ColorMode.Color,
-                Orientation = Orientation.Portrait,
-                PaperSize = PaperKind.A4,
-                Margins = new MarginSettings { Top = 18, Bottom = 18 },
-            };
+            var convertor = new HtmlConverter();
 
-            var objectSettings = new ObjectSettings
-            {
-                PagesCount = true,
-                HtmlContent = htmlContent,
-                WebSettings = { DefaultEncoding = "utf-8" },
-                HeaderSettings = { FontSize = 10, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { 
-                    FontSize = 8, 
-                    Center = "Snail Racing News", 
-                    Right = $"{DateTime.UtcNow.ToShortDateString()} GMT", 
-                    Line = true },
-            };
-
-            var htmlToPdfDocument = new HtmlToPdfDocument()
-            {
-                GlobalSettings = globalSettings,
-                Objects = { objectSettings },
-            };
-
-            return _htmlConvertor.Convert(htmlToPdfDocument);
+            return convertor.FromHtmlString(htmlContent, 1024, CoreHtmlToImage.ImageFormat.Png, 100);
         }
     }
 }

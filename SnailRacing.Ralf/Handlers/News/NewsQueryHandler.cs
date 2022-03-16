@@ -18,7 +18,6 @@ namespace SnailRacing.Ralf.Handlers.News
 
             var news = newsStore.OrderByDescending(n => n.Value.When)
                 .Where(m => request.Filter(m.Value))
-                .Take(5) // only ever return the top 10 news items
                 .Select(m => m.Value)
                 .ToList();
             return Task.FromResult(new NewsQueryResponse
