@@ -94,10 +94,10 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
 
 static async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
 {
-    var BotEventId = new EventId(1001, "Ralf-0001"); // ToDo: review this
+    if (e.Exception is CommandNotFoundException) return;
 
     // let's log the error details
-    e.Context.Client.Logger.LogError(BotEventId, $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception?.ToString() ?? "<no message>"}", DateTime.Now);
+    e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception?.ToString() ?? "<no message>"}", DateTime.Now);
 
     // let's check if the error is a result of lack
     // of required permissions

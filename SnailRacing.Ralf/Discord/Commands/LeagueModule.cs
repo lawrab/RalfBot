@@ -319,8 +319,6 @@ namespace SnailRacing.Ralf.Discord.Commands
 
             foreach (var d in drivers ?? Enumerable.Empty<LeagueParticipantModel>())
             {
-                // ToDo: need to fix this by storing Discord Username
-                ////var member = await ctx.Guild.GetMemberAsync(ulong.Parse(d.DiscordMemberId));
                 var driverText = $"{d.DiscordMemberId} | {d.DicordMemberUser} | {d.IRacingName} | {d.IRacingCustomerId} | {d.RegistrationDate} | {d.Status}";
                 writer.WriteLine(driverText);
             }

@@ -62,9 +62,8 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 await ctx.TriggerTypingAsync();
 
-                _logger.LogInformation("Your wish is my command, PONG!!!");
-
-                await ctx.RespondAsync($"Pong in logging channel ack");
+                var msg = $"Yes, yes, I am here with a {ctx.Client.Ping}ms delay in reactions time.";
+                await ctx.RespondAsync(msg);
             }
         }
     }
