@@ -35,5 +35,33 @@ namespace SnailRacing.Ralf.Infrastrtucture
             var store = GetStore<LeagueModel>(StorageProviderConstants.LEAGUE, guildId, storageProvider);
             return store[leagueKey];
         }
+
+        public static GuildConfigModel GetGuildConfig(string guildId, IStorageProvider? storageProvider)
+        {
+            if (storageProvider is null) throw new ArgumentException($"{nameof(storageProvider)} cannot be null");
+
+            var store = GetStore<GuildConfigModel>(StorageProviderConstants.GUILD_CONFIG, guildId, storageProvider);
+
+            if(!store.ContainsKey(guildId))
+            {
+                store.TryAdd(guildId, new GuildConfigModel { GuildId = guildId });
+            }
+
+            return store[guildId];
+        }
+
+        public static IStore<GuildConfigModel> GetGuildConfigStore(string guildId, IStorageProvider? storageProvider)
+        {
+            if (storageProvider is null) throw new ArgumentException($"{nameof(storageProvider)} cannot be null");
+
+            var store = GetStore<GuildConfigModel>(StorageProviderConstants.GUILD_CONFIG, guildId, storageProvider);
+
+            if (!store.ContainsKey(guildId))
+            {
+                store.TryAdd(guildId, new GuildConfigModel { GuildId = guildId });
+            }
+
+            return store;
+        }
     }
 }

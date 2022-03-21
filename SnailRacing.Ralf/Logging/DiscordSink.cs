@@ -1,31 +1,33 @@
 ﻿using DSharpPlus.Entities;
 using Serilog.Core;
 using Serilog.Events;
+using System.Collections.Concurrent;
 
 namespace SnailRacing.Ralf.Logging
 {
     public class DiscordSink : ILogEventSink
     {
         private bool _enabled = false;
-        private DiscordChannel? _channel;
+        private readonly ConcurrentDictionary<string, DiscordChannel> _channels = new();
         private IFormatProvider? _formatProvider;
 
-        public DiscordChannel? Channel
+        public ConcurrentDictionary<string, DiscordChannel> Channels
         {
-            get => _channel;
+            get => _channels;
 
             private set { }
         }
 
         public void Emit(LogEvent logEvent)
         {
-            if (!_enabled || _channel == null) return;
+            var channel = logEvent.Properties;
+            //if (!_enabled || _channel == null) return;
 
-            if (logEvent.Level >= LogEventLevel.Information)
-            {
-                var embed = BuildMessage(logEvent);
-                _channel.SendMessageAsync(embed);
-            }
+            //if (logEvent.Level >= LogEventLevel.Information)
+            //{
+            //    var embed = BuildMessage(logEvent);
+            //    _channel.SendMessageAsync(embed);
+            //}
         }
 
         public void SetFormatProvider(IFormatProvider formatProvider)
@@ -43,19 +45,19 @@ namespace SnailRacing.Ralf.Logging
             _enabled = false;
         }
 
-        public void SetChannel(DiscordChannel channel)
+        public void AddChannel(DiscordChannel channel)
         {
-            _channel = channel;
+            _channels.TryAdd(channel.Guild.Id.ToString(), channel);
         }
 
-        public DiscordChannel? GetChannel()
+        public DiscordChannel? GetChannel(string guildId)
         {
-            return _channel;
+            return _channels[guildId];
         }
 
-        public void ClearChannel()
+        public void RemoveChannel(string guildId)
         {
-            _channel = null;
+            _channels.TryRemove(guildId, out _);
         }
 
         private DiscordEmbed BuildMessage(LogEvent logEvent)

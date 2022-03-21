@@ -25,13 +25,6 @@ static async Task MainAsync()
     var services = ServiceInstaller.ConfigureServices(appConfig, discordSink);
     var discord = await ConnectToDiscord(services, loggerFactory, appConfig.Discord.BotToken);
 
-    // ToDo: move to configuration and settings
-    // make it guild specific, this is currently global
-    // Logging to SnailRacing ralf-log
-    var loggingChannel = await discord.GetChannelAsync(951866363268464670);
-    discordSink.SetChannel(loggingChannel);
-    discordSink.Enable();
-
     await Task.Delay(-1);
 }
 
@@ -52,13 +45,11 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     });
 
     discord.UseInteractivity();
-
     var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
     {
         StringPrefixes = new[] { "!" },
         Services = services
     });
-
     commands.CommandErrored += Commands_CommandErrored;
 
     // ToDo: tidy up and use a assebly registration instead, so all modules in the assembly is always registered
@@ -66,6 +57,8 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     commands.RegisterCommands<AdminModule>();
     commands.RegisterCommands<NewsLetterModule>();
     commands.RegisterCommands<LeagueModule>();
+
+    discord.GuildAvailable += (s, e) => GuildEventHandlers.GuidAvailableHandler(s, e, services);
 
     discord.GuildMemberUpdated += async (s, e) =>
     {

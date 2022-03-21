@@ -2,26 +2,51 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Logging;
+using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Discord.Commands
 {
     [Group("admin")] // let's mark this class as a command group
     [Description("Administrative commands.")] // give it a description for help purposes
     [Hidden] // let's hide this from the eyes of curious users
-    [RequirePermissions(Permissions.ManageGuild)] // and restrict this to users who have appropriate permissions
+    [RequireRoles(RoleCheckMode.Any, ADMIN_ROLE)] // and restrict this to users who have appropriate permissions
     internal class AdminModule : BaseCommandModule
     {
+        private const string ADMIN_ROLE = "Ralf Admin";
+        private readonly ILogger<AdminModule> _logger;
+
+        public AdminModule(ILogger<AdminModule> logger)
+        {
+            _logger = logger;
+        }
+
+        [Command("ping")]
+        public async Task Ping(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            using (_logger.BeginScope(ctx.Guild.Id))
+            {
+                _logger.LogInformation("testing some logging with guild filters");
+            }
+            var msg = $"Yes, yes, I am here with a `{ctx.Client.Ping}ms` delay in reaction time.";
+            await ctx.RespondAsync(msg);
+        }
+
         [Group("tail"), Hidden]
         public class LoggingModule : BaseCommandModule
         {
             private readonly DiscordSink _discordSink;
             private readonly ILogger<LoggingModule> _logger;
+            private readonly IStorageProvider _storageProvider;
 
-            public LoggingModule(DiscordSink discordSink, ILogger<LoggingModule> logger)
+            public LoggingModule(DiscordSink discordSink, ILogger<LoggingModule> logger, IStorageProvider storageProvider)
             {
                 _discordSink = discordSink;
                 _logger = logger;
+                _storageProvider = storageProvider;
             }
 
             [GroupCommand]
@@ -29,7 +54,7 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 await ctx.TriggerTypingAsync();
 
-                var loggingChannel = _discordSink.GetChannel()?.Name ?? "Not Set";
+                var loggingChannel = _discordSink.GetChannel(ctx.Guild.Id.ToString())?.Name ?? "Not Set";
 
                 await ctx.RespondAsync($"Tailing log in {loggingChannel}");
             }
@@ -39,7 +64,9 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 await ctx.TriggerTypingAsync();
 
-                _discordSink.SetChannel(channel);
+                SaveLogging(ctx, channel, true);
+
+                _discordSink.AddChannel(channel);
                 _discordSink.Enable();
 
                 _logger.LogInformation("Turned tail on in {channel}", channel);
@@ -51,19 +78,23 @@ namespace SnailRacing.Ralf.Discord.Commands
             {
                 await ctx.TriggerTypingAsync();
 
-                _logger.LogInformation("Turning tail off in {channel}", _discordSink.Channel);
+                var channel = _discordSink.GetChannel(ctx.Guild.Id.ToString());
+                _logger.LogInformation("Turning tail off in {channel}", channel);
+
+                SaveLogging(ctx, null, false);
                 _discordSink.Disable();
 
-                await ctx.RespondAsync($"Tailing off in {_discordSink?.Channel?.Mention ?? "unknown"}");
+                await ctx.RespondAsync($"Tailing off in {channel?.Mention ?? "unknown"}");
             }
-
-            [Command("ping")]
-            public async Task Ping(CommandContext ctx)
+            private void SaveLogging(CommandContext ctx, DiscordChannel? channel, bool isTailOn)
             {
-                await ctx.TriggerTypingAsync();
+                var guildId = ctx.Guild.Id.ToString();
 
-                var msg = $"Yes, yes, I am here with a {ctx.Client.Ping}ms delay in reactions time.";
-                await ctx.RespondAsync(msg);
+                var guildConfigStore = StoreHelper.GetGuildConfigStore(guildId, _storageProvider);
+                var guildConfig = guildConfigStore[guildId];
+                guildConfig.IsTailOn = isTailOn;
+                guildConfig.LoggingChannelId = channel?.Id;
+                guildConfigStore.TryUpdate(guildId, guildConfig);
             }
         }
     }
