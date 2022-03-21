@@ -10,7 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'acf700d9-81a2-4a6f-a792-5304494c7c5f'
+  dockerRegistryServiceConnection: 'SnailRacing'
   imageRepository: 'ralf-bot'
   containerRegistry: 'snailracing.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
