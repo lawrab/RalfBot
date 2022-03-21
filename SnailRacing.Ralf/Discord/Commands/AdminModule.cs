@@ -25,14 +25,13 @@ namespace SnailRacing.Ralf.Discord.Commands
         [Command("ping")]
         public async Task Ping(CommandContext ctx)
         {
-            await ctx.TriggerTypingAsync();
-
-            using (_logger.BeginScope(ctx.Guild.Id))
+            using (LoggingHelper.BeginScope(_logger, ctx))
             {
-                _logger.LogInformation("testing some logging with guild filters");
+                await ctx.TriggerTypingAsync();
+
+                var msg = $"Yes, yes, I am here with a `{ctx.Client.Ping}ms` delay in reaction time.";
+                await ctx.RespondAsync(msg);
             }
-            var msg = $"Yes, yes, I am here with a `{ctx.Client.Ping}ms` delay in reaction time.";
-            await ctx.RespondAsync(msg);
         }
 
         [Group("tail"), Hidden]
@@ -52,39 +51,53 @@ namespace SnailRacing.Ralf.Discord.Commands
             [GroupCommand]
             public async Task ShowLoggingChannel(CommandContext ctx)
             {
-                await ctx.TriggerTypingAsync();
+                using (LoggingHelper.BeginScope(_logger, ctx))
+                {
 
-                var loggingChannel = _discordSink.GetChannel(ctx.Guild.Id.ToString())?.Name ?? "Not Set";
+                    await ctx.TriggerTypingAsync();
 
-                await ctx.RespondAsync($"Tailing log in {loggingChannel}");
+                    var loggingChannel = _discordSink.GetChannel(ctx.Guild.Id.ToString())?.Name ?? "Not Set";
+
+                    await ctx.RespondAsync($"Tailing log in {loggingChannel}");
+                }
             }
 
             [Command("on")]
             public async Task TailOn(CommandContext ctx, DiscordChannel channel)
             {
-                await ctx.TriggerTypingAsync();
+                using (LoggingHelper.BeginScope(_logger, ctx))
+                {
 
-                SaveLogging(ctx, channel, true);
+                    await ctx.TriggerTypingAsync();
 
-                _discordSink.AddChannel(channel);
-                _discordSink.Enable();
+                    SaveLogging(ctx, channel, true);
 
-                _logger.LogInformation("Turned tail on in {channel}", channel);
-                await ctx.RespondAsync($"Logging channel set to `{channel}`");
+                    _discordSink.AddChannel(channel);
+                    _discordSink.Enable();
+
+                    _logger.LogInformation("Turned tail on in {channel}", channel);
+                    await ctx.RespondAsync($"Logging channel set to `{channel}`");
+                }
             }
 
             [Command("off")]
             public async Task TailOff(CommandContext ctx)
             {
-                await ctx.TriggerTypingAsync();
+                using (LoggingHelper.BeginScope(_logger, ctx))
+                {
+                    await ctx.TriggerTypingAsync();
+                    var guildId = ctx.Guild.Id.ToString();
+                    var channel = _discordSink.GetChannel(guildId);
+                    _logger.LogInformation("Turning tail off in {channel}", channel);
 
-                var channel = _discordSink.GetChannel(ctx.Guild.Id.ToString());
-                _logger.LogInformation("Turning tail off in {channel}", channel);
+                    _discordSink.RemoveChannel(guildId);
 
-                SaveLogging(ctx, null, false);
-                _discordSink.Disable();
+                    SaveLogging(ctx, null, false);
 
-                await ctx.RespondAsync($"Tailing off in {channel?.Mention ?? "unknown"}");
+                    _discordSink.Disable();
+
+                    await ctx.RespondAsync($"Tailing off in {channel?.Mention ?? "unknown"}");
+                }
             }
             private void SaveLogging(CommandContext ctx, DiscordChannel? channel, bool isTailOn)
             {

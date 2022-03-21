@@ -20,14 +20,17 @@ namespace SnailRacing.Ralf.Logging
 
         public void Emit(LogEvent logEvent)
         {
-            var channel = logEvent.Properties;
-            //if (!_enabled || _channel == null) return;
+            var guildId = logEvent.Properties.ContainsKey("GuildId") ? logEvent.Properties["GuildId"].ToString() : null;
 
-            //if (logEvent.Level >= LogEventLevel.Information)
-            //{
-            //    var embed = BuildMessage(logEvent);
-            //    _channel.SendMessageAsync(embed);
-            //}
+            if(_enabled && !string.IsNullOrEmpty(guildId) && _channels.ContainsKey(guildId))
+            {
+                var channel = _channels[guildId];
+                if (logEvent.Level >= LogEventLevel.Information)
+                {
+                    var embed = BuildMessage(logEvent);
+                    channel.SendMessageAsync(embed).ConfigureAwait(false);
+                }
+            }
         }
 
         public void SetFormatProvider(IFormatProvider formatProvider)
