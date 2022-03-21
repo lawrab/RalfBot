@@ -1,9 +1,10 @@
-﻿namespace SnailRacing.Ralf.Handlers.League
+﻿using SnailRacing.Ralf.Infrastrtucture;
+
+namespace SnailRacing.Ralf.Handlers.League
 {
-    public class LeagueRequestBase
+    public class LeagueRequestBase : RequestBase
     {
         public string LeagueName { get; set; } = string.Empty;
-        public string GuildId { get; set; } = string.Empty;
 
         public string LeagueKey { get => $"{LeagueName.ToUpper()}"; }
     }
