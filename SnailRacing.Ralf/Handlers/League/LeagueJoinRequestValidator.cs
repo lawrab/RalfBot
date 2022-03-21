@@ -31,7 +31,7 @@ namespace SnailRacing.Ralf.Handlers.League
                 validationContext.AddFailure(string.Format(Messages.INVALID_LEAGUE, leagueName));
                 return;
             }
-            
+
             var league = leagues[validationContext.InstanceToValidate.LeagueKey];
             if (league?.Name != leagueName)
             {
@@ -46,7 +46,7 @@ namespace SnailRacing.Ralf.Handlers.League
             var discordMemberId = validationContext.InstanceToValidate.DiscordMemberId;
             if (league.Participants.ContainsKey(discordMemberId))
             {
-                validationContext.AddFailure( string.Format(Messages.ALREADY_MEMBER_OF_LEAGUE, league.Participants[discordMemberId]?.Status, leagueName));
+                validationContext.AddFailure(string.Format(Messages.ALREADY_MEMBER_OF_LEAGUE, league.Participants[discordMemberId]?.Status, leagueName));
             }
         }
     }

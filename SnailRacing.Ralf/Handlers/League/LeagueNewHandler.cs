@@ -24,7 +24,7 @@ namespace SnailRacing.Ralf.Handlers.League
             store.TryAdd(request.LeagueKey, new LeagueModel
             {
                 Guild = request.GuildId,
-                Name = request.LeagueName, 
+                Name = request.LeagueName,
                 Description = request.Description,
                 Status = LeagueStatus.Closed,
                 CreatedDate = DateTime.UtcNow,

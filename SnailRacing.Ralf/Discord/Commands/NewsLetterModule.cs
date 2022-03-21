@@ -22,7 +22,7 @@ namespace SnailRacing.Ralf.Discord.Commands
         }
 
         [GroupCommand]
-        [Command("pdf")]
+        [Command("show")]
         public async Task ListNews(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();

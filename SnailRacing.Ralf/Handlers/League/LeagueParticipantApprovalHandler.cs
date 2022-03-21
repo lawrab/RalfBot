@@ -16,7 +16,7 @@ namespace SnailRacing.Ralf.Handlers.League
         public Task<LeagueParticipantApprovalResponse> Handle(LeagueParticipantApproalRequest request, CancellationToken cancellationToken)
         {
             var response = new LeagueParticipantApprovalResponse();
-            
+
             var store = StoreHelper.GetLeagueStore(request.GuildId, _storageProvider);
             var league = store[request.LeagueKey];
 

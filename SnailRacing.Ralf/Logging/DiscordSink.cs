@@ -22,7 +22,7 @@ namespace SnailRacing.Ralf.Logging
         {
             var guildId = logEvent.Properties.ContainsKey("GuildId") ? logEvent.Properties["GuildId"].ToString() : null;
 
-            if(_enabled && !string.IsNullOrEmpty(guildId) && _channels.ContainsKey(guildId))
+            if (_enabled && !string.IsNullOrEmpty(guildId) && _channels.ContainsKey(guildId))
             {
                 var channel = _channels[guildId];
                 if (logEvent.Level >= LogEventLevel.Information)

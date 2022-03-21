@@ -1,6 +1,4 @@
-﻿using FluentValidation.Results;
-
-namespace SnailRacing.Ralf
+﻿namespace SnailRacing.Ralf
 {
     public static class Messages
     {

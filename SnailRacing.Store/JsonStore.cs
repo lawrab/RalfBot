@@ -63,7 +63,7 @@ namespace SnailRacing.Store
         private void SaveData()
         {
             var json = JsonSerializer.Serialize(_data);
-            File.WriteAllTextAsync(_filePath, json).Wait(2000);
+            File.WriteAllText(_filePath, json);
         }
 
         public IEnumerator<KeyValuePair<string, TEntity>> GetEnumerator()

@@ -5,6 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -41,7 +42,7 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
         MinimumLogLevel = LogLevel.Trace,
         Token = token,
         TokenType = TokenType.Bot,
-        Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers 
+        Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
     });
 
     discord.UseInteractivity();
@@ -74,7 +75,8 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     {
         var storage = services.GetService<IStorageProvider>();
         var logger = services.GetService<ILogger<ReactionAddedHandler>>();
-        var handler = new ReactionAddedHandler(storage!, logger!);
+        var mediatr = services.GetService<IMediator>();
+        var handler = new ReactionAddedHandler(mediatr!, storage!, logger!);
 
         await handler.HandleReactionAdded(s, e);
         e.Handled = true;

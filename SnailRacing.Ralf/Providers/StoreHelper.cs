@@ -10,7 +10,7 @@ namespace SnailRacing.Ralf.Infrastrtucture
             // ToDo: refactor this, create the store if it does not exist yet
             if (!storageProvider.Contains(guildId, key))
             {
-                storageProvider.Add(guildId, key); 
+                storageProvider.Add(guildId, key);
             }
             return storageProvider.Get<TValue>(guildId, key);
         }
@@ -42,7 +42,7 @@ namespace SnailRacing.Ralf.Infrastrtucture
 
             var store = GetStore<GuildConfigModel>(StorageProviderConstants.GUILD_CONFIG, guildId, storageProvider);
 
-            if(!store.ContainsKey(guildId))
+            if (!store.ContainsKey(guildId))
             {
                 store.TryAdd(guildId, new GuildConfigModel { GuildId = guildId });
             }

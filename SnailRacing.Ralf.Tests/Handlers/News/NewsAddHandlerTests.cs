@@ -23,7 +23,7 @@ namespace SnailRacing.Ralf.Tests.Handlers.News
             var storage = StorageProviderBuilder.Create("1News_Add_Requests_Stores_News", true)
                 .Build();
 
-            var handler = new NewsAddHandler(storage);
+            var handler = new NewsAddHandler(storage, null);
 
             // act
             var response = await handler.Handle(request, CancellationToken.None);

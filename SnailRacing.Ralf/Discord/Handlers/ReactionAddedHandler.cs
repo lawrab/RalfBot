@@ -1,52 +1,44 @@
 ﻿using DSharpPlus.Entities;
+using MediatR;
 using Microsoft.Extensions.Logging;
-using SnailRacing.Ralf.Infrastrtucture;
+using SnailRacing.Ralf.Handlers.News;
+using SnailRacing.Ralf.Logging;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Discord.Handlers
 {
     public class ReactionAddedHandler
     {
+        private readonly IMediator _mediator;
         private readonly IStorageProvider _storageProvider;
         private readonly ILogger<ReactionAddedHandler> _logger;
 
-        public ReactionAddedHandler(IStorageProvider storageProvider, ILogger<ReactionAddedHandler> logger)
+        public ReactionAddedHandler(IMediator mediator, IStorageProvider storageProvider, ILogger<ReactionAddedHandler> logger)
         {
+            _mediator = mediator;
             _storageProvider = storageProvider;
             _logger = logger;
         }
 
-        public Task HandleReactionAdded(DiscordClient client, MessageReactionAddEventArgs e)
+        public async Task HandleReactionAdded(DiscordClient client, MessageReactionAddEventArgs e)
         {
-            var newsPaperEmoji = DiscordEmoji.FromName(client, ":newspaper:");
-
-            if(e.Emoji == newsPaperEmoji)
+            using (LoggingHelper.BeginScope(_logger, e.Guild.Id, e.User.Username))
             {
-                _logger.LogInformation("Newspaper reaction added to message ({messageId})", e.Message.Id);
-                AddNews(e);
+                var newsPaperEmoji = DiscordEmoji.FromName(client, ":newspaper:");
+
+                if (e.Emoji == newsPaperEmoji)
+                {
+                    _logger.LogInformation("Newspaper reaction added to message ({messageId})", e.Message.Id);
+
+                    var response = await _mediator.Send(new NewsAddRequest
+                    {
+                        GuildId = e.Guild.Id.ToString(),
+                        Who = e.Message.Author?.Username ?? "Unknown",
+                        When = e.Message.CreationTimestamp.UtcDateTime,
+                        Story = e.Message.Content
+                    });
+                }
             }
-
-            return Task.CompletedTask;
-        }
-
-        // ToDo: move this to mediatr
-        private void AddNews(MessageReactionAddEventArgs eventArgs)
-        {
-            if(eventArgs.Message.Author == null ||
-                eventArgs.Message.Content == null)
-            {
-                return;
-            }
-
-            var store = StoreHelper.GetNewsStore(eventArgs.Guild.Id.ToString(), _storageProvider);
-            var key = eventArgs.Message.Id.ToString();
-
-            store.TryAdd(key, new NewsModel
-            {
-                Who = eventArgs.Message.Author?.Username ?? "Unknown",
-                Story = eventArgs.Message.Content ?? "No content",
-                When = eventArgs.Message.CreationTimestamp.UtcDateTime
-            });
         }
     }
 }

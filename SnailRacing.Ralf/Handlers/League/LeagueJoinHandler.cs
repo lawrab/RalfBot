@@ -23,14 +23,14 @@ namespace SnailRacing.Ralf.Handlers.League
             var status = league.Status == LeagueStatus.Open && approvedMembers < league.MaxGrid ?
                 LeagueParticipantStatus.Approved : LeagueParticipantStatus.Pending;
 
-            league.Join(request.DiscordMemberId, 
+            league.Join(request.DiscordMemberId,
                 request.DiscordMemberUser,
-                request.IRacingCustomerId, 
-                request.IRacingName, 
+                request.IRacingCustomerId,
+                request.IRacingName,
                 request.AgreeTermsAndConditions,
                 status);
 
-            if(league.MaxGrid.HasValue && 
+            if (league.MaxGrid.HasValue &&
                 league.Status == LeagueStatus.Open
                 && approvedMembers >= league.MaxGrid)
             {
