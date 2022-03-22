@@ -84,12 +84,11 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     discord.MessageCreated += (s, e) =>
     {
         var storage = services.GetService<IStorageProvider>();
-        var logger = services.GetService<ILogger<ReactionAddedHandler>>();
         var mediatr = services.GetService<IMediator>();
 
         _ = Task.Run(async () =>
         {
-            var handler = new MessageCreatedHandler(mediatr!, storage!, logger!);
+            var handler = new MessageCreatedHandler(mediatr!, storage!);
 
             await handler.HandleMessage(s, e);
         });

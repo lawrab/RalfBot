@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SnailRacing.Ralf.Handlers.General;
+using SnailRacing.Ralf.Infrastrtucture;
 using SnailRacing.Ralf.Providers;
 
 namespace SnailRacing.Ralf.Discord.Handlers
@@ -9,14 +10,12 @@ namespace SnailRacing.Ralf.Discord.Handlers
     public class MessageCreatedHandler
     {
         private IMediator _mediator;
-        private IStorageProvider _storageProvider;
-        private ILogger<ReactionAddedHandler> _logger;
+        private readonly IStorageProvider _storageProvider;
 
-        public MessageCreatedHandler(IMediator mediator, IStorageProvider storageProvider, ILogger<ReactionAddedHandler> logger)
+        public MessageCreatedHandler(IMediator mediator, IStorageProvider storageProvider)
         {
             _mediator = mediator;
             _storageProvider = storageProvider;
-            _logger = logger;
         }
 
         public async Task HandleMessage(DiscordClient s, MessageCreateEventArgs e)
@@ -28,7 +27,7 @@ namespace SnailRacing.Ralf.Discord.Handlers
 
         private async Task SendFactMessage(DiscordClient s, MessageCreateEventArgs e)
         {
-            if (!ShouldCreateFact()) return;
+            if (!IsFactsOn(e.Guild.Id.ToString()) ||!ShouldCreateFact()) return;
 
             var fact = await _mediator.Send(new FactRequest());
 
@@ -37,6 +36,13 @@ namespace SnailRacing.Ralf.Discord.Handlers
                 var factEmoji = DiscordEmoji.FromName(s, ":thinking:", true);
                 await e.Message.RespondAsync($"{factEmoji} {fact.Content}");
             }
+        }
+
+        private bool IsFactsOn(string guildId)
+        {
+            var guildConfig = StoreHelper.GetGuildConfig(guildId, _storageProvider);
+
+            return guildConfig.IsFactsOn;
         }
 
         private bool ShouldCreateFact()
