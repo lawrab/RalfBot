@@ -2,7 +2,8 @@
 
 namespace SnailRacing.Ralf.Handlers.General
 {
-    internal class FactResponse : ResponseBase
+    public class FactResponse : ResponseBase
     {
+        public string Content { get; set; } = string.Empty;
     }
 }

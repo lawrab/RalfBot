@@ -71,15 +71,30 @@ static async Task<DiscordClient> ConnectToDiscord(ServiceProvider services, ILog
     };
 
     // ToDo: move to DI
-    discord.MessageReactionAdded += async (s, e) =>
+    discord.MessageReactionAdded += (s, e) =>
     {
         var storage = services.GetService<IStorageProvider>();
         var logger = services.GetService<ILogger<ReactionAddedHandler>>();
         var mediatr = services.GetService<IMediator>();
         var handler = new ReactionAddedHandler(mediatr!, storage!, logger!);
 
-        await handler.HandleReactionAdded(s, e);
-        e.Handled = true;
+        return handler.HandleReactionAdded(s, e);
+    };
+
+    discord.MessageCreated += (s, e) =>
+    {
+        var storage = services.GetService<IStorageProvider>();
+        var logger = services.GetService<ILogger<ReactionAddedHandler>>();
+        var mediatr = services.GetService<IMediator>();
+
+        _ = Task.Run(async () =>
+        {
+            var handler = new MessageCreatedHandler(mediatr!, storage!, logger!);
+
+            await handler.HandleMessage(s, e);
+        });
+
+        return Task.CompletedTask;
     };
 
     await discord.ConnectAsync();
