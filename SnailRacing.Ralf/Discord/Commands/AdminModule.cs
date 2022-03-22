@@ -110,5 +110,69 @@ namespace SnailRacing.Ralf.Discord.Commands
                 guildConfigStore.TryUpdate(guildId, guildConfig);
             }
         }
+
+        [Group("facts"), Hidden]
+        public class FactsAdminModule : BaseCommandModule
+        {
+            private readonly DiscordSink _discordSink;
+            private readonly ILogger<LoggingModule> _logger;
+            private readonly IStorageProvider _storageProvider;
+
+            public FactsAdminModule(DiscordSink discordSink, ILogger<LoggingModule> logger, IStorageProvider storageProvider)
+            {
+                _discordSink = discordSink;
+                _logger = logger;
+                _storageProvider = storageProvider;
+            }
+
+            [GroupCommand]
+            public async Task ShowFactsStatus(CommandContext ctx)
+            {
+                using (LoggingHelper.BeginScope(_logger, ctx))
+                {
+                    await ctx.TriggerTypingAsync();
+                    var guildConfig = StoreHelper.GetGuildConfig(ctx.Guild.Id.ToString(), _storageProvider);
+
+                    await ctx.RespondAsync($"Is facts on: {guildConfig.IsFactsOn}");
+                }
+            }
+
+            [Command("on")]
+            public async Task FactsOn(CommandContext ctx)
+            {
+                using (LoggingHelper.BeginScope(_logger, ctx))
+                {
+                    await ctx.TriggerTypingAsync();
+
+                    SaveFactsOn(ctx, true);
+
+                    _logger.LogInformation("Facts is turned on for {GuidlId}", ctx.Guild.Id);
+                    await ctx.RespondAsync($"Facts is turned `on`");
+                }
+            }
+
+            [Command("off")]
+            public async Task FactsOff(CommandContext ctx)
+            {
+                using (LoggingHelper.BeginScope(_logger, ctx))
+                {
+                    await ctx.TriggerTypingAsync();
+
+                    SaveFactsOn(ctx, false);
+
+                    _logger.LogInformation("Facts is turned off for {GuidlId}", ctx.Guild.Id);
+                    await ctx.RespondAsync($"Facts is turned `off`");
+                }
+            }
+            private void SaveFactsOn(CommandContext ctx, bool isFactsOn)
+            {
+                var guildId = ctx.Guild.Id.ToString();
+
+                var guildConfigStore = StoreHelper.GetGuildConfigStore(guildId, _storageProvider);
+                var guildConfig = guildConfigStore[guildId];
+                guildConfig.IsFactsOn = isFactsOn;
+                guildConfigStore.TryUpdate(guildId, guildConfig);
+            }
+        }
     }
 }
